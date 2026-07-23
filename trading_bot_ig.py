@@ -7,10 +7,10 @@ from trading_ig import IGService
 # ==========================================
 # 1. LOAD CREDENTIALS FROM ENVIRONMENT
 # ==========================================
-IG_USERNAME = os.getenv("IG_USERNAME")
-IG_PASSWORD = os.getenv("IG_PASSWORD")
-IG_API_KEY = os.getenv("IG_API_KEY")
-IG_ACC_NUMBER = os.getenv("IG_ACC_NUMBER")
+IG_USERNAME = os.getenv("gdemobot")
+IG_PASSWORD = os.getenv("Rednimrug1")
+IG_API_KEY = os.getenv("d50de03a31a3e81420be29663d0124c27326dbfa")
+IG_ACC_NUMBER = os.getenv("XYLKX")
 IG_ACC_TYPE = "DEMO"  # Set to "LIVE" when ready for real funds
 
 # Map Tickers to IG Spread Betting EPICs (DFB = Daily Funded Bet)
