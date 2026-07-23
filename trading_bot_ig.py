@@ -52,33 +52,23 @@ def get_account_balance(ig_service):
 
 def resolve_ig_epic(ig_service, ticker):
     """
-    Constructs active Spread Bet Epics accurately:
-    - UK LSE Equities: ED.D.[TICKER].DAILY.IP
-    - US Equities: UA.D.[TICKER].DAILY.IP
-    Fallback to live API search if pattern doesn't fit.
+    Dynamically searches IG API to find the exact active Spread Bet Epic.
     """
-    clean_symbol = ticker.strip().upper()
-
-    # 1. Direct Rule Matching
-    if clean_symbol.endswith(".L"):
-        base_symbol = clean_symbol.replace(".L", "")
-        return f"ED.D.{base_symbol}.DAILY.IP"
-    elif clean_symbol.isalpha():
-        return f"UA.D.{clean_symbol}.DAILY.IP"
-
-    # 2. Dynamic Search Fallback
+    clean_symbol = ticker.replace(".L", "").strip().upper()
     try:
         search_results = ig_service.search_markets(clean_symbol)
-        if isinstance(search_results, pd.DataFrame) and not search_results.empty:
+        
+        # Parse results DataFrame or Dict from trading_ig
+        if hasattr(search_results, "iterrows"):
             for _, row in search_results.iterrows():
                 epic = str(row.get("epic", ""))
                 itype = str(row.get("instrumentType", ""))
                 if "SHARES" in itype and ("DAILY" in epic or "DFB" in epic):
                     return epic
-            return search_results.iloc[0].get("epic")
+            return search_results.iloc[0].get("epic") if not search_results.empty else None
+            
     except Exception as e:
-        print(f"⚠️ Search fallback exception for {ticker}: {e}")
-
+        print(f"⚠️ Search failed for {ticker}: {e}")
     return None
 
 
