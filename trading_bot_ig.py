@@ -27,8 +27,17 @@ def connect_to_ig():
     print("🔌 Connecting to IG Demo API...")
     ig_service = IGService(IG_USERNAME, IG_PASSWORD, IG_API_KEY, IG_ACC_TYPE)
     ig_service.create_session()
-    ig_service.switch_account(IG_ACC_NUMBER, False)
-    print(f"✅ Connected to Account: {IG_ACC_NUMBER}")
+    
+    # Try switching account safely (ignore error if already on default account)
+    try:
+        ig_service.switch_account(IG_ACC_NUMBER, False)
+        print(f"✅ Switched to Account: {IG_ACC_NUMBER}")
+    except Exception as e:
+        if "error.switch.accountId-must-be-different" in str(e):
+            print(f"✅ Already active on Account: {IG_ACC_NUMBER}")
+        else:
+            print(f"⚠️ Account switch note: {e}")
+
     return ig_service
 
 def evaluate_signal(ticker):
