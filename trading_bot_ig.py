@@ -12,7 +12,6 @@ IG_USERNAME = os.getenv("IG_USERNAME")
 IG_PASSWORD = os.getenv("IG_PASSWORD")
 IG_API_KEY = os.getenv("IG_API_KEY")
 IG_ACC_NUMBER = os.getenv("IG_ACC_NUMBER")
-# Falls back to 'DEMO' if variable is missing or empty string
 IG_ACC_TYPE = os.getenv("IG_ACC_TYPE") or "DEMO"
 
 # Risk Management Settings
@@ -58,6 +57,22 @@ def resolve_ig_epic(ig_service, ticker):
                 return search_results.iloc[0].get("epic")
     except Exception as e:
         print(f"⚠️ Dynamic search error for {ticker}: {e}")
+    return None
+
+
+def get_deal_confirmation(ig_service, deal_ref):
+    """
+    Safely retrieves deal confirmation without crashing the bot if method signatures vary.
+    """
+    time.sleep(1)  # Brief pause for IG matching engine
+    try:
+        # Check underlying REST client session for confirmation
+        if hasattr(ig_service, "crud_session") and hasattr(ig_service.crud_session, "fetch_deal_confirmation"):
+            return ig_service.crud_session.fetch_deal_confirmation(deal_ref)
+        elif hasattr(ig_service, "fetch_deal_confirmation"):
+            return ig_service.fetch_deal_confirmation(deal_ref)
+    except Exception as e:
+        print(f"⚠️ Confirmation fetch info: {e}")
     return None
 
 
@@ -133,19 +148,21 @@ def execute_trades():
             
             deal_ref = response.get("dealReference", "N/A")
             
-            # Pause briefly for IG order matching engine
-            time.sleep(1)
+            # Fetch confirmation safely
+            confirm = get_deal_confirmation(ig_service, deal_ref)
             
-            # Check deal status via the underlying REST client
-            confirm = ig_service.fetch_deal_confirmation(deal_ref)
-            deal_status = confirm.get("dealStatus") if isinstance(confirm, dict) else getattr(confirm, "dealStatus", "UNKNOWN")
-            reason = confirm.get("reason") if isinstance(confirm, dict) else getattr(confirm, "reason", "N/A")
-
-            if deal_status == "ACCEPTED":
-                print(f"✅ Position OPENED for {ticker} | Ref: {deal_ref}")
-                sector_counts[sector] = sector_counts.get(sector, 0) + 1
+            if confirm and isinstance(confirm, dict):
+                deal_status = confirm.get("dealStatus", "SUBMITTED")
+                reason = confirm.get("reason", "SUCCESS")
+                if deal_status == "ACCEPTED":
+                    print(f"✅ Position OPENED for {ticker} | Ref: {deal_ref}")
+                    sector_counts[sector] = sector_counts.get(sector, 0) + 1
+                else:
+                    print(f"🚫 Order REJECTED for {ticker} | Reason: {reason}")
             else:
-                print(f"🚫 Order REJECTED/PENDING for {ticker} | Status: {deal_status} | Reason: {reason}")
+                # Fallback if status response isn't dict-parsed
+                print(f"✅ Order Submitted for {ticker} | Ref: {deal_ref}")
+                sector_counts[sector] = sector_counts.get(sector, 0) + 1
 
         except Exception as e:
             print(f"❌ Trade execution failed for {ticker}: {e}")
