@@ -1,246 +1,275 @@
 import os
+import sys
 import json
+import time
 import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 import pandas as pd
 import yfinance as yf
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from trading_ig import IGService
 
-# Environment Variables from GitHub Secrets
+# ==========================================
+# 1. CONFIGURATION & ENVIRONMENT SETUP
+# ==========================================
+IG_USERNAME = os.getenv("IG_USERNAME")
+IG_PASSWORD = os.getenv("IG_PASSWORD")
+IG_API_KEY = os.getenv("IG_API_KEY")
+IG_ACC_NUMBER = os.getenv("IG_ACC_NUMBER")
+IG_ACC_TYPE = "DEMO"
+
 SENDER_EMAIL = os.getenv("SENDER_EMAIL")
-SENDER_PASSWORD = os.getenv("SENDER_PASSWORD")
-RECEIVER_EMAIL = os.getenv("RECEIVER_EMAIL", "g_lally@yahoo.co.uk")
+RECEIVER_EMAIL = os.getenv("RECEIVER_EMAIL")
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
 
-# Diversified Universe across US, UK, Global Large/Mid/Small Caps & Sectors
-SCREEN_UNIVERSE = [
-    # US Tech & Growth
-    "AAPL", "MSFT", "GOOGL", "AMZN", "NVDA", "META", "AMD", "AVGO",
-    # UK / European Large Caps
-    "RR.L", "GLEN.L", "AZN.L", "SHEL.L", "GSK.L", "HSBC.L", "ULVR.L", "BP.L",
-    # Global Industrials, Financials & Consumer
-    "JPM", "BAC", "CAT", "GE", "PG", "KO", "COST", "TSLA",
-    # Mid & Small Caps / Emerging Growth
-    "CROX", "DUOL", "ELF", "CELH", "WING", "BOOT", "NIO", "ALTR"
+# Expanded Watchlist (US Equities & UK LSE Equities)
+WATCHLIST = [
+    {"ticker": "AAPL", "sector": "Technology"},
+    {"ticker": "MSFT", "sector": "Technology"},
+    {"ticker": "GOOGL", "sector": "Communication Services"},
+    {"ticker": "AMZN", "sector": "Consumer Cyclical"},
+    {"ticker": "NVDA", "sector": "Technology"},
+    {"ticker": "META", "sector": "Communication Services"},
+    {"ticker": "AMD", "sector": "Technology"},
+    {"ticker": "AVGO", "sector": "Technology"},
+    {"ticker": "JPM", "sector": "Financial Services"},
+    {"ticker": "BAC", "sector": "Financial Services"},
+    {"ticker": "CAT", "sector": "Industrials"},
+    {"ticker": "GE", "sector": "Industrials"},
+    {"ticker": "KO", "sector": "Consumer Defensive"},
+    {"ticker": "COST", "sector": "Consumer Defensive"},
+    {"ticker": "CROX", "sector": "Consumer Cyclical"},
+    {"ticker": "RR.L", "sector": "Industrials"},
+    {"ticker": "GLEN.L", "sector": "Basic Materials"},
+    {"ticker": "SHEL.L", "sector": "Energy"},
+    {"ticker": "GSK.L", "sector": "Healthcare"},
+    {"ticker": "BP.L", "sector": "Energy"},
+    {"ticker": "HSBC.L", "sector": "Financial Services"},
+    {"ticker": "ALTR", "sector": "Technology"}
 ]
 
 
-def calculate_atr(df, period=14):
-    """Calculates Average True Range (14-day) for volatility-adjusted stop losses."""
-    high_low = df['High'] - df['Low']
-    high_close = (df['High'] - df['Close'].shift()).abs()
-    low_close = (df['Low'] - df['Close'].shift()).abs()
-    tr = pd.concat([high_low, high_close, low_close], axis=1).max(axis=1)
-    return float(tr.rolling(window=period).mean().iloc[-1])
-
-
-def screen_stock_in_depth(symbol):
+# ==========================================
+# 2. IG EPIC RESOLVER
+# ==========================================
+def connect_ig():
+    if not all([IG_USERNAME, IG_PASSWORD, IG_API_KEY, IG_ACC_NUMBER]):
+        print("⚠️ Missing IG environment variables. Epic resolution fallback enabled.")
+        return None
     try:
-        ticker_obj = yf.Ticker(symbol)
-        df = ticker_obj.history(period="1y", interval="1d")
-
-        if len(df) < 200:
-            return None
-
-        # Calculate 14-day ATR for dynamic stop-loss distance
-        atr_val = calculate_atr(df, period=14)
-        
-        # Convert ATR to points (handles London GBp vs USD pricing)
-        curr_price = float(df["Close"].iloc[-1])
-        if ".L" in symbol:
-            # London stocks in yfinance are pence; convert to point distance
-            atr_pts = round(atr_val, 1)
-        else:
-            atr_pts = round(atr_val, 2)
-            
-        # Guarantee a safe minimum stop distance floor
-        final_atr_pts = max(atr_pts, 15.0)
-
-        # Fetch Fundamentals safely
+        ig_service = IGService(IG_USERNAME, IG_PASSWORD, IG_API_KEY, IG_ACC_TYPE)
+        ig_service.create_session()
         try:
-            info = ticker_obj.info
-            pe_ratio = info.get("forwardPE", info.get("trailingPE", None))
-            peg_ratio = info.get("pegRatio", None)
-            sector = info.get("sector", "N/A")
-            roe = info.get("returnOnEquity", None)
-            debt_to_equity = info.get("debtToEquity", None)
-            target_price = info.get("targetMeanPrice", None)
+            ig_service.switch_account(IG_ACC_NUMBER, False)
         except Exception:
-            pe_ratio, peg_ratio, sector, roe, debt_to_equity, target_price = None, None, "N/A", None, None, None
-
-        # Technical Indicators
-        df["SMA_20"] = df["Close"].rolling(20).mean()
-        df["SMA_50"] = df["Close"].rolling(50).mean()
-        df["SMA_200"] = df["Close"].rolling(200).mean()
-
-        delta = df["Close"].diff()
-        gain = (delta.where(delta > 0, 0)).rolling(14).mean()
-        loss = (-delta.where(delta < 0, 0)).rolling(14).mean()
-        rs = gain / loss
-        df["RSI"] = 100 - (100 / (1 + rs))
-
-        ema12 = df["Close"].ewm(span=12, adjust=False).mean()
-        ema26 = df["Close"].ewm(span=26, adjust=False).mean()
-        df["MACD"] = ema12 - ema26
-        df["Signal"] = df["MACD"].ewm(span=9, adjust=False).mean()
-
-        latest = df.iloc[-1]
-
-        uptrend = bool(curr_price > latest["SMA_200"])
-        golden_cross = bool(latest["SMA_50"] > latest["SMA_200"])
-        macd_bull = bool(latest["MACD"] > latest["Signal"])
-        rsi_val = float(latest["RSI"])
-
-        # Conviction Score Engine (0 to 100 scale)
-        conviction_score = 40  # Base line
-        if uptrend: conviction_score += 15
-        if golden_cross: conviction_score += 15
-        if macd_bull: conviction_score += 10
-        if 40 <= rsi_val <= 65: conviction_score += 10
-        if roe and roe > 0.15: conviction_score += 10
-        if peg_ratio and 0.5 <= peg_ratio <= 1.5: conviction_score += 10
-
-        # Analyst Upside Calculation
-        upside_str = "N/A"
-        if target_price and curr_price > 0:
-            upside_pct = ((target_price - curr_price) / curr_price) * 100
-            upside_str = f"{upside_pct:+.1f}%"
-
-        # Signal Classification based on Conviction Score
-        if conviction_score >= 80:
-            signal = "STRONG BUY"
-            badge_color = "#10B981"
-            rationale = f"Score {conviction_score}/100: Strong Trend + High ROE/Fair Valuation"
-        elif conviction_score >= 65:
-            signal = "BUY"
-            badge_color = "#3B82F6"
-            rationale = f"Score {conviction_score}/100: Bullish Trend & Positive Momentum"
-        elif conviction_score <= 40:
-            signal = "SELL / AVOID"
-            badge_color = "#EF4444"
-            rationale = f"Score {conviction_score}/100: Weak Structure / Downtrend Momentum"
-        else:
-            signal = "HOLD"
-            badge_color = "#F59E0B"
-            rationale = f"Score {conviction_score}/100: Neutral / Consolidation Phase"
-
-        return {
-            "Ticker": symbol,
-            "Sector": sector,
-            "Price": f"{curr_price:.2f}",
-            "Signal": signal,
-            "ConvictionScore": conviction_score,
-            "BadgeColor": badge_color,
-            "Rationale": rationale,
-            "Analyst Upside": upside_str,
-            "RSI": round(rsi_val, 1),
-            "ROE": f"{roe*100:.1f}%" if roe else "N/A",
-            "ATR_Points": final_atr_pts,
-            "TradingView": f"https://www.tradingview.com/symbols/{symbol}/",
-            "YahooFinance": f"https://finance.yahoo.com/quote/{symbol}/key-statistics"
-        }
+            pass
+        return ig_service
     except Exception as e:
-        print(f"Skipping {symbol} due to processing error: {e}")
+        print(f"⚠️ Could not connect to IG: {e}")
         return None
 
 
-def build_html_report(data_list):
-    cards_html = ""
-    if not data_list:
-        cards_html = "<p style='text-align:center; color:#6b7280;'>No stocks evaluated today or market data unavailable.</p>"
-    else:
-        for item in data_list:
-            cards_html += f"""
-            <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 18px; margin-bottom: 16px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f3f4f6; padding-bottom: 10px; margin-bottom: 12px;">
-                    <div>
-                        <span style="font-size: 20px; font-weight: bold; color: #111827;">{item['Ticker']}</span>
-                        <span style="font-size: 12px; color: #6b7280; margin-left: 8px;">{item['Sector']}</span>
-                    </div>
-                    <div>
-                        <span style="background-color: {item['BadgeColor']}; color: #ffffff; padding: 4px 10px; border-radius: 12px; font-weight: bold; font-size: 12px;">{item['Signal']}</span>
-                    </div>
-                </div>
-                <div style="font-size: 14px; color: #374151; margin-bottom: 12px;">
-                    <strong>Rationale:</strong> {item['Rationale']}
-                </div>
-                <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; background: #f9fafb; padding: 10px; border-radius: 6px; font-size: 12px; text-align: center;">
-                    <div><span style="color: #6b7280; display: block; font-size: 10px;">PRICE</span> <strong>{item['Price']}</strong></div>
-                    <div><span style="color: #6b7280; display: block; font-size: 10px;">UPSIDE</span> <strong>{item['Analyst Upside']}</strong></div>
-                    <div><span style="color: #6b7280; display: block; font-size: 10px;">RSI (14)</span> <strong>{item['RSI']}</strong></div>
-                    <div><span style="color: #6b7280; display: block; font-size: 10px;">ROE</span> <strong>{item['ROE']}</strong></div>
-                    <div><span style="color: #6b7280; display: block; font-size: 10px;">14-ATR PTS</span> <strong>{item['ATR_Points']}</strong></div>
-                </div>
-                <div style="margin-top: 14px; font-size: 12px; text-align: right;">
-                    <a href="{item['TradingView']}" target="_blank" style="color: #2563eb; text-decoration: none; margin-right: 12px; font-weight: bold;">📈 TradingView Chart &rarr;</a>
-                    <a href="{item['YahooFinance']}" target="_blank" style="color: #4b5563; text-decoration: none; font-weight: bold;">🔍 Yahoo Financials &rarr;</a>
-                </div>
-            </div>
-            """
+def resolve_ig_epic(ig_service, ticker):
+    """
+    Searches IG API dynamically to get the EXACT active Spread Bet Epic.
+    """
+    if not ig_service:
+        return None
+        
+    clean_symbol = ticker.replace(".L", "").strip().upper()
+    try:
+        search_results = ig_service.search_markets(clean_symbol)
+        
+        # 1. Handle DataFrame Response
+        if isinstance(search_results, pd.DataFrame) and not search_results.empty:
+            for _, row in search_results.iterrows():
+                epic = str(row.get("epic", ""))
+                itype = str(row.get("instrumentType", ""))
+                if "SHARES" in itype and ("DAILY" in epic or "DFB" in epic):
+                    return epic
+            return search_results.iloc[0].get("epic")
+            
+        # 2. Handle Dict Response
+        elif isinstance(search_results, dict):
+            markets = search_results.get("markets", [])
+            if isinstance(markets, pd.DataFrame) and not markets.empty:
+                for _, row in markets.iterrows():
+                    epic = str(row.get("epic", ""))
+                    itype = str(row.get("instrumentType", ""))
+                    if "SHARES" in itype and ("DAILY" in epic or "DFB" in epic):
+                        return epic
+                return markets.iloc[0].get("epic")
+            elif isinstance(markets, list) and len(markets) > 0:
+                for m in markets:
+                    epic = m.get("epic", "")
+                    if m.get("instrumentType") == "SHARES" and ("DAILY" in epic or "DFB" in epic):
+                        return epic
+                return markets[0].get("epic")
+    except Exception as e:
+        print(f"⚠️ IG Search lookup warning for {ticker}: {e}")
+    return None
 
+
+# ==========================================
+# 3. TECHNICAL ANALYSIS ENGINE
+# ==========================================
+def calculate_technical_signal(ticker_symbol):
+    try:
+        df = yf.download(ticker_symbol, period="1y", interval="1d", progress=False)
+        if df.empty or len(df) < 50:
+            return None
+
+        # Flatten multi-index columns if returned by yfinance
+        if isinstance(df.columns, pd.MultiIndex):
+            df.columns = df.columns.get_level_values(0)
+
+        close = df["Close"]
+        high = df["High"]
+        low = df["Low"]
+
+        # Simple Moving Averages
+        sma_20 = close.rolling(20).mean().iloc[-1]
+        sma_50 = close.rolling(50).mean().iloc[-1]
+        current_price = close.iloc[-1]
+
+        # ATR (Average True Range)
+        tr1 = high - low
+        tr2 = (high - close.shift(1)).abs()
+        tr3 = (low - close.shift(1)).abs()
+        tr = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
+        atr_value = tr.rolling(14).mean().iloc[-1]
+
+        # Convert ATR to points integer (1 point = 0.01 for USD/LSE pence)
+        atr_points = max(int(round(atr_value * 100)), 15) if ticker_symbol.endswith(".L") else max(int(round(atr_value)), 15)
+
+        # Signal Logic
+        signal = "HOLD"
+        if current_price > sma_20 and sma_20 > sma_50:
+            signal = "STRONG BUY"
+        elif current_price > sma_20:
+            signal = "BUY"
+        elif current_price < sma_20 and sma_20 < sma_50:
+            signal = "SELL"
+
+        return {
+            "Price": round(float(current_price), 2),
+            "SMA_20": round(float(sma_20), 2),
+            "SMA_50": round(float(sma_50), 2),
+            "Signal": signal,
+            "ATR_Points": atr_points
+        }
+    except Exception as e:
+        print(f"⏩ Skipping {ticker_symbol} (Yahoo Finance fetch error: {e})")
+        return None
+
+
+# ==========================================
+# 4. REPORT GENERATOR & EMAIL SENDER
+# ==========================================
+def build_html_report(candidates):
+    rows = ""
+    for c in candidates:
+        badge_color = "#28a745" if c["Signal"] == "STRONG BUY" else "#17a2b8"
+        rows += f"""
+        <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #ddd;"><b>{c['Ticker']}</b></td>
+            <td style="padding: 10px; border-bottom: 1px solid #ddd;">{c['Sector']}</td>
+            <td style="padding: 10px; border-bottom: 1px solid #ddd;">${c['Price']}</td>
+            <td style="padding: 10px; border-bottom: 1px solid #ddd;"><span style="background-color: {badge_color}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">{c['Signal']}</span></td>
+            <td style="padding: 10px; border-bottom: 1px solid #ddd;">{c['ATR_Points']} pts</td>
+            <td style="padding: 10px; border-bottom: 1px solid #ddd;"><code>{c['IG_Epic']}</code></td>
+        </tr>
+        """
     return f"""
-    <!DOCTYPE html>
     <html>
-      <head><meta charset="utf-8"></head>
-      <body style="font-family: Arial, sans-serif; background-color: #f3f4f6; padding: 20px; margin: 0;">
-        <div style="max-width: 680px; margin: 0 auto;">
-            <div style="background: #1e293b; color: #ffffff; padding: 24px; border-radius: 8px 8px 0 0; text-align: center;">
-                <h1 style="margin: 0; font-size: 22px;">GLOBAL EQUITY BRIEFING</h1>
-                <p style="margin: 6px 0 0 0; font-size: 13px; color: #94a3b8;">Automated Quantitative Screener & Volatility Signal Report</p>
-            </div>
-            <div style="padding: 20px 0;">{cards_html}</div>
+    <body style="font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px;">
+        <div style="max-width: 700px; margin: auto; background: white; padding: 20px; border-radius: 8px;">
+            <h2 style="color: #333;">📈 Daily Market Screener Candidates</h2>
+            <p style="color: #666;">Top momentum stock setups resolved for IG Execution:</p>
+            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead>
+                    <tr style="background-color: #f8f9fa;">
+                        <th style="padding: 10px; border-bottom: 2px solid #ddd;">Ticker</th>
+                        <th style="padding: 10px; border-bottom: 2px solid #ddd;">Sector</th>
+                        <th style="padding: 10px; border-bottom: 2px solid #ddd;">Price</th>
+                        <th style="padding: 10px; border-bottom: 2px solid #ddd;">Signal</th>
+                        <th style="padding: 10px; border-bottom: 2px solid #ddd;">Stop Distance</th>
+                        <th style="padding: 10px; border-bottom: 2px solid #ddd;">IG Epic</th>
+                    </tr>
+                </thead>
+                <tbody>{rows}</tbody>
+            </table>
         </div>
-      </body>
+    </body>
     </html>
     """
 
 
-def send_email_alert(html_body, candidate_count):
-    if not SENDER_EMAIL or not SENDER_PASSWORD:
-        print("SENDER_EMAIL or SENDER_PASSWORD secret missing. Skipping email send.")
+def send_email(html_content):
+    if not all([SENDER_EMAIL, RECEIVER_EMAIL, SMTP_PASSWORD]):
+        print("ℹ️ Email credentials not present. Skipping email dispatch.")
         return
 
-    msg = MIMEMultipart("alternative")
-    msg["Subject"] = f"📊 INSTITUTIONAL EQUITY BRIEFING ({candidate_count} Equities Evaluated)"
-    msg["From"] = SENDER_EMAIL
-    msg["To"] = RECEIVER_EMAIL
-    msg.attach(MIMEText(html_body, "html"))
-
     try:
-        server = smtplib.SMTP("smtp.gmail.com", 587)
-        server.starttls()
-        server.login(SENDER_EMAIL, SENDER_PASSWORD)
-        server.sendmail(SENDER_EMAIL, RECEIVER_EMAIL, msg.as_string())
-        server.quit()
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = "🚀 Daily Market Screener - IG Qualified Candidates"
+        msg["From"] = SENDER_EMAIL
+        msg["To"] = RECEIVER_EMAIL
+        msg.attach(MIMEText(html_content, "html"))
+
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+            server.login(SENDER_EMAIL, SMTP_PASSWORD)
+            server.sendmail(SENDER_EMAIL, RECEIVER_EMAIL, msg.as_string())
         print(f"-> Email successfully sent to {RECEIVER_EMAIL}!")
     except Exception as e:
-        print(f"Failed to send email: {e}")
+        print(f"⚠️ Email notification failed: {e}")
 
 
+# ==========================================
+# 5. MAIN SCREENER PIPELINE
+# ==========================================
 def run_screener():
     print("=== RUNNING GLOBAL HYBRID STOCK SCREENER ===")
-    results = []
+    ig_service = connect_ig()
+    candidates = []
 
-    for ticker in SCREEN_UNIVERSE:
-        candidate = screen_stock_in_depth(ticker)
-        if candidate:
-            results.append(candidate)
+    for item in WATCHLIST:
+        ticker = item["ticker"]
+        sector = item["sector"]
 
-    # 1. Filter out candidate setup list for the IG Trading Bot
-    top_buys = [item for item in results if item["Signal"] in ["STRONG BUY", "BUY"]]
+        metrics = calculate_technical_signal(ticker)
+        if not metrics:
+            continue
 
-    # 2. Save JSON candidate file for trading_bot_ig.py to consume
-    with open("top_candidates.json", "w", encoding="utf-8") as f:
-        json.dump(top_buys, f, indent=4)
-    print(f"-> Saved {len(top_buys)} top buy setup candidates to top_candidates.json!")
+        if metrics["Signal"] in ["BUY", "STRONG BUY"]:
+            # Pre-flight IG Epic Resolution
+            epic = resolve_ig_epic(ig_service, ticker)
+            
+            # Rate limit safety delay
+            time.sleep(0.3)
 
-    # 3. Build HTML Report & Save Locally for GitHub Pages
-    html_content = build_html_report(results)
-    with open("index.html", "w", encoding="utf-8") as f:
-        f.write(html_content)
+            candidates.append({
+                "Ticker": ticker,
+                "Sector": sector,
+                "Price": metrics["Price"],
+                "Signal": metrics["Signal"],
+                "ATR_Points": metrics["ATR_Points"],
+                "IG_Epic": epic
+            })
+
+    # Save to top_candidates.json
+    with open("top_candidates.json", "w") as f:
+        json.dump(candidates, f, indent=4)
+    print(f"-> Saved {len(candidates)} top buy setup candidates to top_candidates.json!")
+
+    # Generate index.html
+    html_report = build_html_report(candidates)
+    with open("index.html", "w") as f:
+        f.write(html_report)
     print("-> Successfully generated index.html!")
 
-    # 4. Send Email Briefing Alert
-    send_email_alert(html_content, len(results))
+    # Send Email Notification
+    send_email(html_report)
 
 
 if __name__ == "__main__":
