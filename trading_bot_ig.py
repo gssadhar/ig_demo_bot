@@ -52,25 +52,48 @@ def get_account_balance(ig_service):
     return 20000.0
 
 
+import pandas as pd
+
 def resolve_ig_epic(ig_service, ticker):
-    """Dynamically fetches active IG epic to avoid 'instrument.invalid' errors."""
-    clean_symbol = ticker.replace(".L", "").strip()
+    """
+    Resolves ticker to IG Epic using standard prefix generation first,
+    falling back to robust Pandas/Dict search parser if required.
+    """
+    clean_symbol = ticker.strip().upper()
+    
+    # 1. DIRECT REGIONAL CONVENTION MATCHING (Fastest & avoids search rate limits)
+    if clean_symbol.endswith(".L"):
+        base_symbol = clean_symbol.replace(".L", "")
+        # Standard IG UK Equity Spread Bet Epic
+        return f"SE.D.{base_symbol}.DAILY.IP"
+    elif clean_symbol.isalpha():
+        # Standard IG US Equity Spread Bet Epic
+        return f"UA.D.{clean_symbol}.DAILY.IP"
+
+    # 2. DYNAMIC SEARCH FALLBACK (Handles non-standard tickers)
     try:
         search_results = ig_service.search_markets(clean_symbol)
-        markets = search_results.get("markets", []) if isinstance(search_results, dict) else []
         
-        # Look for Spread Bet / Daily Shares
-        for m in markets:
-            epic = m.get("epic", "")
-            if m.get("instrumentType") == "SHARES" and ("DAILY" in epic or "DFB" in epic):
-                return epic
+        # Handle DataFrame response (Standard for trading_ig library)
+        if isinstance(search_results, pd.DataFrame) and not search_results.empty:
+            for _, row in search_results.iterrows():
+                epic = str(row.get("epic", ""))
+                instrument_type = str(row.get("instrumentType", ""))
+                if "SHARES" in instrument_type or "DAILY" in epic or "DFB" in epic:
+                    return epic
+            return search_results.iloc[0].get("epic")
+            
+        # Handle Dict response
+        elif isinstance(search_results, dict):
+            markets = search_results.get("markets", [])
+            if isinstance(markets, pd.DataFrame) and not markets.empty:
+                return markets.iloc[0].get("epic")
+            elif isinstance(markets, list) and len(markets) > 0:
+                return markets[0].get("epic")
                 
-        # Fallback to first available share match
-        for m in markets:
-            if m.get("instrumentType") == "SHARES":
-                return m.get("epic")
     except Exception as e:
-        print(f"⚠️ Search failed for {ticker}: {e}")
+        print(f"⚠️ Search API lookup failed for {ticker}: {e}")
+
     return None
 
 
