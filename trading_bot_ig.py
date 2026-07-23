@@ -1,7 +1,7 @@
 import os
 import json
 import logging
-import time
+from datetime import datetime, timezone
 from trading_ig import IGService
 
 # Setup Logging
@@ -17,6 +17,8 @@ IG_ACC_TYPE = os.getenv("IG_ACC_TYPE") or "DEMO"
 # Risk Management Settings
 MAX_RISK_PER_TRADE_GBP = 75.0  # Max £ amount to lose per trade
 MAX_POSITIONS_PER_SECTOR = 2
+REWARD_RISK_RATIO = 2.0        # 2:1 Reward to Risk (Take-Profit = 2x ATR)
+LOG_FILE = "trade_log.json"
 
 
 def connect_ig():
@@ -40,13 +42,9 @@ def connect_ig():
 
 
 def resolve_ig_epic(ig_service, ticker):
-    """
-    Dynamically searches IG API to resolve active Spread Bet Epics.
-    """
     clean_symbol = ticker.replace(".L", "").strip().upper()
     try:
         search_results = ig_service.search_markets(clean_symbol)
-        
         if hasattr(search_results, "iterrows"):
             for _, row in search_results.iterrows():
                 epic = str(row.get("epic", ""))
@@ -60,20 +58,22 @@ def resolve_ig_epic(ig_service, ticker):
     return None
 
 
-def get_deal_confirmation(ig_service, deal_ref):
+def log_trade(trade_data):
     """
-    Safely retrieves deal confirmation without crashing the bot if method signatures vary.
+    Appends successful trade records to trade_log.json for audit and analysis.
     """
-    time.sleep(1)  # Brief pause for IG matching engine
-    try:
-        # Check underlying REST client session for confirmation
-        if hasattr(ig_service, "crud_session") and hasattr(ig_service.crud_session, "fetch_deal_confirmation"):
-            return ig_service.crud_session.fetch_deal_confirmation(deal_ref)
-        elif hasattr(ig_service, "fetch_deal_confirmation"):
-            return ig_service.fetch_deal_confirmation(deal_ref)
-    except Exception as e:
-        print(f"⚠️ Confirmation fetch info: {e}")
-    return None
+    logs = []
+    if os.path.exists(LOG_FILE):
+        try:
+            with open(LOG_FILE, "r") as f:
+                logs = json.load(f)
+        except Exception:
+            logs = []
+
+    logs.append(trade_data)
+    with open(LOG_FILE, "w") as f:
+        json.dump(logs, f, indent=4)
+    print(f"📜 Trade logged to {LOG_FILE}")
 
 
 def execute_trades():
@@ -92,7 +92,6 @@ def execute_trades():
     if not ig_service:
         return
 
-    # Check available funds
     accounts = ig_service.fetch_accounts()
     if hasattr(accounts, "iterrows"):
         balance = accounts.iloc[0].get("available", 0)
@@ -105,8 +104,11 @@ def execute_trades():
         ticker = c["Ticker"]
         sector = c["Sector"]
         stop_distance = c["ATR_Points"]
+        
+        # Calculate Take-Profit distance (2x Stop Distance)
+        limit_distance = round(stop_distance * REWARD_RISK_RATIO, 1)
 
-        # Enforce sector diversification
+        # Enforce sector limits
         if sector_counts.get(sector, 0) >= MAX_POSITIONS_PER_SECTOR:
             print(f"🛡️ Sector Limit Reached: {sector} already has {MAX_POSITIONS_PER_SECTOR} active trades. Skipping {ticker}.")
             continue
@@ -116,15 +118,14 @@ def execute_trades():
             print(f"❌ Skipped {ticker}: Could not resolve IG Epic.")
             continue
 
-        # Dynamic Sizing Logic: Risk £75 max per trade
+        # Position Sizing
         calculated_size = round(MAX_RISK_PER_TRADE_GBP / stop_distance, 2)
-        
-        # Enforce IG minimum stake constraints
         is_uk = ticker.endswith(".L")
         min_size = 0.1 if is_uk else 0.5
         stake_size = max(calculated_size, min_size)
 
-        print(f"🚀 Submitting BUY order on {ticker} [{epic}] | Stop: {stop_distance} pts | Stake: £{stake_size}/pt...")
+        print(f"🚀 Submitting BUY order on {ticker} [{epic}]")
+        print(f"   └─ Stake: £{stake_size}/pt | Stop Loss: {stop_distance} pts | Take Profit: {limit_distance} pts")
 
         try:
             response = ig_service.create_open_position(
@@ -137,32 +138,30 @@ def execute_trades():
                 order_type="MARKET",
                 size=stake_size,
                 level=None,
-                limit_distance=None,
+                limit_distance=limit_distance,  # Sets automated Take-Profit
                 limit_level=None,
                 quote_id=None,
-                stop_distance=stop_distance,
+                stop_distance=stop_distance,   # Sets automated Stop-Loss
                 stop_level=None,
                 trailing_stop=False,
                 trailing_stop_increment=None
             )
             
             deal_ref = response.get("dealReference", "N/A")
-            
-            # Fetch confirmation safely
-            confirm = get_deal_confirmation(ig_service, deal_ref)
-            
-            if confirm and isinstance(confirm, dict):
-                deal_status = confirm.get("dealStatus", "SUBMITTED")
-                reason = confirm.get("reason", "SUCCESS")
-                if deal_status == "ACCEPTED":
-                    print(f"✅ Position OPENED for {ticker} | Ref: {deal_ref}")
-                    sector_counts[sector] = sector_counts.get(sector, 0) + 1
-                else:
-                    print(f"🚫 Order REJECTED for {ticker} | Reason: {reason}")
-            else:
-                # Fallback if status response isn't dict-parsed
-                print(f"✅ Order Submitted for {ticker} | Ref: {deal_ref}")
-                sector_counts[sector] = sector_counts.get(sector, 0) + 1
+            print(f"✅ Order Submitted for {ticker} | Ref: {deal_ref}")
+            sector_counts[sector] = sector_counts.get(sector, 0) + 1
+
+            # Save to JSON log
+            log_trade({
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "ticker": ticker,
+                "epic": epic,
+                "sector": sector,
+                "stake_gbp_per_point": stake_size,
+                "stop_distance_pts": stop_distance,
+                "take_profit_pts": limit_distance,
+                "deal_reference": deal_ref
+            })
 
         except Exception as e:
             print(f"❌ Trade execution failed for {ticker}: {e}")
