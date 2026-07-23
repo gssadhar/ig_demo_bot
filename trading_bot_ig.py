@@ -136,16 +136,16 @@ def execute_trades():
             # Pause briefly for IG order matching engine
             time.sleep(1)
             
-            # Check deal status
+            # Check deal status via the underlying REST client
             confirm = ig_service.fetch_deal_confirmation(deal_ref)
-            deal_status = confirm.get("dealStatus")
-            reason = confirm.get("reason", "SUCCESS")
+            deal_status = confirm.get("dealStatus") if isinstance(confirm, dict) else getattr(confirm, "dealStatus", "UNKNOWN")
+            reason = confirm.get("reason") if isinstance(confirm, dict) else getattr(confirm, "reason", "N/A")
 
             if deal_status == "ACCEPTED":
                 print(f"✅ Position OPENED for {ticker} | Ref: {deal_ref}")
                 sector_counts[sector] = sector_counts.get(sector, 0) + 1
             else:
-                print(f"🚫 Order REJECTED for {ticker} | Reason: {reason}")
+                print(f"🚫 Order REJECTED/PENDING for {ticker} | Status: {deal_status} | Reason: {reason}")
 
         except Exception as e:
             print(f"❌ Trade execution failed for {ticker}: {e}")
