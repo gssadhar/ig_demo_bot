@@ -13,49 +13,6 @@ IG_API_KEY = os.getenv("IG_API_KEY")
 IG_ACC_NUMBER = os.getenv("IG_ACC_NUMBER")
 IG_ACC_TYPE = "DEMO"
 
-# COMPLETE EPIC Lookup Table
-EPIC_MAP = {
-    # --- TECH & GROWTH ---
-    "AAPL":     {"epic": "UC.D.AAPL.DAILY.IP",  "sector": "Tech"},
-    "MSFT":     {"epic": "UC.D.MSFT.DAILY.IP",  "sector": "Tech"},
-    "NVDA":     {"epic": "UC.D.NVDA.DAILY.IP",  "sector": "Tech"},
-    "GOOGL":    {"epic": "UC.D.GOOGL.DAILY.IP", "sector": "Tech"},
-    "AMZN":     {"epic": "UC.D.AMZN.DAILY.IP",  "sector": "Tech"},
-    "META":     {"epic": "UC.D.META.DAILY.IP",  "sector": "Tech"},
-    "AMD":      {"epic": "UC.D.AMD.DAILY.IP",   "sector": "Tech"},
-    "AVGO":     {"epic": "UC.D.AVGO.DAILY.IP",  "sector": "Tech"},
-    "TSLA":     {"epic": "UC.D.TSLA.DAILY.IP",  "sector": "Tech"},
-    "ALTR":     {"epic": "UC.D.ALTR.DAILY.IP",  "sector": "Tech"},
-
-    # --- UK / EUROPEAN LARGE CAPS ---
-    "RR.L":     {"epic": "SE.D.RR.DAILY.IP",    "sector": "Industrials"},
-    "GLEN.L":   {"epic": "SE.D.GLEN.DAILY.IP",  "sector": "Materials"},
-    "AZN.L":    {"epic": "SE.D.AZN.DAILY.IP",   "sector": "Healthcare"},
-    "SHEL.L":   {"epic": "SE.D.SHEL.DAILY.IP",  "sector": "Energy"},
-    "GSK.L":    {"epic": "SE.D.GSK.DAILY.IP",   "sector": "Healthcare"},
-    "HSBC.L":   {"epic": "SE.D.HSBC.DAILY.IP",  "sector": "Financials"},
-    "ULVR.L":   {"epic": "SE.D.ULVR.DAILY.IP",  "sector": "Consumer"},
-    "BP.L":     {"epic": "SE.D.BP.DAILY.IP",    "sector": "Energy"},
-
-    # --- FINANCIALS & INDUSTRIALS ---
-    "JPM":      {"epic": "UC.D.JPM.DAILY.IP",   "sector": "Financials"},
-    "BAC":      {"epic": "UC.D.BAC.DAILY.IP",   "sector": "Financials"},
-    "CAT":      {"epic": "UC.D.CAT.DAILY.IP",   "sector": "Industrials"},
-    "GE":       {"epic": "UC.D.GE.DAILY.IP",    "sector": "Industrials"},
-
-    # --- CONSUMER & RETAIL ---
-    "PG":       {"epic": "UC.D.PG.DAILY.IP",    "sector": "Consumer"},
-    "KO":       {"epic": "UC.D.KO.DAILY.IP",    "sector": "Consumer"},
-    "COST":     {"epic": "UC.D.COST.DAILY.IP",  "sector": "Consumer"},
-    "CROX":     {"epic": "UC.D.CROX.DAILY.IP",  "sector": "Consumer"},
-    "DUOL":     {"epic": "UC.D.DUOL.DAILY.IP",  "sector": "Consumer"},
-    "ELF":      {"epic": "UC.D.ELF.DAILY.IP",   "sector": "Consumer"},
-    "CELH":     {"epic": "UC.D.CELH.DAILY.IP",  "sector": "Consumer"},
-    "WING":     {"epic": "UC.D.WING.DAILY.IP",  "sector": "Consumer"},
-    "BOOT":     {"epic": "UC.D.BOOT.DAILY.IP",  "sector": "Consumer"},
-    "NIO":      {"epic": "UC.D.NIO.DAILY.IP",   "sector": "Consumer"}
-}
-
 # Risk Parameters
 MAX_POSITIONS_PER_SECTOR = 2
 RISK_PCT_PER_TRADE = 0.01   # Risk 1% of cash per trade
@@ -95,22 +52,33 @@ def get_account_balance(ig_service):
     return 20000.0
 
 
+def resolve_ig_epic(ig_service, ticker):
+    """Dynamically fetches active IG epic to avoid 'instrument.invalid' errors."""
+    clean_symbol = ticker.replace(".L", "").strip()
+    try:
+        search_results = ig_service.search_markets(clean_symbol)
+        markets = search_results.get("markets", []) if isinstance(search_results, dict) else []
+        
+        # Look for Spread Bet / Daily Shares
+        for m in markets:
+            epic = m.get("epic", "")
+            if m.get("instrumentType") == "SHARES" and ("DAILY" in epic or "DFB" in epic):
+                return epic
+                
+        # Fallback to first available share match
+        for m in markets:
+            if m.get("instrumentType") == "SHARES":
+                return m.get("epic")
+    except Exception as e:
+        print(f"⚠️ Search failed for {ticker}: {e}")
+    return None
+
+
 def calculate_stake_size(available_cash, stop_loss_points=20):
     risk_amount = available_cash * RISK_PCT_PER_TRADE
     stake = risk_amount / stop_loss_points
     max_stake = 5.0  # Safety cap at £5/point
     return max(min(round(stake, 2), max_stake), 0.50)
-
-
-def count_sector_positions(open_positions):
-    sector_counts = {}
-    if isinstance(open_positions, pd.DataFrame) and not open_positions.empty and "epic" in open_positions.columns:
-        active_epics = open_positions["epic"].tolist()
-        for ticker, data in EPIC_MAP.items():
-            if data["epic"] in active_epics:
-                sec = data["sector"]
-                sector_counts[sec] = sector_counts.get(sec, 0) + 1
-    return sector_counts
 
 
 def load_screener_candidates():
@@ -128,7 +96,13 @@ def load_screener_candidates():
     return []
 
 
-def execute_ig_trade(ig_service, ticker, epic, sector, open_positions, sector_counts, available_cash, atr_points):
+def execute_ig_trade(ig_service, ticker, sector, open_positions, sector_counts, available_cash, atr_points):
+    # Dynamic Epic Lookup
+    epic = resolve_ig_epic(ig_service, ticker)
+    if not epic:
+        print(f"❌ Skipped {ticker}: Could not dynamically resolve IG Epic.")
+        return
+
     # 1. Prevent duplicate position entries
     if isinstance(open_positions, pd.DataFrame) and not open_positions.empty and "epic" in open_positions.columns:
         if epic in open_positions["epic"].tolist():
@@ -144,14 +118,13 @@ def execute_ig_trade(ig_service, ticker, epic, sector, open_positions, sector_co
     stop_dist = atr_points if atr_points and atr_points >= 10 else DEFAULT_STOP_DISTANCE
     stake_size = calculate_stake_size(available_cash, stop_loss_points=stop_dist)
     
-    print(f"🚀 Placing BUY Trade on {ticker} ({sector}) @ £{stake_size}/point (Stop: {stop_dist} pts)...")
+    print(f"🚀 Placing BUY Trade on {ticker} ({sector}) [Epic: {epic}] @ £{stake_size}/point (Stop: {stop_dist} pts)...")
     try:
-        # Fully explicit argument signature required by trading-ig package
         response = ig_service.create_open_position(
             currency_code="GBP",
             direction="BUY",
             epic=epic,
-            expiry="-",
+            expiry="DFB",
             force_open=True,
             guaranteed_stop=False,
             level=None,
@@ -178,7 +151,7 @@ def run_bot():
     available_cash = get_account_balance(ig_service)
     
     open_positions = ig_service.fetch_open_positions()
-    sector_counts = count_sector_positions(open_positions)
+    sector_counts = {}  # Tracked dynamically during execution loop
     
     candidates = load_screener_candidates()
     if not candidates:
@@ -190,21 +163,14 @@ def run_bot():
     for item in candidates:
         ticker = item.get("Ticker")
         signal = item.get("Signal", "HOLD")
+        sector = item.get("Sector", "General")
         atr_pts = item.get("ATR_Points", DEFAULT_STOP_DISTANCE)
         
         if signal not in ["BUY", "STRONG BUY"]:
             print(f"⏩ Skipping {ticker}: Signal is {signal}")
             continue
-
-        meta = EPIC_MAP.get(ticker)
-        if not meta:
-            print(f"⚠️ Skipped {ticker}: Missing IG EPIC mapping. Add to EPIC_MAP.")
-            continue
             
-        epic = meta["epic"]
-        sector = meta["sector"]
-        
-        execute_ig_trade(ig_service, ticker, epic, sector, open_positions, sector_counts, available_cash, atr_pts)
+        execute_ig_trade(ig_service, ticker, sector, open_positions, sector_counts, available_cash, atr_pts)
 
     print("\n=== EXECUTION COMPLETE ===")
 
