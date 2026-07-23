@@ -4,9 +4,7 @@ import json
 import pandas as pd
 from trading_ig import IGService
 
-# ==========================================
-# 1. CONFIGURATION & ENVIRONMENT SETUP
-# ==========================================
+# Environment Credentials
 IG_USERNAME = os.getenv("IG_USERNAME")
 IG_PASSWORD = os.getenv("IG_PASSWORD")
 IG_API_KEY = os.getenv("IG_API_KEY")
@@ -16,7 +14,7 @@ IG_ACC_TYPE = "DEMO"
 # Risk & Execution Controls
 MAX_POSITIONS_PER_SECTOR = 2
 RISK_PCT_PER_TRADE = 0.01   # Risk 1% of total cash per trade
-DEFAULT_STOP_DISTANCE = 20  # Fallback 20 points stop-loss
+DEFAULT_STOP_DISTANCE = 20  # Default fallback stop loss
 
 
 def connect_to_ig():
@@ -48,14 +46,46 @@ def get_account_balance(ig_service):
                     print(f"💰 Current Available Capital: £{float(available_cash):,.2f}")
                     return float(available_cash)
     except Exception as e:
-        print(f"⚠️ Could not fetch balance via API, using default: {e}")
+        print(f"⚠️ Could not fetch balance via API: {e}")
     return 20000.0
+
+
+def resolve_ig_epic(ig_service, ticker):
+    """
+    Constructs active Spread Bet Epics accurately:
+    - UK LSE Equities: ED.D.[TICKER].DAILY.IP
+    - US Equities: UA.D.[TICKER].DAILY.IP
+    Fallback to live API search if pattern doesn't fit.
+    """
+    clean_symbol = ticker.strip().upper()
+
+    # 1. Direct Rule Matching
+    if clean_symbol.endswith(".L"):
+        base_symbol = clean_symbol.replace(".L", "")
+        return f"ED.D.{base_symbol}.DAILY.IP"
+    elif clean_symbol.isalpha():
+        return f"UA.D.{clean_symbol}.DAILY.IP"
+
+    # 2. Dynamic Search Fallback
+    try:
+        search_results = ig_service.search_markets(clean_symbol)
+        if isinstance(search_results, pd.DataFrame) and not search_results.empty:
+            for _, row in search_results.iterrows():
+                epic = str(row.get("epic", ""))
+                itype = str(row.get("instrumentType", ""))
+                if "SHARES" in itype and ("DAILY" in epic or "DFB" in epic):
+                    return epic
+            return search_results.iloc[0].get("epic")
+    except Exception as e:
+        print(f"⚠️ Search fallback exception for {ticker}: {e}")
+
+    return None
 
 
 def calculate_stake_size(available_cash, stop_loss_points=20):
     risk_amount = available_cash * RISK_PCT_PER_TRADE
     stake = risk_amount / stop_loss_points
-    max_stake = 5.0  # Safety cap at £5/point
+    max_stake = 5.0  # Cap at £5/point
     return max(min(round(stake, 2), max_stake), 0.50)
 
 
@@ -78,23 +108,21 @@ def execute_ig_trade(ig_service, item, open_positions, sector_counts, available_
     ticker = item.get("Ticker")
     sector = item.get("Sector", "General")
     atr_points = item.get("ATR_Points", DEFAULT_STOP_DISTANCE)
-    epic = item.get("IG_Epic")
-
-    # 1. Check if Epic was resolved in Step 1
-    if not epic or epic == "None":
-        print(f"❌ Skipped {ticker}: Missing or unresolved IG_Epic.")
+    
+    epic = resolve_ig_epic(ig_service, ticker)
+    if not epic:
+        print(f"❌ Skipped {ticker}: Could not resolve IG Epic.")
         return
 
-    # 2. Prevent duplicate entries
+    # Duplicate check
     if isinstance(open_positions, pd.DataFrame) and not open_positions.empty and "epic" in open_positions.columns:
         if epic in open_positions["epic"].tolist():
             print(f"ℹ️ Active position already exists for {ticker} ({epic}). Skipping.")
             return
 
-    # 3. Sector Concentration Cap
-    current_sector_trades = sector_counts.get(sector, 0)
-    if current_sector_trades >= MAX_POSITIONS_PER_SECTOR:
-        print(f"🛡️ Sector Limit Reached: {sector} already has {current_sector_trades} active trades. Skipping {ticker}.")
+    # Sector Concentration check
+    if sector_counts.get(sector, 0) >= MAX_POSITIONS_PER_SECTOR:
+        print(f"🛡️ Sector Limit Reached: {sector} already has {sector_counts.get(sector, 0)} active trades. Skipping {ticker}.")
         return
 
     stop_dist = atr_points if atr_points and atr_points >= 10 else DEFAULT_STOP_DISTANCE
@@ -144,7 +172,6 @@ def run_bot():
     
     for item in candidates:
         signal = item.get("Signal", "HOLD")
-        
         if signal not in ["BUY", "STRONG BUY"]:
             print(f"⏩ Skipping {item.get('Ticker')}: Signal is {signal}")
             continue
