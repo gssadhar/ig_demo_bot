@@ -101,10 +101,9 @@ def execute_trades():
             continue
 
         # Dynamic Sizing Logic: Risk £75 max per trade
-        # Stake per point = Risk Amount / Stop Distance (in points)
         calculated_size = round(MAX_RISK_PER_TRADE_GBP / stop_distance, 2)
         
-        # Enforce IG minimum stake constraints (0.10p for UK, £0.50 or £1 for US)
+        # Enforce IG minimum stake constraints
         is_uk = ticker.endswith(".L")
         min_size = 0.1 if is_uk else 0.5
         stake_size = max(calculated_size, min_size)
@@ -121,7 +120,14 @@ def execute_trades():
                 guaranteed_stop=False,
                 order_type="MARKET",
                 size=stake_size,
-                stop_distance=stop_distance
+                level=None,
+                limit_distance=None,
+                limit_level=None,
+                quote_id=None,
+                stop_distance=stop_distance,
+                stop_level=None,
+                trailing_stop=False,
+                trailing_stop_increment=None
             )
             deal_ref = response.get("dealReference", "N/A")
             print(f"✅ Order executed for {ticker} | Ref: {deal_ref}")
