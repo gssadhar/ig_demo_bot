@@ -14,13 +14,39 @@ IG_ACC_NUMBER = os.getenv("IG_ACC_NUMBER")
 IG_ACC_TYPE = "DEMO"  # Always test on DEMO first
 
 # Map Tickers to IG Spread Betting EPICs
+# Expanded Global Watchlist Across Sectors & Market Caps
 WATCHLIST_EPICS = {
+    # --- US LARGE CAP TECH & GROWTH ---
     "AAPL": "UC.D.AAPL.DAILY.IP",
     "MSFT": "UC.D.MSFT.DAILY.IP",
     "NVDA": "UC.D.NVDA.DAILY.IP",
-    "RR.L": "SE.D.RR.DAILY.IP",
-    "GLEN.L": "SE.D.GLEN.DAILY.IP",
-    "AZN.L": "SE.D.AZN.DAILY.IP",
+    "GOOGL": "UC.D.GOOGL.DAILY.IP",
+    "AMZN": "UC.D.AMZN.DAILY.IP",
+    "META": "UC.D.META.DAILY.IP",
+    "TSLA": "UC.D.TSLA.DAILY.IP",
+    "AMD": "UC.D.AMD.DAILY.IP",
+    
+    # --- UK & EUROPEAN LARGE CAPS ---
+    "RR.L": "SE.D.RR.DAILY.IP",         # Rolls-Royce
+    "GLEN.L": "SE.D.GLEN.DAILY.IP",     # Glencore
+    "AZN.L": "SE.D.AZN.DAILY.IP",       # AstraZeneca
+    "SHEL.L": "SE.D.SHEL.DAILY.IP",     # Shell
+    "BP.L": "SE.D.BP.DAILY.IP",         # BP
+    "GSK.L": "SE.D.GSK.DAILY.IP",       # GSK
+    "HSBC.L": "SE.D.HSBC.DAILY.IP",     # HSBC
+    
+    # --- MID & SMALL CAPS / HIGH GROWTH ---
+    "CROX": "UC.D.CROX.DAILY.IP",
+    "DUOL": "UC.D.DUOL.DAILY.IP",
+    "ELF": "UC.D.ELF.DAILY.IP",
+    "WING": "UC.D.WING.DAILY.IP",
+    "BOOT": "UC.D.BOOT.DAILY.IP",
+    
+    # --- DEFENSIVE & CONSUMER STAPLES ---
+    "PG": "UC.D.PG.DAILY.IP",
+    "KO": "UC.D.KO.DAILY.IP",
+    "COST": "UC.D.COST.DAILY.IP",
+    "JPM": "UC.D.JPM.DAILY.IP"
 }
 
 def connect_to_ig():
