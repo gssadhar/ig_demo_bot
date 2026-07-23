@@ -11,7 +11,7 @@ SENDER_EMAIL = os.getenv("SENDER_EMAIL")
 RECEIVER_EMAIL = os.getenv("RECEIVER_EMAIL")
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
 
-# Cleaned Watchlist (Valid Active Yahoo Tickers)
+# Cleaned Watchlist
 WATCHLIST = [
     {"ticker": "AAPL", "sector": "Technology"},
     {"ticker": "MSFT", "sector": "Technology"},
@@ -54,14 +54,23 @@ def calculate_technical_signal(ticker_symbol):
         sma_50 = close.rolling(50).mean().iloc[-1]
         current_price = close.iloc[-1]
 
-        # Calculate ATR
+        # Calculate True Range & 14-day ATR
         tr1 = high - low
         tr2 = (high - close.shift(1)).abs()
         tr3 = (low - close.shift(1)).abs()
         tr = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
         atr_value = tr.rolling(14).mean().iloc[-1]
 
-        atr_points = max(int(round(atr_value * 100)), 15) if ticker_symbol.endswith(".L") else max(int(round(atr_value)), 15)
+        # Realistic Stop Loss calculation based on market type
+        is_uk = ticker_symbol.endswith(".L")
+        if is_uk:
+            # UK stocks trade in pence (GBX)
+            # 1.5x ATR in pence, minimum 20 points (20p)
+            atr_points = max(int(round(atr_value * 1.5 * 100)), 20)
+        else:
+            # US stocks trade in USD (1 point = $0.01 / 1 cent on IG)
+            # 1.5x ATR in cents, minimum 150 points ($1.50) to absorb spread and noise
+            atr_points = max(int(round(atr_value * 1.5 * 100)), 150)
 
         signal = "HOLD"
         if current_price > sma_20 and sma_20 > sma_50:
