@@ -1,28 +1,17 @@
 import os
-import sys
 import json
-import time
 import smtplib
 import pandas as pd
 import yfinance as yf
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from trading_ig import IGService
 
-# ==========================================
-# 1. CONFIGURATION & ENVIRONMENT SETUP
-# ==========================================
-IG_USERNAME = os.getenv("IG_USERNAME")
-IG_PASSWORD = os.getenv("IG_PASSWORD")
-IG_API_KEY = os.getenv("IG_API_KEY")
-IG_ACC_NUMBER = os.getenv("IG_ACC_NUMBER")
-IG_ACC_TYPE = "DEMO"
-
+# Environment Variables
 SENDER_EMAIL = os.getenv("SENDER_EMAIL")
 RECEIVER_EMAIL = os.getenv("RECEIVER_EMAIL")
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
 
-# Expanded Watchlist (US Equities & UK LSE Equities)
+# Cleaned Watchlist (Valid Active Yahoo Tickers)
 WATCHLIST = [
     {"ticker": "AAPL", "sector": "Technology"},
     {"ticker": "MSFT", "sector": "Technology"},
@@ -44,82 +33,16 @@ WATCHLIST = [
     {"ticker": "SHEL.L", "sector": "Energy"},
     {"ticker": "GSK.L", "sector": "Healthcare"},
     {"ticker": "BP.L", "sector": "Energy"},
-    {"ticker": "HSBC.L", "sector": "Financial Services"},
-    {"ticker": "ALTR", "sector": "Technology"}
+    {"ticker": "HSBA.L", "sector": "Financial Services"}
 ]
 
 
-# ==========================================
-# 2. IG EPIC RESOLVER
-# ==========================================
-def connect_ig():
-    if not all([IG_USERNAME, IG_PASSWORD, IG_API_KEY, IG_ACC_NUMBER]):
-        print("⚠️ Missing IG environment variables. Epic resolution fallback enabled.")
-        return None
-    try:
-        ig_service = IGService(IG_USERNAME, IG_PASSWORD, IG_API_KEY, IG_ACC_TYPE)
-        ig_service.create_session()
-        try:
-            ig_service.switch_account(IG_ACC_NUMBER, False)
-        except Exception:
-            pass
-        return ig_service
-    except Exception as e:
-        print(f"⚠️ Could not connect to IG: {e}")
-        return None
-
-
-def resolve_ig_epic(ig_service, ticker):
-    """
-    Searches IG API dynamically to get the EXACT active Spread Bet Epic.
-    """
-    if not ig_service:
-        return None
-        
-    clean_symbol = ticker.replace(".L", "").strip().upper()
-    try:
-        search_results = ig_service.search_markets(clean_symbol)
-        
-        # 1. Handle DataFrame Response
-        if isinstance(search_results, pd.DataFrame) and not search_results.empty:
-            for _, row in search_results.iterrows():
-                epic = str(row.get("epic", ""))
-                itype = str(row.get("instrumentType", ""))
-                if "SHARES" in itype and ("DAILY" in epic or "DFB" in epic):
-                    return epic
-            return search_results.iloc[0].get("epic")
-            
-        # 2. Handle Dict Response
-        elif isinstance(search_results, dict):
-            markets = search_results.get("markets", [])
-            if isinstance(markets, pd.DataFrame) and not markets.empty:
-                for _, row in markets.iterrows():
-                    epic = str(row.get("epic", ""))
-                    itype = str(row.get("instrumentType", ""))
-                    if "SHARES" in itype and ("DAILY" in epic or "DFB" in epic):
-                        return epic
-                return markets.iloc[0].get("epic")
-            elif isinstance(markets, list) and len(markets) > 0:
-                for m in markets:
-                    epic = m.get("epic", "")
-                    if m.get("instrumentType") == "SHARES" and ("DAILY" in epic or "DFB" in epic):
-                        return epic
-                return markets[0].get("epic")
-    except Exception as e:
-        print(f"⚠️ IG Search lookup warning for {ticker}: {e}")
-    return None
-
-
-# ==========================================
-# 3. TECHNICAL ANALYSIS ENGINE
-# ==========================================
 def calculate_technical_signal(ticker_symbol):
     try:
         df = yf.download(ticker_symbol, period="1y", interval="1d", progress=False)
         if df.empty or len(df) < 50:
             return None
 
-        # Flatten multi-index columns if returned by yfinance
         if isinstance(df.columns, pd.MultiIndex):
             df.columns = df.columns.get_level_values(0)
 
@@ -127,22 +50,19 @@ def calculate_technical_signal(ticker_symbol):
         high = df["High"]
         low = df["Low"]
 
-        # Simple Moving Averages
         sma_20 = close.rolling(20).mean().iloc[-1]
         sma_50 = close.rolling(50).mean().iloc[-1]
         current_price = close.iloc[-1]
 
-        # ATR (Average True Range)
+        # Calculate ATR
         tr1 = high - low
         tr2 = (high - close.shift(1)).abs()
         tr3 = (low - close.shift(1)).abs()
         tr = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
         atr_value = tr.rolling(14).mean().iloc[-1]
 
-        # Convert ATR to points integer (1 point = 0.01 for USD/LSE pence)
         atr_points = max(int(round(atr_value * 100)), 15) if ticker_symbol.endswith(".L") else max(int(round(atr_value)), 15)
 
-        # Signal Logic
         signal = "HOLD"
         if current_price > sma_20 and sma_20 > sma_50:
             signal = "STRONG BUY"
@@ -153,19 +73,14 @@ def calculate_technical_signal(ticker_symbol):
 
         return {
             "Price": round(float(current_price), 2),
-            "SMA_20": round(float(sma_20), 2),
-            "SMA_50": round(float(sma_50), 2),
             "Signal": signal,
             "ATR_Points": atr_points
         }
     except Exception as e:
-        print(f"⏩ Skipping {ticker_symbol} (Yahoo Finance fetch error: {e})")
+        print(f"⏩ Skipping {ticker_symbol}: {e}")
         return None
 
 
-# ==========================================
-# 4. REPORT GENERATOR & EMAIL SENDER
-# ==========================================
 def build_html_report(candidates):
     rows = ""
     for c in candidates:
@@ -177,7 +92,6 @@ def build_html_report(candidates):
             <td style="padding: 10px; border-bottom: 1px solid #ddd;">${c['Price']}</td>
             <td style="padding: 10px; border-bottom: 1px solid #ddd;"><span style="background-color: {badge_color}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">{c['Signal']}</span></td>
             <td style="padding: 10px; border-bottom: 1px solid #ddd;">{c['ATR_Points']} pts</td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;"><code>{c['IG_Epic']}</code></td>
         </tr>
         """
     return f"""
@@ -185,7 +99,6 @@ def build_html_report(candidates):
     <body style="font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px;">
         <div style="max-width: 700px; margin: auto; background: white; padding: 20px; border-radius: 8px;">
             <h2 style="color: #333;">📈 Daily Market Screener Candidates</h2>
-            <p style="color: #666;">Top momentum stock setups resolved for IG Execution:</p>
             <table style="width: 100%; border-collapse: collapse; text-align: left;">
                 <thead>
                     <tr style="background-color: #f8f9fa;">
@@ -194,7 +107,6 @@ def build_html_report(candidates):
                         <th style="padding: 10px; border-bottom: 2px solid #ddd;">Price</th>
                         <th style="padding: 10px; border-bottom: 2px solid #ddd;">Signal</th>
                         <th style="padding: 10px; border-bottom: 2px solid #ddd;">Stop Distance</th>
-                        <th style="padding: 10px; border-bottom: 2px solid #ddd;">IG Epic</th>
                     </tr>
                 </thead>
                 <tbody>{rows}</tbody>
@@ -207,12 +119,11 @@ def build_html_report(candidates):
 
 def send_email(html_content):
     if not all([SENDER_EMAIL, RECEIVER_EMAIL, SMTP_PASSWORD]):
-        print("ℹ️ Email credentials not present. Skipping email dispatch.")
+        print("ℹ️ Email credentials missing. Skipping email dispatch.")
         return
-
     try:
         msg = MIMEMultipart("alternative")
-        msg["Subject"] = "🚀 Daily Market Screener - IG Qualified Candidates"
+        msg["Subject"] = "🚀 Daily Market Screener - Candidates"
         msg["From"] = SENDER_EMAIL
         msg["To"] = RECEIVER_EMAIL
         msg.attach(MIMEText(html_content, "html"))
@@ -222,15 +133,11 @@ def send_email(html_content):
             server.sendmail(SENDER_EMAIL, RECEIVER_EMAIL, msg.as_string())
         print(f"-> Email successfully sent to {RECEIVER_EMAIL}!")
     except Exception as e:
-        print(f"⚠️ Email notification failed: {e}")
+        print(f"⚠️ Email dispatch error: {e}")
 
 
-# ==========================================
-# 5. MAIN SCREENER PIPELINE
-# ==========================================
 def run_screener():
     print("=== RUNNING GLOBAL HYBRID STOCK SCREENER ===")
-    ig_service = connect_ig()
     candidates = []
 
     for item in WATCHLIST:
@@ -242,33 +149,23 @@ def run_screener():
             continue
 
         if metrics["Signal"] in ["BUY", "STRONG BUY"]:
-            # Pre-flight IG Epic Resolution
-            epic = resolve_ig_epic(ig_service, ticker)
-            
-            # Rate limit safety delay
-            time.sleep(0.3)
-
             candidates.append({
                 "Ticker": ticker,
                 "Sector": sector,
                 "Price": metrics["Price"],
                 "Signal": metrics["Signal"],
-                "ATR_Points": metrics["ATR_Points"],
-                "IG_Epic": epic
+                "ATR_Points": metrics["ATR_Points"]
             })
 
-    # Save to top_candidates.json
     with open("top_candidates.json", "w") as f:
         json.dump(candidates, f, indent=4)
     print(f"-> Saved {len(candidates)} top buy setup candidates to top_candidates.json!")
 
-    # Generate index.html
     html_report = build_html_report(candidates)
     with open("index.html", "w") as f:
         f.write(html_report)
     print("-> Successfully generated index.html!")
 
-    # Send Email Notification
     send_email(html_report)
 
 
