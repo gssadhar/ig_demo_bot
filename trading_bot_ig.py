@@ -12,7 +12,8 @@ IG_USERNAME = os.getenv("IG_USERNAME")
 IG_PASSWORD = os.getenv("IG_PASSWORD")
 IG_API_KEY = os.getenv("IG_API_KEY")
 IG_ACC_NUMBER = os.getenv("IG_ACC_NUMBER")
-IG_ACC_TYPE = os.getenv("IG_ACC_TYPE", "DEMO")  # Set to 'LIVE' for real account
+# Falls back to 'DEMO' if variable is missing or empty string
+IG_ACC_TYPE = os.getenv("IG_ACC_TYPE") or "DEMO"
 
 # Risk Management Settings
 MAX_RISK_PER_TRADE_GBP = 75.0  # Max £ amount to lose per trade
@@ -28,11 +29,11 @@ def connect_ig():
             username=IG_USERNAME,
             password=IG_PASSWORD,
             api_key=IG_API_KEY,
-            acc_type=IG_ACC_TYPE,
+            acc_type=IG_ACC_TYPE.upper(),
             acc_number=IG_ACC_NUMBER
         )
         ig_service.create_session()
-        print("⚡ Connected to IG API successfully!")
+        print(f"⚡ Connected to IG API successfully ({IG_ACC_TYPE.upper()} Mode)!")
         return ig_service
     except Exception as e:
         print(f"❌ Connection error: {e}")
@@ -132,10 +133,10 @@ def execute_trades():
             
             deal_ref = response.get("dealReference", "N/A")
             
-            # Brief pause to allow IG's order engine to process
+            # Pause briefly for IG order matching engine
             time.sleep(1)
             
-            # Fetch deal confirmation to verify execution status
+            # Check deal status
             confirm = ig_service.fetch_deal_confirmation(deal_ref)
             deal_status = confirm.get("dealStatus")
             reason = confirm.get("reason", "SUCCESS")
