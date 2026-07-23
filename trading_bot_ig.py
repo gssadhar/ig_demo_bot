@@ -1,6 +1,7 @@
 import os
 import json
 import logging
+import time
 from trading_ig import IGService
 
 # Setup Logging
@@ -46,7 +47,6 @@ def resolve_ig_epic(ig_service, ticker):
     try:
         search_results = ig_service.search_markets(clean_symbol)
         
-        # Search for valid daily/DFB share spread bet market
         if hasattr(search_results, "iterrows"):
             for _, row in search_results.iterrows():
                 epic = str(row.get("epic", ""))
@@ -108,7 +108,7 @@ def execute_trades():
         min_size = 0.1 if is_uk else 0.5
         stake_size = max(calculated_size, min_size)
 
-        print(f"🚀 Placing BUY on {ticker} [{epic}] | Stop: {stop_distance} pts | Stake: £{stake_size}/pt...")
+        print(f"🚀 Submitting BUY order on {ticker} [{epic}] | Stop: {stop_distance} pts | Stake: £{stake_size}/pt...")
 
         try:
             response = ig_service.create_open_position(
@@ -129,9 +129,23 @@ def execute_trades():
                 trailing_stop=False,
                 trailing_stop_increment=None
             )
+            
             deal_ref = response.get("dealReference", "N/A")
-            print(f"✅ Order executed for {ticker} | Ref: {deal_ref}")
-            sector_counts[sector] = sector_counts.get(sector, 0) + 1
+            
+            # Brief pause to allow IG's order engine to process
+            time.sleep(1)
+            
+            # Fetch deal confirmation to verify execution status
+            confirm = ig_service.fetch_deal_confirmation(deal_ref)
+            deal_status = confirm.get("dealStatus")
+            reason = confirm.get("reason", "SUCCESS")
+
+            if deal_status == "ACCEPTED":
+                print(f"✅ Position OPENED for {ticker} | Ref: {deal_ref}")
+                sector_counts[sector] = sector_counts.get(sector, 0) + 1
+            else:
+                print(f"🚫 Order REJECTED for {ticker} | Reason: {reason}")
+
         except Exception as e:
             print(f"❌ Trade execution failed for {ticker}: {e}")
 
