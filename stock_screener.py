@@ -12,7 +12,6 @@ SENDER_EMAIL = os.getenv("SENDER_EMAIL")
 RECEIVER_EMAIL = os.getenv("RECEIVER_EMAIL")
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
 
-# Expanded Comprehensive Global Multi-Sector Watchlist
 WATCHLIST = [
     {"ticker": "MSFT", "sector": "Technology"},
     {"ticker": "GOOGL", "sector": "Communication Services"},
@@ -118,23 +117,8 @@ def calculate_technical_signal(ticker_symbol):
 
 
 def build_interactive_html_report(candidates):
-    json_data = json.dumps(candidates)
+    json_candidates = json.dumps(candidates)
     
-    rows = ""
-    for c in candidates:
-        badge_color = "#28a745" if c["Signal"] == "STRONG BUY" else "#17a2b8"
-        # Safely serialize item to avoid quote clashes in inline onclick
-        safe_json_item = json.dumps(c).replace('"', '&quot;')
-        rows += f"""
-        <tr onclick='openModal({safe_json_item})' style="cursor: pointer;">
-            <td style="padding: 12px; border-bottom: 1px solid #334155;"><b>{c['Ticker']}</b></td>
-            <td style="padding: 12px; border-bottom: 1px solid #334155;">{c['Sector']}</td>
-            <td style="padding: 12px; border-bottom: 1px solid #334155;">${c['Price']}</td>
-            <td style="padding: 12px; border-bottom: 1px solid #334155;"><span style="background-color: {badge_color}; color: white; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: bold;">{c['Signal']}</span></td>
-            <td style="padding: 12px; border-bottom: 1px solid #334155;">{c['ATR_Points']} pts</td>
-        </tr>
-        """
-
     return f"""
     <!DOCTYPE html>
     <html lang="en">
@@ -147,7 +131,8 @@ def build_interactive_html_report(candidates):
             h2 {{ color: #38bdf8; margin-top: 0; }}
             table {{ width: 100%; border-collapse: collapse; text-align: left; margin-top: 20px; }}
             th {{ background-color: #0f172a; color: #38bdf8; padding: 14px; border-bottom: 2px solid #334155; font-size: 13px; text-transform: uppercase; }}
-            tr:hover {{ background-color: #334155; }}
+            tr.clickable-row {{ cursor: pointer; }}
+            tr.clickable-row:hover {{ background-color: #334155; }}
             .modal {{ display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); }}
             .modal-content {{ background: #1e293b; margin: 6% auto; padding: 30px; border: 1px solid #475569; width: 80%; max-width: 650px; border-radius: 12px; color: #f8fafc; }}
             .close {{ color: #94a3b8; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }}
@@ -173,7 +158,7 @@ def build_interactive_html_report(candidates):
                         <th>Stop Distance</th>
                     </tr>
                 </thead>
-                <tbody>{rows}</tbody>
+                <tbody id="table-body"></tbody>
             </table>
         </div>
 
@@ -213,6 +198,27 @@ def build_interactive_html_report(candidates):
         </div>
 
         <script>
+            const candidates = {json_candidates};
+
+            function renderTable() {{
+                const tbody = document.getElementById('table-body');
+                tbody.innerHTML = '';
+                candidates.forEach((c, index) => {{
+                    const badgeColor = c.Signal === 'STRONG BUY' ? '#28a745' : '#17a2b8';
+                    const row = document.createElement('tr');
+                    row.className = 'clickable-row';
+                    row.innerHTML = `
+                        <td style="padding: 12px; border-bottom: 1px solid #334155;"><b>${{c.Ticker}}</b></td>
+                        <td style="padding: 12px; border-bottom: 1px solid #334155;">${{c.Sector}}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #334155;">$${{c.Price}}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #334155;"><span style="background-color: ${{badgeColor}}; color: white; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: bold;">${{c.Signal}}</span></td>
+                        <td style="padding: 12px; border-bottom: 1px solid #334155;">${{c.ATR_Points}} pts</td>
+                    `;
+                    row.onclick = () => openModal(c);
+                    tbody.appendChild(row);
+                }});
+            }}
+
             function openModal(data) {{
                 document.getElementById('modalTitle').innerText = data.Ticker + ' — Sector Deep Dive Analysis';
                 document.getElementById('mPrice').innerText = '$' + data.Price;
@@ -235,6 +241,8 @@ def build_interactive_html_report(candidates):
                     modal.style.display = 'none';
                 }}
             }}
+
+            renderTable();
         </script>
     </body>
     </html>
