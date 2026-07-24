@@ -458,5 +458,105 @@
         "strategy": "Adaptive Multi-Factor Momentum",
         "stake": 1.63,
         "deal_reference": "FYKQB99685YTYSB"
+    },
+    {
+        "timestamp": "2026-07-24T12:57:02.592482+00:00",
+        "ticker": "NVDA",
+        "epic": "UC.D.NVDA.DAILY.IP",
+        "sector": "Technology",
+        "regime": "NORMAL",
+        "strategy": "Adaptive Multi-Factor Momentum",
+        "stake": 0.5,
+        "deal_reference": "R3FR2NGCDS8TYSB"
+    },
+    {
+        "timestamp": "2026-07-24T12:57:03.845969+00:00",
+        "ticker": "AAPL",
+        "epic": "UA.D.AAPL.DAILY.IP",
+        "sector": "Technology",
+        "regime": "NORMAL",
+        "strategy": "Adaptive Multi-Factor Momentum",
+        "stake": 0.5,
+        "deal_reference": "C6SP2XTKQLUTYSB"
+    },
+    {
+        "timestamp": "2026-07-24T12:57:04.795886+00:00",
+        "ticker": "JPM",
+        "epic": "SD.D.JPM.DAILY.IP",
+        "sector": "Financial Services",
+        "regime": "NORMAL",
+        "strategy": "Adaptive Multi-Factor Momentum",
+        "stake": 0.5,
+        "deal_reference": "P8R2SQFWKGYTYSB"
+    },
+    {
+        "timestamp": "2026-07-24T12:57:06.119835+00:00",
+        "ticker": "HSBA.L",
+        "epic": "KA.D.HSBA.DAILY.IP",
+        "sector": "Financial Services",
+        "regime": "NORMAL",
+        "strategy": "Adaptive Multi-Factor Momentum",
+        "stake": 1.63,
+        "deal_reference": "5MMSFTX5DQCTYSB"
+    },
+    {
+        "timestamp": "2026-07-24T12:57:07.203431+00:00",
+        "ticker": "BA.L",
+        "epic": "KA.D.BA.DAILY.IP",
+        "sector": "Industrials",
+        "regime": "NORMAL",
+        "strategy": "Adaptive Multi-Factor Momentum",
+        "stake": 1.28,
+        "deal_reference": "3TXU8U5SGFLTYSB"
+    },
+    {
+        "timestamp": "2026-07-24T12:57:08.638065+00:00",
+        "ticker": "SHEL.L",
+        "epic": "KA.D.SHELLN.DAILY.IP",
+        "sector": "Energy",
+        "regime": "NORMAL",
+        "strategy": "Adaptive Multi-Factor Momentum",
+        "stake": 0.76,
+        "deal_reference": "DDKE569TC5YTYSB"
+    },
+    {
+        "timestamp": "2026-07-24T12:57:09.497376+00:00",
+        "ticker": "BP.L",
+        "epic": "KA.D.BP.DAILY.IP",
+        "sector": "Energy",
+        "regime": "NORMAL",
+        "strategy": "Adaptive Multi-Factor Momentum",
+        "stake": 4.57,
+        "deal_reference": "F4AH9UUARFYTYSB"
+    },
+    {
+        "timestamp": "2026-07-24T12:57:10.330694+00:00",
+        "ticker": "GLEN.L",
+        "epic": "KA.D.GLEN.DAILY.IP",
+        "sector": "Basic Materials",
+        "regime": "NORMAL",
+        "strategy": "Adaptive Multi-Factor Momentum",
+        "stake": 4.66,
+        "deal_reference": "6Q3BMQ9UJ88TYSB"
+    },
+    {
+        "timestamp": "2026-07-24T12:57:11.323674+00:00",
+        "ticker": "DGE.L",
+        "epic": "KA.D.DGE.DAILY.IP",
+        "sector": "Consumer Defensive",
+        "regime": "NORMAL",
+        "strategy": "Adaptive Multi-Factor Momentum",
+        "stake": 1.63,
+        "deal_reference": "TP2736AUU3CTYSB"
+    },
+    {
+        "timestamp": "2026-07-24T12:57:12.601520+00:00",
+        "ticker": "CROX",
+        "epic": "UA.D.CROX.DAILY.IP",
+        "sector": "Consumer Cyclical",
+        "regime": "NORMAL",
+        "strategy": "Adaptive Multi-Factor Momentum",
+        "stake": 0.5,
+        "deal_reference": "GK5J9XQWA8GTYSB"
     }
 ]
