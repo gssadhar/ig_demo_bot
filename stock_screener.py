@@ -12,9 +12,8 @@ SENDER_EMAIL = os.getenv("SENDER_EMAIL")
 RECEIVER_EMAIL = os.getenv("RECEIVER_EMAIL")
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
 
-# Expanded Comprehensive Global Multi-Sector Watchlist (Including Core Portfolio Assets)
+# Expanded Comprehensive Global Multi-Sector Watchlist
 WATCHLIST = [
-    # Technology & Growth
     {"ticker": "MSFT", "sector": "Technology"},
     {"ticker": "GOOGL", "sector": "Communication Services"},
     {"ticker": "AMZN", "sector": "Consumer Cyclical"},
@@ -24,39 +23,28 @@ WATCHLIST = [
     {"ticker": "AMD", "sector": "Technology"},
     {"ticker": "AVGO", "sector": "Technology"},
     {"ticker": "ORCL", "sector": "Technology"},
-    {"ticker": "ALPH.L", "sector": "Technology"}, # Alphawave IP
-    
-    # Financial Services
     {"ticker": "JPM", "sector": "Financial Services"},
     {"ticker": "BAC", "sector": "Financial Services"},
     {"ticker": "HSBA.L", "sector": "Financial Services"},
     {"ticker": "LLOY.L", "sector": "Financial Services"},
-    {"ticker": "LGEN.L", "sector": "Financial Services"}, # Legal & General
-    
-    # Industrials & Aerospace
-    {"ticker": "RR.L", "sector": "Industrials"}, # Rolls-Royce
+    {"ticker": "LGEN.L", "sector": "Financial Services"},
+    {"ticker": "RR.L", "sector": "Industrials"},
     {"ticker": "CAT", "sector": "Industrials"},
     {"ticker": "GE", "sector": "Industrials"},
     {"ticker": "BA.L", "sector": "Industrials"},
-    {"ticker": "OXIG.L", "sector": "Industrials"}, # Oxford Instruments
-    
-    # Energy & Basic Materials
+    {"ticker": "OXIG.L", "sector": "Industrials"},
     {"ticker": "SHEL.L", "sector": "Energy"},
     {"ticker": "BP.L", "sector": "Energy"},
     {"ticker": "GLEN.L", "sector": "Basic Materials"},
-    {"ticker": "TGA.JO", "sector": "Basic Materials"}, # Thungela Resources proxy / alternative tracking
-    {"ticker": "ITH.L", "sector": "Energy"}, # Ithaca Energy
-    
-    # Healthcare & Consumer Defensive
+    {"ticker": "TGA.JO", "sector": "Basic Materials"},
+    {"ticker": "ITH.L", "sector": "Energy"},
     {"ticker": "GSK.L", "sector": "Healthcare"},
     {"ticker": "AZN.L", "sector": "Healthcare"},
-    {"ticker": "DGE.L", "sector": "Consumer Defensive"}, # Diageo
+    {"ticker": "DGE.L", "sector": "Consumer Defensive"},
     {"ticker": "KO", "sector": "Consumer Defensive"},
     {"ticker": "COST", "sector": "Consumer Defensive"},
-    
-    # Consumer Cyclical & Leisure
-    {"ticker": "WINE.L", "sector": "Consumer Cyclical"}, # JD Wetherspoon
-    {"ticker": "EZJ.L", "sector": "Consumer Cyclical"}, # easyJet
+    {"ticker": "WINE.L", "sector": "Consumer Cyclical"},
+    {"ticker": "EZJ.L", "sector": "Consumer Cyclical"},
     {"ticker": "CROX", "sector": "Consumer Cyclical"}
 ]
 
@@ -78,18 +66,15 @@ def calculate_technical_signal(ticker_symbol):
         sma_50 = float(close.rolling(50).mean().iloc[-1])
         current_price = float(close.iloc[-1])
         
-        # 1-Month Momentum calculation
         prev_price = float(close.iloc[-20]) if len(close) >= 20 else current_price
         momentum_1m = ((current_price - prev_price) / prev_price) * 100
 
-        # Calculate True Range & 14-day ATR
         tr1 = high - low
         tr2 = (high - close.shift(1)).abs()
         tr3 = (low - close.shift(1)).abs()
         tr = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
         atr_value = float(tr.rolling(14).mean().iloc[-1])
 
-        # Realistic Stop Loss calculation based on market type
         is_uk = ticker_symbol.endswith(".L")
         if is_uk:
             atr_points = max(int(round(atr_value * 1.5 * 100)), 20)
@@ -104,17 +89,14 @@ def calculate_technical_signal(ticker_symbol):
         elif current_price < sma_20 and sma_20 < sma_50:
             signal = "SELL"
 
-        # Fetch fundamentals via yfinance Ticker info safely
         ticker_obj = yf.Ticker(ticker_symbol)
         info = ticker_obj.info
         pe_ratio = info.get("trailingPE", "N/A")
-        market_cap = info.get("marketCap", "N/A")
 
-        # Expert Rationale Construction
         trend_desc = "bullish structural uptrend" if current_price > sma_50 else "defensive range"
         reasoning = (
-            f"Technical Analysis: Price (£/$) {current_price:.2f} is trading relative to the 20-period SMA ({sma_20:.2f}) and 50-period SMA ({sma_50:.2f}), "
-            f"classifying the current market phase as a {trend_desc}. 1-month momentum is measured at {momentum_1m:.2f}%. "
+            f"Technical Analysis: Price is trading relative to the 20-period SMA ({sma_20:.2f}) and 50-period SMA ({sma_50:.2f}), "
+            f"classifying the market phase as a {trend_desc}. 1-month momentum is measured at {momentum_1m:.2f}%. "
             f"Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of {atr_points} points. "
             f"Fundamental Valuation: Trailing P/E ratio registers at {pe_ratio}. "
             f"Expert Verdict: Systematic multi-factor rules assign a '{signal}' directive based on dynamic moving-average alignment and volatility thresholds."
@@ -141,8 +123,10 @@ def build_interactive_html_report(candidates):
     rows = ""
     for c in candidates:
         badge_color = "#28a745" if c["Signal"] == "STRONG BUY" else "#17a2b8"
+        # Safely serialize item to avoid quote clashes in inline onclick
+        safe_json_item = json.dumps(c).replace('"', '&quot;')
         rows += f"""
-        <tr onclick='openModal({json.dumps(c)})' style="cursor: pointer;">
+        <tr onclick='openModal({safe_json_item})' style="cursor: pointer;">
             <td style="padding: 12px; border-bottom: 1px solid #334155;"><b>{c['Ticker']}</b></td>
             <td style="padding: 12px; border-bottom: 1px solid #334155;">{c['Sector']}</td>
             <td style="padding: 12px; border-bottom: 1px solid #334155;">${c['Price']}</td>
@@ -164,7 +148,6 @@ def build_interactive_html_report(candidates):
             table {{ width: 100%; border-collapse: collapse; text-align: left; margin-top: 20px; }}
             th {{ background-color: #0f172a; color: #38bdf8; padding: 14px; border-bottom: 2px solid #334155; font-size: 13px; text-transform: uppercase; }}
             tr:hover {{ background-color: #334155; }}
-            /* Modal Design */
             .modal {{ display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); }}
             .modal-content {{ background: #1e293b; margin: 6% auto; padding: 30px; border: 1px solid #475569; width: 80%; max-width: 650px; border-radius: 12px; color: #f8fafc; }}
             .close {{ color: #94a3b8; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }}
@@ -194,7 +177,6 @@ def build_interactive_html_report(candidates):
             </table>
         </div>
 
-        <!-- Expansion Modal -->
         <div id="stockModal" class="modal">
             <div class="modal-content">
                 <span class="close" onclick="closeModal()">&times;</span>
@@ -232,7 +214,7 @@ def build_interactive_html_report(candidates):
 
         <script>
             function openModal(data) {{
-                document.getElementById('modalTitleinnerText').innerText = data.Ticker + ' — Sector Deep Dive';
+                document.getElementById('modalTitle').innerText = data.Ticker + ' — Sector Deep Dive Analysis';
                 document.getElementById('mPrice').innerText = '$' + data.Price;
                 document.getElementById('mSignal').innerText = data.Signal;
                 document.getElementById('mSma20').innerText = '$' + data.SMA_20;
@@ -257,25 +239,6 @@ def build_interactive_html_report(candidates):
     </body>
     </html>
     """
-
-
-def send_email(html_content):
-    if not all([SENDER_EMAIL, RECEIVER_EMAIL, SMTP_PASSWORD]):
-        print("ℹ️ Email credentials missing. Skipping email dispatch.")
-        return
-    try:
-        msg = MIMEMultipart("alternative")
-        msg["Subject"] = "🚀 Global Multi-Sector Screener - Live Report"
-        msg["From"] = SENDER_EMAIL
-        msg["To"] = RECEIVER_EMAIL
-        msg.attach(MIMEText(html_content, "html"))
-
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-            server.login(SENDER_EMAIL, SMTP_PASSWORD)
-            server.sendmail(SENDER_EMAIL, RECEIVER_EMAIL, msg.as_string())
-        print(f"-> Email successfully sent to {RECEIVER_EMAIL}!")
-    except Exception as e:
-        print(f"⚠️ Email dispatch error: {e}")
 
 
 def run_screener():
@@ -312,8 +275,6 @@ def run_screener():
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(html_report)
     print("-> Successfully generated interactive index.html dashboard!")
-
-    send_email(html_report)
 
 
 if __name__ == "__main__":
