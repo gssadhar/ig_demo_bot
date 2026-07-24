@@ -30,16 +30,16 @@ WATCHLIST = [
     {"ticker": "WTB.L", "sector": "Consumer Cyclical"},
 
     # --- Emerging Market Giants & ADRs ---
-    {"ticker": "TSM", "sector": "Technology"},         # Taiwan Semiconductor (Taiwan)
-    {"ticker": "BABA", "sector": "Consumer Cyclical"},  # Alibaba Group (China)
-    {"ticker": "INFY", "sector": "Technology"},         # Infosys (India)
-    {"ticker": "VALE", "sector": "Basic Materials"},    # Vale S.A. (Brazil)
-    {"ticker": "HDB", "sector": "Financial Services"},  # HDFC Bank (India)
-    {"ticker": "PDD", "sector": "Consumer Cyclical"},   # PDD Holdings (China)
+    {"ticker": "TSM", "sector": "Technology"},         
+    {"ticker": "BABA", "sector": "Consumer Cyclical"},  
+    {"ticker": "INFY", "sector": "Technology"},         
+    {"ticker": "VALE", "sector": "Basic Materials"},    
+    {"ticker": "HDB", "sector": "Financial Services"},  
+    {"ticker": "PDD", "sector": "Consumer Cyclical"},   
     
     # --- Broad Emerging Market & Regional ETFs ---
-    {"ticker": "IEMG", "sector": "Financial Services"}, # iShares Core MSCI Emerging Markets ETF
-    {"ticker": "INDA", "sector": "Financial Services"}  # iShares MSCI India ETF
+    {"ticker": "IEMG", "sector": "Financial Services"}, 
+    {"ticker": "INDA", "sector": "Financial Services"}  
 ]
 
 def format_large_number(val):
@@ -54,7 +54,7 @@ def format_large_number(val):
     return f"${val:,.2f}"
 
 def process_single_equity(ticker_symbol, sector):
-    """Processes technical indicators and fundamentals for an individual global equity."""
+    """Processes technical indicators and fundamentals with upgraded filters for risk mitigation."""
     try:
         df = yf.download(ticker_symbol, period="1y", interval="1d", progress=False, multi_level_index=False)
         if df.empty or len(df) < 50:
@@ -80,16 +80,17 @@ def process_single_equity(ticker_symbol, sector):
 
         is_uk = ticker_symbol.endswith(".L")
         if is_uk:
-            atr_points = max(int(round(atr_value * 1.5 * 100)), 20)
+            atr_points = max(int(round(atr_value * 1.2 * 100)), 15)
         else:
-            atr_points = max(int(round(atr_value * 1.5 * 100)), 150)
+            atr_points = max(int(round(atr_value * 1.2 * 100)), 100)
 
+        # UPGRADED STRICTER STRATEGY FILTERS
         signal = "HOLD"
-        if current_price > sma_20 and sma_20 > sma_50:
+        if current_price > sma_20 and current_price > sma_50 and sma_20 > sma_50 and momentum_1m > 1.0:
             signal = "STRONG BUY"
-        elif current_price > sma_20:
+        elif current_price > sma_20 and current_price > sma_50 and momentum_1m > 0:
             signal = "BUY"
-        elif current_price < sma_20 and sma_20 < sma_50:
+        elif current_price < sma_20 or current_price < sma_50:
             signal = "SELL"
 
         ticker_obj = yf.Ticker(ticker_symbol)
@@ -142,16 +143,16 @@ def process_single_equity(ticker_symbol, sector):
             projected = base_rev * ((1 + max(rev_growth, 0.04)) ** yr)
             forecasts.append(f"<b>Year {yr}:</b> Projected Revenue {format_large_number(projected)} (Est. Growth Trend: +{rev_growth*100:.1f}%)")
 
-        trend_phase = "Primary Bull Market (Above 50 SMA & 200 SMA)" if current_price > sma_200 else "Tactical Recovery Range"
-        conviction_weight = "High Conviction Institutional Accumulation" if signal == "STRONG BUY" else "Moderate Tactical Upside"
+        trend_phase = "Primary Bull Market (Strictly Above 50 & 200 SMA)" if current_price > sma_200 else "Tactical Recovery Range"
+        conviction_weight = "High Conviction Filtered Momentum" if signal == "STRONG BUY" else "Moderate Tactical Upside"
         
         reasoning = (
-            f"<b>Global Institutional Thesis & Market Structure:</b> Price action confirms a {trend_phase}, supported by a 1-month momentum print of {momentum_1m:.2f}%. "
-            f"The asset trades relative to a 20-day SMA of ${sma_20:.2f} and 50-day SMA of ${sma_50:.2f}, triggering a <b>{signal}</b> directive. "
+            f"<b>Upgraded Institutional Thesis & Risk Structure:</b> Price action confirms a {trend_phase}, supported by a strict 1-month momentum print of {momentum_1m:.2f}%. "
+            f"The asset trades above both the 20-day SMA (${sma_20:.2f}) and 50-day SMA (${sma_50:.2f}), triggering a filtered <b>{signal}</b> directive. "
             f"<br><br><b>Fundamental Balance Sheet & Solvency:</b> Operating with a market capitalization of {market_cap}, trailing revenues register at {revenue} with net income of {net_income}. "
-            f"Capital structure reveals total debt of {total_debt} against liquid cash reserves of {total_cash}, confirming robust liquidity coverage. "
-            f"<br><br><b>Valuation & Risk Architecture:</b> Trailing P/E is positioned at {pe_ratio_str} ({pe_eval}), backed by an institutional ATR stop-loss buffer of {atr_points} points. "
-            f"<b>Verdict:</b> {conviction_weight} supported by solid cash flow generation and alignment across multi-factor technical models."
+            f"Capital structure reveals total debt of {total_debt} against liquid cash reserves of {total_cash}. "
+            f"<br><br><b>Valuation & Risk Architecture:</b> Trailing P/E is positioned at {pe_ratio_str} ({pe_eval}), backed by a tightened ATR stop-loss buffer of {atr_points} points. "
+            f"<b>Verdict:</b> {conviction_weight} backed by strict trend alignment to minimize early drawdown exposure."
         )
 
         return {
@@ -225,8 +226,8 @@ def build_interactive_html_report(candidates):
     </head>
     <body>
         <div class="container">
-            <h2>🌍 Global Multi-Sector Quantitative Terminal (US, UK & Emerging Markets)</h2>
-            <p style="color: #94a3b8; font-size: 13px;">Click any asset row to launch the professional due diligence suite with side-by-side valuation metric definitions and technical charts.</p>
+            <h2>🌍 Global Multi-Sector Quantitative Terminal (Upgraded Risk Filters)</h2>
+            <p style="color: #94a3b8; font-size: 13px;">Showing high-conviction assets filtered through strict multi-moving average trend parameters.</p>
             <table>
                 <thead>
                     <tr>
@@ -249,7 +250,6 @@ def build_interactive_html_report(candidates):
                 <h3 id="modalTitle" style="color: #38bdf8; margin-top:0; font-size: 20px;">Asset Deep Dive</h3>
                 
                 <div class="modal-layout">
-                    <!-- Left Column: Charts & Analysis -->
                     <div class="left-column">
                         <div class="section-title" style="margin-top:0;">Advanced Technical Charting (RSI, Bollinger Bands, Moving Averages & Volume)</div>
                         <div id="tradingview_widget" class="tv-container"></div>
@@ -265,93 +265,79 @@ def build_interactive_html_report(candidates):
                         <div class="info-box" id="mForecasts"></div>
                     </div>
 
-                    <!-- Right Column: Neat Clean Professional Sidebar with Detailed Tooltips -->
                     <div class="right-sidebar">
                         <div class="sidebar-title">Key Valuation & Market Metrics</div>
-                        <p style="font-size: 11px; color: #94a3b8; margin-top:0; margin-bottom: 15px;">Hover over any metric card to review complete institutional definitions, sector comparisons, and performance thresholds.</p>
                         
                         <div class="metric-card">
                             <div class="metric-label">Current Price</div>
                             <div class="metric-value" id="mPrice"></div>
                             <div class="metric-eval">Live Market Quote</div>
-                            <div class="tooltip"><b>Definition:</b> Live market execution price of a single share.<br><b>Sector Context:</b> Evaluated relative to moving average trend bands.<br><b>Assessment:</b> Rising prices above moving averages confirm bullish momentum.</div>
                         </div>
 
                         <div class="metric-card">
                             <div class="metric-label">Signal Directive</div>
                             <div class="metric-value" id="mSignal"></div>
-                            <div class="metric-eval">Quant Model Verdict</div>
-                            <div class="tooltip"><b>Definition:</b> Systematic multi-factor momentum and moving average verdict.<br><b>Sector Context:</b> Compared against broad market health.<br><b>Assessment:</b> Strong Buy / Buy indicates institutional accumulation.</div>
+                            <div class="metric-eval">Upgraded Quant Model</div>
                         </div>
 
                         <div class="metric-card">
                             <div class="metric-label">Market Capitalization</div>
                             <div class="metric-value" id="mMarketCap"></div>
                             <div class="metric-eval">Enterprise Scale</div>
-                            <div class="tooltip"><b>Definition:</b> Total dollar value of outstanding shares (Price × Shares).<br><b>Sector Context:</b> Mega-Cap ($200B+), Large ($10B+), Mid/Small.<br><b>Assessment:</b> Larger caps provide higher liquidity and economic resilience.</div>
                         </div>
 
                         <div class="metric-card">
                             <div class="metric-label">Trailing P/E Ratio</div>
                             <div class="metric-value" id="mPe"></div>
                             <div class="metric-eval" id="mPeEval"></div>
-                            <div class="tooltip"><b>Definition:</b> Price divided by trailing 12-month EPS.<br><b>Sector Context:</b> Market historical average sits around 20x–22x.<br><b>Assessment:</b> <15x Undervalued/Value; >30x Overvalued/Growth Premium.</div>
                         </div>
 
                         <div class="metric-card">
                             <div class="metric-label">Total Revenue</div>
                             <div class="metric-value" id="mRevenue"></div>
-                            <div class="metric-eval">Trailing 12-Month Top-Line</div>
-                            <div class="tooltip"><b>Definition:</b> Total income from primary business operations over 12 months.<br><b>Sector Context:</b> Benchmarked against direct industry competitors.<br><b>Assessment:</b> Expanding top-line revenue indicates growing market demand.</div>
+                            <div class="metric-eval">Top-Line Revenue</div>
                         </div>
 
                         <div class="metric-card">
                             <div class="metric-label">Net Income</div>
                             <div class="metric-value" id="mNetIncome"></div>
                             <div class="metric-eval">Bottom-Line Profit</div>
-                            <div class="tooltip"><b>Definition:</b> Profit remaining after all operating expenses, taxes, and costs.<br><b>Sector Context:</b> Compared against sector median net profit conversions.<br><b>Assessment:</b> Positive earnings validate a sustainable business model.</div>
                         </div>
 
                         <div class="metric-card">
                             <div class="metric-label">Total Debt</div>
                             <div class="metric-value" id="mDebt"></div>
-                            <div class="metric-eval">Balance Sheet Liabilities</div>
-                            <div class="tooltip"><b>Definition:</b> Sum of all short-term and long-term financial obligations.<br><b>Sector Context:</b> Capital-intensive sectors naturally carry higher debt.<br><b>Assessment:</b> High debt is risky if it exceeds liquid cash reserves.</div>
+                            <div class="metric-eval">Liabilities</div>
                         </div>
 
                         <div class="metric-card">
                             <div class="metric-label">Cash Reserves</div>
                             <div class="metric-value" id="mCash"></div>
                             <div class="metric-eval">Liquidity Cushion</div>
-                            <div class="tooltip"><b>Definition:</b> Total liquid cash and marketable securities available.<br><b>Sector Context:</b> Benchmarked against total debt and quarterly burn rate.<br><b>Assessment:</b> High cash cushions provide safety buffers during downturns.</div>
                         </div>
 
                         <div class="metric-card">
                             <div class="metric-label">Return on Equity (ROE)</div>
                             <div class="metric-value" id="mRoe"></div>
                             <div class="metric-eval" id="mRoeEval"></div>
-                            <div class="tooltip"><b>Definition:</b> Net income divided by shareholder equity.<br><b>Sector Context:</b> Broader market average sits around 12%–15%.<br><b>Assessment:</b> >15% signals excellent management capital efficiency.</div>
                         </div>
 
                         <div class="metric-card">
                             <div class="metric-label">Profit Margin</div>
                             <div class="metric-value" id="mMargin"></div>
                             <div class="metric-eval" id="mMarginEval"></div>
-                            <div class="tooltip"><b>Definition:</b> Percentage of revenue turning into actual net profit.<br><b>Sector Context:</b> Cross-industry average hovers around 8%–10%.<br><b>Assessment:</b> >20% represents high pricing power and business quality.</div>
                         </div>
 
                         <div class="metric-card">
                             <div class="metric-label">20-Day SMA</div>
                             <div class="metric-value" id="mSma20"></div>
                             <div class="metric-eval">Short-Term Trend</div>
-                            <div class="tooltip"><b>Definition:</b> Average closing price over the last 20 trading days.<br><b>Sector Context:</b> Tactical benchmark for short-term institutional momentum.<br><b>Assessment:</b> Trading above indicates immediate bullish momentum.</div>
                         </div>
 
                         <div class="metric-card">
                             <div class="metric-label">50-Day SMA</div>
                             <div class="metric-value" id="mSma50"></div>
-                            <div class="metric-eval">Medium-Term Support</div>
-                            <div class="tooltip"><b>Definition:</b> Average closing price over the last 50 trading days.<br><b>Sector Context:</b> Foundational line for intermediate trend health.<br><b>Assessment:</b> Price holding above 50 SMA confirms a healthy bull market.</div>
+                            <div class="metric-eval">Medium-Term Trend</div>
                         </div>
                     </div>
                 </div>
@@ -365,6 +351,10 @@ def build_interactive_html_report(candidates):
             function renderTable() {{
                 const tbody = document.getElementById('table-body');
                 tbody.innerHTML = '';
+                if (candidates.length === 0) {{
+                    tbody.innerHTML = '<tr><td colspan="7" style="padding: 20px; text-align: center; color: #94a3b8;">No assets currently meet the strict upgraded trend filters. Try running again later.</td></tr>';
+                    return;
+                }}
                 candidates.forEach((c) => {{
                     const badgeColor = c.Signal === 'STRONG BUY' ? '#16a34a' : '#0284c7';
                     const row = document.createElement('tr');
@@ -384,7 +374,7 @@ def build_interactive_html_report(candidates):
             }}
 
             function openModal(data) {{
-                document.getElementById('modalTitle').innerText = data.Ticker + ' — Global Due Diligence & Technical Analysis';
+                document.getElementById('modalTitle').innerText = data.Ticker + ' — Upgraded Due Diligence Suite';
                 document.getElementById('mPrice').innerText = data.Price;
                 document.getElementById('mSignal').innerText = data.Signal;
                 document.getElementById('mMarketCap').innerText = data.MarketCap;
@@ -436,7 +426,7 @@ def build_interactive_html_report(candidates):
                         "container_id": "tradingview_widget"
                     }});
                 }} catch(err) {{
-                    document.getElementById('tradingview_widget').innerHTML = '<div style="padding: 40px; text-align: center; color: #94a3b8;">Embedded data feed restricted for this specific exchange ticker. Please use the button below to view instantly on TradingView.</div>';
+                    document.getElementById('tradingview_widget').innerHTML = '<div style="padding: 40px; text-align: center; color: #94a3b8;">Embedded data feed restricted for this exchange ticker. Use button below to view on TradingView.</div>';
                 }}
             }}
 
@@ -458,17 +448,17 @@ def build_interactive_html_report(candidates):
     """
 
 def run_screener():
-    print("=== RUNNING GLOBAL & EMERGING MARKETS FOCUSED SCREENER ===")
+    print("=== RUNNING UPGRADED GLOBAL QUANTITATIVE SCREENER ===")
     candidates = []
 
     for item in WATCHLIST:
         ticker = item["ticker"]
         sector = item["sector"]
-        print(f"Analyzing {ticker} ({sector})...")
+        print(f"Screening {ticker} ({sector})...")
         metrics = process_single_equity(ticker, sector)
         if metrics and metrics["Signal"] in ["BUY", "STRONG BUY"]:
             candidates.append(metrics)
-        time.sleep(0.4) # Throttle to prevent API rate limiting
+        time.sleep(0.4)
 
     with open("top_candidates.json", "w", encoding="utf-8") as f:
         json.dump(candidates, f, indent=4)
@@ -477,7 +467,7 @@ def run_screener():
     html_report = build_interactive_html_report(candidates)
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(html_report)
-    print("-> Successfully updated index.html dashboard!")
+    print("-> Successfully updated index.html dashboard with upgraded parameters!")
 
 if __name__ == "__main__":
     run_screener()
