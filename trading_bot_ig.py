@@ -61,7 +61,6 @@ def get_volatility_regime_adjustments(ig_service, epic):
     vs historical range, adapting trailing steps and target multipliers dynamically.
     """
     try:
-        # Fetch recent historical daily prices to compute short-term regime state
         hist = ig_service.fetch_historical_prices_by_epic_and_num_points(epic=epic, resolution="D", num_points=10)
         prices_df = hist.get("prices")
         if prices_df is not None and not prices_df.empty:
@@ -70,16 +69,13 @@ def get_volatility_regime_adjustments(ig_service, epic):
             recent_range = (highs - lows).mean()
             baseline_range = (highs - lows).median()
             
-            # If current volatility is expanded past baseline, shift to Trend Regime
             if recent_range > (baseline_range * 1.25):
                 return {"regime": "EXPANDED_TREND", "target_mult": 2.0, "trailing_increment": 8}
-            # If compressed, shift to Tight Scalping Regime
             elif recent_range < (baseline_range * 0.8):
                 return {"regime": "COMPRESSED_RANGE", "target_mult": 1.2, "trailing_increment": 3}
     except Exception:
         pass
     
-    # Default Normal Regime
     return {"regime": "NORMAL", "target_mult": 1.5, "trailing_increment": 5}
 
 
@@ -120,7 +116,7 @@ def execute_trades():
 
     sector_counts = {}
 
-    print("\n=== EXECUTING REGIME-ADAPTIVE HYBRID TRADES ===")
+    print("\n=== EXECUTING NOISE-PROTECTED REGIME TRADES ===")
     for c in candidates:
         ticker = c["Ticker"]
         sector = c["Sector"]
@@ -135,21 +131,20 @@ def execute_trades():
             print(f"❌ Skipped {ticker}: Could not resolve IG Epic.")
             continue
 
-        # 1. Volatility Regime Identification
         regime_data = get_volatility_regime_adjustments(ig_service, epic)
         regime = regime_data["regime"]
         target_mult = regime_data["target_mult"]
         trailing_inc = regime_data["trailing_increment"]
 
-        stop_distance = round(atr_points * 1.0, 1)
+        # AMELIORATION: Increased stop buffer from 1.0 to 1.5 ATR to avoid noise stop-outs
+        stop_distance = round(atr_points * 1.5, 1)
         target_distance = round(atr_points * target_mult, 1)
 
-        # 2. Spread-Size Guardrail Validation Check
         try:
             market_details = ig_service.fetch_market_by_epic(epic)
             snapshot = market_details.get("snapshot", {})
             current_spread = float(snapshot.get("offer", 0)) - float(snapshot.get("bid", 0))
-            max_allowed_spread = stop_distance * 0.12  # Strict 12% max spread drag limit
+            max_allowed_spread = stop_distance * 0.12  
             
             if current_spread > max_allowed_spread:
                 print(f"⚠️ Skipped {ticker}: Spread ({current_spread} pts) exceeds 12% limit of ATR stop ({stop_distance} pts).")
@@ -162,27 +157,28 @@ def execute_trades():
         min_size = 0.1 if is_uk else 0.5
         total_stake = max(calculated_size, min_size)
 
-        # 3. Safe Split Execution Logic
         safe_split_threshold = min_size * 2
 
         if total_stake < safe_split_threshold:
-            print(f"🚀 Executing Safeguarded Single-Lot Trailing Order on {ticker} [{epic}] | Regime: {regime}")
+            print(f"🚀 Executing Safeguarded Single-Lot Order on {ticker} [{epic}] | Wide Stop: {stop_distance} pts")
             try:
                 response = ig_service.create_open_position(
                     currency_code="GBP", direction="BUY", epic=epic, expiry="-", force_open=True,
                     guaranteed_stop=False, order_type="MARKET", size=total_stake, level=None,
                     limit_distance=None, limit_level=None, quote_id=None,
                     stop_distance=stop_distance, stop_level=None,
-                    trailing_stop=True, trailing_stop_increment=trailing_inc
+                    # AMELIORATION: Disabled immediate trailing stop to let the trade breathe
+                    trailing_stop=False, trailing_stop_increment=None
                 )
                 deal_ref = response.get("dealReference", "N/A")
-                print(f"✅ Single-Lot Order Accepted | Ref: {deal_ref}")
+                print(f"✅ Order Accepted (Static Stop Buffer Active) | Ref: {deal_ref}")
                 sector_counts[sector] = sector_counts.get(sector, 0) + 1
+                
                 log_trade({
                     "timestamp": datetime.now(timezone.utc).isoformat(),
                     "ticker": ticker, "epic": epic, "sector": sector,
-                    "regime": regime, "strategy": "Single-Lot Trailing (Regime-Adapted)", 
-                    "stake": total_stake, "deal_reference": deal_ref
+                    "regime": regime, "strategy": "Static Buffer Stop (Noise Protected)", 
+                    "stake": total_stake, "stop_distance": stop_distance, "deal_reference": deal_ref
                 })
             except Exception as e:
                 print(f"❌ Execution failed for {ticker}: {e}")
@@ -210,17 +206,17 @@ def execute_trades():
                     guaranteed_stop=False, order_type="MARKET", size=tranche_size, level=None,
                     limit_distance=None, limit_level=None, quote_id=None,
                     stop_distance=stop_distance, stop_level=None,
-                    trailing_stop=True, trailing_stop_increment=trailing_inc
+                    trailing_stop=False, trailing_stop_increment=None
                 )
                 ref2 = resp2.get("dealReference", "N/A")
-                print(f"   └─ Leg 2 (Trailing Stop Rider) Ref: {ref2}")
+                print(f"   └─ Leg 2 (Static Buffer Protection) Ref: {ref2}")
                 
                 sector_counts[sector] = sector_counts.get(sector, 0) + 1
                 
                 log_trade({
                     "timestamp": datetime.now(timezone.utc).isoformat(),
                     "ticker": ticker, "epic": epic, "sector": sector,
-                    "regime": regime, "strategy": "Split-Lot Hybrid (Regime-Adapted)", 
+                    "regime": regime, "strategy": "Split-Lot Hybrid (Noise Protected)", 
                     "tranche_stake": tranche_size, "deal_references": [ref1, ref2]
                 })
             except Exception as e:
