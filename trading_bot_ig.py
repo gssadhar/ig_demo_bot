@@ -116,11 +116,10 @@ def execute_trades():
 
     sector_counts = {}
 
-    print("\n=== EXECUTING NOISE-PROTECTED REGIME TRADES ===")
+    print("\n=== EXECUTING PERCENTAGE-STOP PROTECTED REGIME TRADES ===")
     for c in candidates:
         ticker = c["Ticker"]
         sector = c["Sector"]
-        atr_points = c["ATR_Points"]
 
         if sector_counts.get(sector, 0) >= MAX_POSITIONS_PER_SECTOR:
             print(f"🛡️ Sector Limit Reached: {sector} already active. Skipping {ticker}.")
@@ -134,23 +133,29 @@ def execute_trades():
         regime_data = get_volatility_regime_adjustments(ig_service, epic)
         regime = regime_data["regime"]
         target_mult = regime_data["target_mult"]
-        trailing_inc = regime_data["trailing_increment"]
-
-        # AMELIORATION: Increased stop buffer from 1.0 to 1.5 ATR to avoid noise stop-outs
-        stop_distance = round(atr_points * 1.5, 1)
-        target_distance = round(atr_points * target_mult, 1)
 
         try:
             market_details = ig_service.fetch_market_by_epic(epic)
             snapshot = market_details.get("snapshot", {})
-            current_spread = float(snapshot.get("offer", 0)) - float(snapshot.get("bid", 0))
-            max_allowed_spread = stop_distance * 0.12  
+            bid_price = float(snapshot.get("bid", 0))
+            offer_price = float(snapshot.get("offer", 0))
+            current_spread = offer_price - bid_price
             
+            if bid_price <= 0:
+                print(f"⚠️ Skipped {ticker}: Invalid bid price.")
+                continue
+
+            # FIX: Use 3% percentage-based stop distance relative to asset price to prevent raw point explosion
+            stop_distance = round(bid_price * 0.03, 1)
+            target_distance = round(stop_distance * target_mult, 1)
+
+            max_allowed_spread = stop_distance * 0.12  
             if current_spread > max_allowed_spread:
-                print(f"⚠️ Skipped {ticker}: Spread ({current_spread} pts) exceeds 12% limit of ATR stop ({stop_distance} pts).")
+                print(f"⚠️ Skipped {ticker}: Spread ({current_spread} pts) exceeds 12% limit of stop ({stop_distance} pts).")
                 continue
         except Exception as e:
-            print(f"⚠️ Spread check warning for {ticker}: {e}")
+            print(f"⚠️ Market detail or spread check error for {ticker}: {e}")
+            continue
 
         calculated_size = round(MAX_RISK_PER_TRADE_GBP / stop_distance, 2)
         is_uk = ticker.endswith(".L")
@@ -160,31 +165,30 @@ def execute_trades():
         safe_split_threshold = min_size * 2
 
         if total_stake < safe_split_threshold:
-            print(f"🚀 Executing Safeguarded Single-Lot Order on {ticker} [{epic}] | Wide Stop: {stop_distance} pts")
+            print(f"🚀 Executing Safeguarded Single-Lot Order on {ticker} [{epic}] | Percentage Stop: {stop_distance} pts")
             try:
                 response = ig_service.create_open_position(
                     currency_code="GBP", direction="BUY", epic=epic, expiry="-", force_open=True,
                     guaranteed_stop=False, order_type="MARKET", size=total_stake, level=None,
                     limit_distance=None, limit_level=None, quote_id=None,
                     stop_distance=stop_distance, stop_level=None,
-                    # AMELIORATION: Disabled immediate trailing stop to let the trade breathe
                     trailing_stop=False, trailing_stop_increment=None
                 )
                 deal_ref = response.get("dealReference", "N/A")
-                print(f"✅ Order Accepted (Static Stop Buffer Active) | Ref: {deal_ref}")
+                print(f"✅ Order Accepted (Percentage Stop Active) | Ref: {deal_ref}")
                 sector_counts[sector] = sector_counts.get(sector, 0) + 1
                 
                 log_trade({
                     "timestamp": datetime.now(timezone.utc).isoformat(),
                     "ticker": ticker, "epic": epic, "sector": sector,
-                    "regime": regime, "strategy": "Static Buffer Stop (Noise Protected)", 
+                    "regime": regime, "strategy": "Percentage-Based Stop Protection", 
                     "stake": total_stake, "stop_distance": stop_distance, "deal_reference": deal_ref
                 })
             except Exception as e:
                 print(f"❌ Execution failed for {ticker}: {e}")
         else:
             tranche_size = round(total_stake / 2, 2)
-            print(f"🚀 Executing Split-Lot Hybrid Strategy on {ticker} [{epic}] | Regime: {regime}")
+            print(f"🚀 Executing Split-Lot Strategy on {ticker} [{epic}] | Regime: {regime}")
             
             ref1, ref2 = None, None
             try:
@@ -209,14 +213,14 @@ def execute_trades():
                     trailing_stop=False, trailing_stop_increment=None
                 )
                 ref2 = resp2.get("dealReference", "N/A")
-                print(f"   └─ Leg 2 (Static Buffer Protection) Ref: {ref2}")
+                print(f"   └─ Leg 2 (Percentage Stop Protection) Ref: {ref2}")
                 
                 sector_counts[sector] = sector_counts.get(sector, 0) + 1
                 
                 log_trade({
                     "timestamp": datetime.now(timezone.utc).isoformat(),
                     "ticker": ticker, "epic": epic, "sector": sector,
-                    "regime": regime, "strategy": "Split-Lot Hybrid (Noise Protected)", 
+                    "regime": regime, "strategy": "Split-Lot Percentage Stop Protection", 
                     "tranche_stake": tranche_size, "deal_references": [ref1, ref2]
                 })
             except Exception as e:
