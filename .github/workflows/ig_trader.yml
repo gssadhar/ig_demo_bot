@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: setup-python@v5
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
@@ -45,6 +45,6 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add index.html top_candidates.json trade_log.json
-          git commit -m "Auto-update trading dashboard and reports [skip ci]" || exit 0
-          git push
+          git add index.html top_candidates.json trade_log.json || true
+          git diff --staged --quiet || git commit -m "Auto-update trading dashboard and reports [skip ci]"
+          git push || echo "No changes to push or push skipped"
