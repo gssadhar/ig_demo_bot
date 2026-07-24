@@ -1,0 +1,79 @@
+[
+    {
+        "Ticker": "AAPL",
+        "Sector": "Technology",
+        "Price": 321.66,
+        "Signal": "STRONG BUY",
+        "ATR_Points": 1118
+    },
+    {
+        "Ticker": "NVDA",
+        "Sector": "Technology",
+        "Price": 208.76,
+        "Signal": "BUY",
+        "ATR_Points": 1102
+    },
+    {
+        "Ticker": "AMD",
+        "Sector": "Technology",
+        "Price": 539.69,
+        "Signal": "STRONG BUY",
+        "ATR_Points": 5694
+    },
+    {
+        "Ticker": "AVGO",
+        "Sector": "Technology",
+        "Price": 392.47,
+        "Signal": "BUY",
+        "ATR_Points": 2398
+    },
+    {
+        "Ticker": "JPM",
+        "Sector": "Financial Services",
+        "Price": 349.9,
+        "Signal": "STRONG BUY",
+        "ATR_Points": 1144
+    },
+    {
+        "Ticker": "BAC",
+        "Sector": "Financial Services",
+        "Price": 61.28,
+        "Signal": "STRONG BUY",
+        "ATR_Points": 187
+    },
+    {
+        "Ticker": "CROX",
+        "Sector": "Consumer Cyclical",
+        "Price": 132.47,
+        "Signal": "STRONG BUY",
+        "ATR_Points": 701
+    },
+    {
+        "Ticker": "GLEN.L",
+        "Sector": "Basic Materials",
+        "Price": 537.51,
+        "Signal": "BUY",
+        "ATR_Points": 3595
+    },
+    {
+        "Ticker": "SHEL.L",
+        "Sector": "Energy",
+        "Price": 3310.0,
+        "Signal": "BUY",
+        "ATR_Points": 19768
+    },
+    {
+        "Ticker": "BP.L",
+        "Sector": "Energy",
+        "Price": 546.8,
+        "Signal": "BUY",
+        "ATR_Points": 2028
+    },
+    {
+        "Ticker": "HSBA.L",
+        "Sector": "Financial Services",
+        "Price": 1544.8,
+        "Signal": "STRONG BUY",
+        "ATR_Points": 5310
+    }
+]

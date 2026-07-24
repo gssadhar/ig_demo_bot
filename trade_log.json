@@ -1,0 +1,72 @@
+[
+    {
+        "timestamp": "2026-07-24T10:42:21.832556+00:00",
+        "ticker": "AAPL",
+        "epic": "UA.D.AAPL.DAILY.IP",
+        "sector": "Technology",
+        "regime": "NORMAL",
+        "strategy": "Adaptive Multi-Factor Momentum",
+        "stake": 0.5,
+        "deal_reference": "VLTBXGWG5L4TYSB"
+    },
+    {
+        "timestamp": "2026-07-24T10:42:22.899271+00:00",
+        "ticker": "NVDA",
+        "epic": "UC.D.NVDA.DAILY.IP",
+        "sector": "Technology",
+        "regime": "NORMAL",
+        "strategy": "Adaptive Multi-Factor Momentum",
+        "stake": 0.5,
+        "deal_reference": "5L65KZTSK7CTYSB"
+    },
+    {
+        "timestamp": "2026-07-24T10:42:24.752061+00:00",
+        "ticker": "CROX",
+        "epic": "UA.D.CROX.DAILY.IP",
+        "sector": "Consumer Cyclical",
+        "regime": "NORMAL",
+        "strategy": "Adaptive Multi-Factor Momentum",
+        "stake": 0.5,
+        "deal_reference": "HDZ5T3CAP7YTYSB"
+    },
+    {
+        "timestamp": "2026-07-24T10:42:25.576905+00:00",
+        "ticker": "GLEN.L",
+        "epic": "KA.D.GLEN.DAILY.IP",
+        "sector": "Basic Materials",
+        "regime": "NORMAL",
+        "strategy": "Adaptive Multi-Factor Momentum",
+        "stake": 4.66,
+        "deal_reference": "VCVYKBM9NJ4TYSB"
+    },
+    {
+        "timestamp": "2026-07-24T10:42:26.477453+00:00",
+        "ticker": "SHEL.L",
+        "epic": "KA.D.SHELLN.DAILY.IP",
+        "sector": "Energy",
+        "regime": "NORMAL",
+        "strategy": "Adaptive Multi-Factor Momentum",
+        "stake": 0.76,
+        "deal_reference": "TBPW9NXJ4XYTYSB"
+    },
+    {
+        "timestamp": "2026-07-24T10:42:27.345552+00:00",
+        "ticker": "BP.L",
+        "epic": "KA.D.BP.DAILY.IP",
+        "sector": "Energy",
+        "regime": "NORMAL",
+        "strategy": "Adaptive Multi-Factor Momentum",
+        "stake": 4.57,
+        "deal_reference": "BN4AEZEBHRYTYSB"
+    },
+    {
+        "timestamp": "2026-07-24T10:42:28.103917+00:00",
+        "ticker": "HSBA.L",
+        "epic": "KA.D.HSBA.DAILY.IP",
+        "sector": "Financial Services",
+        "regime": "NORMAL",
+        "strategy": "Adaptive Multi-Factor Momentum",
+        "stake": 1.62,
+        "deal_reference": "Y9JF5G3X4Z4TYSB"
+    }
+]
