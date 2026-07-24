@@ -40,35 +40,29 @@ def connect_ig():
 
 def resolve_ig_epic(ig_service, ticker):
     """
-    Spread Bet Epic Resolution: Specifically targets Spread Betting epics 
-    compatible with your Demo-SpreadBet account profile.
+    Dynamic Spread Bet Epic Search: Queries IG's market search directory 
+    and returns the first valid tradeable epic matching the account type.
     """
-    # Direct Spread Bet Epic mappings for your portfolio items
-    spread_bet_epics = {
-        "LLOY.L": "IX.D.LLOY.CASH.IP",
-        "LGEN.L": "IX.D.LGEN.CASH.IP",
-        "SHEL.L": "IX.D.SHEL.CASH.IP",
-        "BP.L": "IX.D.BP.CASH.IP",
-        "GLEN.L": "IX.D.GLEN.CASH.IP",
-        "AAPL": "UA.D.AAPL.CASH.IP",
-        "NVDA": "UA.D.NVDA.CASH.IP"
-    }
-    if ticker in spread_bet_epics:
-        return spread_bet_epics[ticker]
-
     clean_symbol = ticker.replace(".L", "").strip().upper()
-    try:
-        search_results = ig_service.search_markets(clean_symbol)
-        if hasattr(search_results, "iterrows") and not search_results.empty:
-            for _, row in search_results.iterrows():
-                epic = str(row.get("epic", ""))
-                # Look specifically for spread betting keys (usually start with IX.D or contain .B / .IP without CFD tags)
-                if "IX.D" in epic or "SB" in epic or epic.startswith("I."):
-                    return epic
-            return search_results.iloc[0].get("epic")
-    except Exception as e:
-        print(f"⚠️ Spread bet epic search error for {ticker}: {e}")
-        
+    search_queries = [clean_symbol, ticker]
+    
+    for query in search_queries:
+        try:
+            search_results = ig_service.search_markets(query)
+            if hasattr(search_results, "iterrows") and not search_results.empty:
+                for _, row in search_results.iterrows():
+                    epic = str(row.get("epic", ""))
+                    itype = str(row.get("instrumentType", ""))
+                    # Target valid share/equity spread betting epics
+                    if any(t in itype for t in ["SHARES", "EQUITIES", "SHARE"]) and (".D." in epic or "CASH" in epic or "DAILY" in epic):
+                        return epic
+                # If no specific tag matched, take the top search result epic safely
+                top_epic = search_results.iloc[0].get("epic")
+                if top_epic:
+                    return top_epic
+        except Exception as e:
+            print(f"⚠️ Search attempt failed for query '{query}': {e}")
+            
     return None
 
 
@@ -124,7 +118,7 @@ def execute_trades():
 
     sector_counts = {}
 
-    print("\n=== EXECUTING SPREAD BETTING QUANTITATIVE PIPELINE ===")
+    print("\n=== EXECUTING DYNAMIC SPREAD BETTING PIPELINE ===")
     for c in candidates:
         ticker = c["Ticker"]
         sector = c["Sector"]
@@ -140,7 +134,7 @@ def execute_trades():
 
         epic = resolve_ig_epic(ig_service, ticker)
         if not epic:
-            print(f"❌ Skipped {ticker}: Could not resolve Spread Bet Epic.")
+            print(f"❌ Skipped {ticker}: Could not resolve dynamic Spread Bet Epic.")
             continue
 
         regime_data = get_volatility_regime_adjustments(ig_service, epic)
@@ -159,7 +153,7 @@ def execute_trades():
 
             stop_distance = round(bid_price * 0.03, 1)
             
-            max_allowed_spread = stop_distance * 0.35  
+            max_allowed_spread = stop_distance * 0.40  
             if current_spread > max_allowed_spread:
                 print(f"⚠️ Skipped {ticker}: Spread ({current_spread} pts) exceeds allowed limit.")
                 continue
@@ -169,7 +163,7 @@ def execute_trades():
 
         calculated_size = round(MAX_RISK_PER_TRADE_GBP / stop_distance, 2)
         is_uk = ticker.endswith(".L") or "." not in ticker
-        min_size = 0.5 if is_uk else 1.0  # Standard minimum point stakes for Spread Betting accounts
+        min_size = 0.5 if is_uk else 1.0
         total_stake = max(calculated_size, min_size)
 
         print(f"🚀 Executing Spread Bet Position on {ticker} [{epic}] | Regime: {regime} | Stake: £{total_stake}/point")
@@ -202,7 +196,7 @@ def execute_trades():
                 "epic": epic, 
                 "sector": sector,
                 "regime": regime, 
-                "strategy": "Spread Bet Multi-Factor Momentum", 
+                "strategy": "Dynamic Spread Bet Momentum", 
                 "stake": total_stake, 
                 "deal_reference": deal_ref
             })
