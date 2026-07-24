@@ -628,5 +628,75 @@
         "strategy": "Adaptive Multi-Factor Momentum",
         "stake": 0.5,
         "deal_reference": "9T7QNKKLKACTYSB"
+    },
+    {
+        "timestamp": "2026-07-24T13:27:08.155999+00:00",
+        "ticker": "LLOY.L",
+        "epic": "KA.D.LLOY.DAILY.IP",
+        "sector": "Financial Services",
+        "regime": "NORMAL",
+        "strategy": "Adaptive Multi-Factor Momentum",
+        "stake": 22.06,
+        "deal_reference": "GTMS33W9LSGTYSB"
+    },
+    {
+        "timestamp": "2026-07-24T13:27:08.886305+00:00",
+        "ticker": "LGEN.L",
+        "epic": "KA.D.LGEN.DAILY.IP",
+        "sector": "Financial Services",
+        "regime": "NORMAL",
+        "strategy": "Adaptive Multi-Factor Momentum",
+        "stake": 8.33,
+        "deal_reference": "8VKG5DM7F34TYSB"
+    },
+    {
+        "timestamp": "2026-07-24T13:27:09.792303+00:00",
+        "ticker": "SHEL.L",
+        "epic": "KA.D.SHELLN.DAILY.IP",
+        "sector": "Energy",
+        "regime": "NORMAL",
+        "strategy": "Adaptive Multi-Factor Momentum",
+        "stake": 0.76,
+        "deal_reference": "S3Z96AN22TLTYSB"
+    },
+    {
+        "timestamp": "2026-07-24T13:27:10.674926+00:00",
+        "ticker": "BP.L",
+        "epic": "KA.D.BP.DAILY.IP",
+        "sector": "Energy",
+        "regime": "NORMAL",
+        "strategy": "Adaptive Multi-Factor Momentum",
+        "stake": 4.55,
+        "deal_reference": "FTNXNFYXPALTYSB"
+    },
+    {
+        "timestamp": "2026-07-24T13:27:11.446553+00:00",
+        "ticker": "GLEN.L",
+        "epic": "KA.D.GLEN.DAILY.IP",
+        "sector": "Basic Materials",
+        "regime": "NORMAL",
+        "strategy": "Adaptive Multi-Factor Momentum",
+        "stake": 4.63,
+        "deal_reference": "4SS9UUGN25UTYSB"
+    },
+    {
+        "timestamp": "2026-07-24T13:27:12.613978+00:00",
+        "ticker": "AAPL",
+        "epic": "UA.D.AAPL.DAILY.IP",
+        "sector": "Technology",
+        "regime": "NORMAL",
+        "strategy": "Adaptive Multi-Factor Momentum",
+        "stake": 0.5,
+        "deal_reference": "MKF63KZUTSCTYSB"
+    },
+    {
+        "timestamp": "2026-07-24T13:27:13.662750+00:00",
+        "ticker": "NVDA",
+        "epic": "UC.D.NVDA.DAILY.IP",
+        "sector": "Technology",
+        "regime": "NORMAL",
+        "strategy": "Adaptive Multi-Factor Momentum",
+        "stake": 0.5,
+        "deal_reference": "4GPPCNB5NCCTYSB"
     }
 ]
