@@ -938,5 +938,75 @@
         "strategy": "Dynamic Spread Bet Momentum",
         "stake": 0.5,
         "deal_reference": "LYMSW8BTF6QTYSB"
+    },
+    {
+        "timestamp": "2026-07-24T16:48:12.867876+00:00",
+        "ticker": "LLOY.L",
+        "epic": "KA.D.LLOY.DAILY.IP",
+        "sector": "Financial Services",
+        "regime": "NORMAL",
+        "strategy": "Dynamic Spread Bet Momentum",
+        "stake": 22.06,
+        "deal_reference": "GCAXGU9AR7GTYSB"
+    },
+    {
+        "timestamp": "2026-07-24T16:48:13.855978+00:00",
+        "ticker": "LGEN.L",
+        "epic": "KA.D.LGEN.DAILY.IP",
+        "sector": "Financial Services",
+        "regime": "NORMAL",
+        "strategy": "Dynamic Spread Bet Momentum",
+        "stake": 8.33,
+        "deal_reference": "QH8SYCATJ3QTYSB"
+    },
+    {
+        "timestamp": "2026-07-24T16:48:14.763650+00:00",
+        "ticker": "SHEL.L",
+        "epic": "KA.D.SHELLN.DAILY.IP",
+        "sector": "Energy",
+        "regime": "NORMAL",
+        "strategy": "Dynamic Spread Bet Momentum",
+        "stake": 0.76,
+        "deal_reference": "TWKXVMGPYZLTYSB"
+    },
+    {
+        "timestamp": "2026-07-24T16:48:15.640486+00:00",
+        "ticker": "BP.L",
+        "epic": "KA.D.BP.DAILY.IP",
+        "sector": "Energy",
+        "regime": "NORMAL",
+        "strategy": "Dynamic Spread Bet Momentum",
+        "stake": 4.55,
+        "deal_reference": "BEYWBSWNUMLTYSB"
+    },
+    {
+        "timestamp": "2026-07-24T16:48:16.539777+00:00",
+        "ticker": "GLEN.L",
+        "epic": "KA.D.GLEN.DAILY.IP",
+        "sector": "Basic Materials",
+        "regime": "NORMAL",
+        "strategy": "Dynamic Spread Bet Momentum",
+        "stake": 4.66,
+        "deal_reference": "8JM3C4WVZ8UTYSB"
+    },
+    {
+        "timestamp": "2026-07-24T16:48:17.745097+00:00",
+        "ticker": "AAPL",
+        "epic": "UA.D.AAPL.DAILY.IP",
+        "sector": "Technology",
+        "regime": "NORMAL",
+        "strategy": "Dynamic Spread Bet Momentum",
+        "stake": 0.5,
+        "deal_reference": "JRMHDSQ6MFGTYSB"
+    },
+    {
+        "timestamp": "2026-07-24T16:48:18.777510+00:00",
+        "ticker": "NVDA",
+        "epic": "UC.D.NVDA.DAILY.IP",
+        "sector": "Technology",
+        "regime": "NORMAL",
+        "strategy": "Dynamic Spread Bet Momentum",
+        "stake": 0.5,
+        "deal_reference": "YXXNRYYXUMLTYSB"
     }
 ]
