@@ -43,7 +43,6 @@ def resolve_ig_epic(ig_service, ticker):
     Universal Epic Resolution: Handles both UK (.L suffix) and USA tickers seamlessly 
     by querying the IG market search API dynamically with multiple term variants.
     """
-    # Universal fallback mapping for known assets
     fallback_epics = {
         "LLOY.L": "IX.D.LLOY.CASH.IP",
         "LGEN.L": "IX.D.LGEN.CASH.IP",
@@ -56,7 +55,6 @@ def resolve_ig_epic(ig_service, ticker):
     if ticker in fallback_epics:
         return fallback_epics[ticker]
 
-    # Clean ticker for universal search query
     clean_symbol = ticker.replace(".L", "").strip().upper()
     search_queries = [clean_symbol, ticker]
     
@@ -67,10 +65,8 @@ def resolve_ig_epic(ig_service, ticker):
                 for _, row in search_results.iterrows():
                     epic = str(row.get("epic", ""))
                     itype = str(row.get("instrumentType", ""))
-                    # Accept SHARES or EQUITIES across cash, daily, or DFB formats
                     if any(t in itype for t in ["SHARES", "EQUITIES"]) and any(tag in epic for tag in ["CASH", "DAILY", "DFB", ".IP"]):
                         return epic
-                # If filtered loop didn't catch an exact match, grab the top search row
                 top_epic = search_results.iloc[0].get("epic")
                 if top_epic:
                     return top_epic
@@ -138,7 +134,7 @@ def execute_trades():
         sector = c["Sector"]
         signal = c["Signal"]
 
-        # Universal execution: Process both STRONG BUY and BUY signals to maximize pipeline coverage
+        # Universal pipeline acceptance for both STRONG BUY and BUY signals
         if signal not in ["STRONG BUY", "BUY"]:
             print(f"ℹ️ Skipping {ticker}: Signal is '{signal}' (Required: BUY or STRONG BUY).")
             continue
@@ -166,7 +162,6 @@ def execute_trades():
                 print(f"⚠️ Skipped {ticker}: Invalid bid price.")
                 continue
 
-            # Normalized risk boundary calculation
             stop_distance = round(bid_price * 0.03, 1)
             
             # Flexible spread tolerance to accommodate volatile demo feeds across international exchanges
@@ -179,7 +174,7 @@ def execute_trades():
             continue
 
         calculated_size = round(MAX_RISK_PER_TRADE_GBP / stop_distance, 2)
-        is_uk = ticker.endswith(".L") or "." not in ticker # Adapt sizing based on asset origin
+        is_uk = ticker.endswith(".L") or "." not in ticker
         min_size = 0.1 if is_uk else 0.5
         total_stake = max(calculated_size, min_size)
 
@@ -211,7 +206,7 @@ def execute_trades():
                 "timestamp": datetime.now(timezone.utc).isoformat(),
                 "ticker": ticker, 
                 "epic": epic, 
-                "sector": sector,
+                | "sector": sector,
                 "regime": regime, 
                 "strategy": "Universal Multi-Factor Momentum", 
                 "stake": total_stake, 
