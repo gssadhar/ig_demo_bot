@@ -2,20 +2,20 @@
     {
         "Ticker": "AAPL",
         "Sector": "Technology",
-        "Price": 332.3,
-        "SMA_20": 314.35,
-        "SMA_50": 306.22,
-        "Momentum_1M": 17.1,
+        "Price": 333.02,
+        "SMA_20": 314.39,
+        "SMA_50": 306.23,
+        "Momentum_1M": 17.35,
         "Signal": "STRONG BUY",
         "ATR_Points": 942,
-        "StopLoss": 322.88,
-        "Target15R": 346.43,
-        "MarketCap": "$4.88T",
+        "StopLoss": 323.6,
+        "Target15R": 347.15,
+        "MarketCap": "$4.89T",
         "Revenue": "$451.44B",
         "NetIncome": "$122.58B",
         "TotalDebt": "$84.71B",
         "TotalCash": "$68.51B",
-        "PE_Ratio": "40.18",
+        "PE_Ratio": "40.27",
         "PE_Eval": "Overvalued / Growth Premium",
         "ROE": "141.47%",
         "ROE_Eval": "Strong Capital Efficiency",
@@ -33,7 +33,7 @@
             "<b>Year 4:</b> Projected Revenue $834.44B (Est. Growth Trend: +16.6%)",
             "<b>Year 5:</b> Projected Revenue $972.96B (Est. Growth Trend: +16.6%)"
         ],
-        "Reasoning": "<b>Institutional Thesis & Rules-Based Execution:</b> Price action confirms a primary trend above both the 20-day SMA ($314.35) and 50-day SMA ($306.22), backed by a 1-month momentum print of 17.10% (STRONG BUY). <br><br><b>\ud83c\udfaf Strict Entry Plan:</b> Wait for a minor pullback toward the 20-day SMA or an intraday volume breakout above resistance before opening position. <br><br><b>\ud83d\udee1\ufe0f Defensive Exit Plan (Stop-Loss):</b> Set automated stop-loss at <b>$322.88</b> (1.2 \u00d7 ATR buffer). If hit, exit immediately to protect capital. <br><br><b>\ud83d\udcb0 Profit Management Plan:</b> Scale out 50% of the position upon reaching Target 1 at <b>$346.43</b> (1.5R) and move remaining stop to break-even. Trail the rest of the position along the 20-day SMA."
+        "Reasoning": "<b>Institutional Thesis & Rules-Based Execution:</b> Price action confirms a primary trend above both the 20-day SMA ($314.39) and 50-day SMA ($306.23), backed by a 1-month momentum print of 17.35% (STRONG BUY). <br><br><b>\ud83c\udfaf Strict Entry Plan:</b> Wait for a minor pullback toward the 20-day SMA or an intraday volume breakout above resistance before opening position. <br><br><b>\ud83d\udee1\ufe0f Defensive Exit Plan (Stop-Loss):</b> Set automated stop-loss at <b>$323.60</b> (1.2 \u00d7 ATR buffer). If hit, exit immediately to protect capital. <br><br><b>\ud83d\udcb0 Profit Management Plan:</b> Scale out 50% of the position upon reaching Target 1 at <b>$347.15</b> (1.5R) and move remaining stop to break-even. Trail the rest of the position along the 20-day SMA."
     },
     {
         "Ticker": "LLOY.L",
