@@ -9,7 +9,7 @@
         "Signal": "BUY",
         "ATR_Points": 1102,
         "PE_Ratio": 31.96937,
-        "Reasoning": "Technical Analysis: Price (\u00a3/$) 208.76 is trading relative to the 20-period SMA (202.78) and 50-period SMA (209.38), classifying the current market phase as a defensive range. 1-month momentum is measured at 6.65%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 1102 points. Fundamental Valuation: Trailing P/E ratio registers at 31.96937. Expert Verdict: Systematic multi-factor rules assign a 'BUY' directive based on dynamic moving-average alignment and volatility thresholds."
+        "Reasoning": "Technical Analysis: Price is trading relative to the 20-period SMA (202.78) and 50-period SMA (209.38), classifying the market phase as a defensive range. 1-month momentum is measured at 6.65%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 1102 points. Fundamental Valuation: Trailing P/E ratio registers at 31.96937. Expert Verdict: Systematic multi-factor rules assign a 'BUY' directive based on dynamic moving-average alignment and volatility thresholds."
     },
     {
         "Ticker": "AAPL",
@@ -21,7 +21,7 @@
         "Signal": "STRONG BUY",
         "ATR_Points": 1118,
         "PE_Ratio": 38.8948,
-        "Reasoning": "Technical Analysis: Price (\u00a3/$) 321.66 is trading relative to the 20-period SMA (311.49) and 50-period SMA (305.47), classifying the current market phase as a bullish structural uptrend. 1-month momentum is measured at 16.90%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 1118 points. Fundamental Valuation: Trailing P/E ratio registers at 38.8948. Expert Verdict: Systematic multi-factor rules assign a 'STRONG BUY' directive based on dynamic moving-average alignment and volatility thresholds."
+        "Reasoning": "Technical Analysis: Price is trading relative to the 20-period SMA (311.49) and 50-period SMA (305.47), classifying the market phase as a bullish structural uptrend. 1-month momentum is measured at 16.90%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 1118 points. Fundamental Valuation: Trailing P/E ratio registers at 38.8948. Expert Verdict: Systematic multi-factor rules assign a 'STRONG BUY' directive based on dynamic moving-average alignment and volatility thresholds."
     },
     {
         "Ticker": "AMD",
@@ -33,7 +33,7 @@
         "Signal": "STRONG BUY",
         "ATR_Points": 5694,
         "PE_Ratio": 185.46048,
-        "Reasoning": "Technical Analysis: Price (\u00a3/$) 539.69 is trading relative to the 20-period SMA (533.59) and 50-period SMA (507.01), classifying the current market phase as a bullish structural uptrend. 1-month momentum is measured at 1.34%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 5694 points. Fundamental Valuation: Trailing P/E ratio registers at 185.46048. Expert Verdict: Systematic multi-factor rules assign a 'STRONG BUY' directive based on dynamic moving-average alignment and volatility thresholds."
+        "Reasoning": "Technical Analysis: Price is trading relative to the 20-period SMA (533.59) and 50-period SMA (507.01), classifying the market phase as a bullish structural uptrend. 1-month momentum is measured at 1.34%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 5694 points. Fundamental Valuation: Trailing P/E ratio registers at 185.46048. Expert Verdict: Systematic multi-factor rules assign a 'STRONG BUY' directive based on dynamic moving-average alignment and volatility thresholds."
     },
     {
         "Ticker": "AVGO",
@@ -45,7 +45,7 @@
         "Signal": "BUY",
         "ATR_Points": 2398,
         "PE_Ratio": 66.183815,
-        "Reasoning": "Technical Analysis: Price (\u00a3/$) 392.47 is trading relative to the 20-period SMA (381.25) and 50-period SMA (399.74), classifying the current market phase as a defensive range. 1-month momentum is measured at 3.58%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 2398 points. Fundamental Valuation: Trailing P/E ratio registers at 66.183815. Expert Verdict: Systematic multi-factor rules assign a 'BUY' directive based on dynamic moving-average alignment and volatility thresholds."
+        "Reasoning": "Technical Analysis: Price is trading relative to the 20-period SMA (381.25) and 50-period SMA (399.74), classifying the market phase as a defensive range. 1-month momentum is measured at 3.58%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 2398 points. Fundamental Valuation: Trailing P/E ratio registers at 66.183815. Expert Verdict: Systematic multi-factor rules assign a 'BUY' directive based on dynamic moving-average alignment and volatility thresholds."
     },
     {
         "Ticker": "JPM",
@@ -57,7 +57,7 @@
         "Signal": "STRONG BUY",
         "ATR_Points": 1144,
         "PE_Ratio": 14.99143,
-        "Reasoning": "Technical Analysis: Price (\u00a3/$) 349.90 is trading relative to the 20-period SMA (337.54) and 50-period SMA (320.38), classifying the current market phase as a bullish structural uptrend. 1-month momentum is measured at 4.88%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 1144 points. Fundamental Valuation: Trailing P/E ratio registers at 14.99143. Expert Verdict: Systematic multi-factor rules assign a 'STRONG BUY' directive based on dynamic moving-average alignment and volatility thresholds."
+        "Reasoning": "Technical Analysis: Price is trading relative to the 20-period SMA (337.54) and 50-period SMA (320.38), classifying the market phase as a bullish structural uptrend. 1-month momentum is measured at 4.88%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 1144 points. Fundamental Valuation: Trailing P/E ratio registers at 14.99143. Expert Verdict: Systematic multi-factor rules assign a 'STRONG BUY' directive based on dynamic moving-average alignment and volatility thresholds."
     },
     {
         "Ticker": "BAC",
@@ -69,7 +69,7 @@
         "Signal": "STRONG BUY",
         "ATR_Points": 187,
         "PE_Ratio": 14.152425,
-        "Reasoning": "Technical Analysis: Price (\u00a3/$) 61.28 is trading relative to the 20-period SMA (59.70) and 50-period SMA (55.76), classifying the current market phase as a bullish structural uptrend. 1-month momentum is measured at 5.31%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 187 points. Fundamental Valuation: Trailing P/E ratio registers at 14.152425. Expert Verdict: Systematic multi-factor rules assign a 'STRONG BUY' directive based on dynamic moving-average alignment and volatility thresholds."
+        "Reasoning": "Technical Analysis: Price is trading relative to the 20-period SMA (59.70) and 50-period SMA (55.76), classifying the market phase as a bullish structural uptrend. 1-month momentum is measured at 5.31%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 187 points. Fundamental Valuation: Trailing P/E ratio registers at 14.152425. Expert Verdict: Systematic multi-factor rules assign a 'STRONG BUY' directive based on dynamic moving-average alignment and volatility thresholds."
     },
     {
         "Ticker": "HSBA.L",
@@ -81,7 +81,7 @@
         "Signal": "STRONG BUY",
         "ATR_Points": 5310,
         "PE_Ratio": 17.175556,
-        "Reasoning": "Technical Analysis: Price (\u00a3/$) 1545.80 is trading relative to the 20-period SMA (1475.67) and 50-period SMA (1420.82), classifying the current market phase as a bullish structural uptrend. 1-month momentum is measured at 8.57%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 5310 points. Fundamental Valuation: Trailing P/E ratio registers at 17.175556. Expert Verdict: Systematic multi-factor rules assign a 'STRONG BUY' directive based on dynamic moving-average alignment and volatility thresholds."
+        "Reasoning": "Technical Analysis: Price is trading relative to the 20-period SMA (1475.67) and 50-period SMA (1420.82), classifying the market phase as a bullish structural uptrend. 1-month momentum is measured at 8.57%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 5310 points. Fundamental Valuation: Trailing P/E ratio registers at 17.175556. Expert Verdict: Systematic multi-factor rules assign a 'STRONG BUY' directive based on dynamic moving-average alignment and volatility thresholds."
     },
     {
         "Ticker": "LLOY.L",
@@ -93,115 +93,115 @@
         "Signal": "STRONG BUY",
         "ATR_Points": 369,
         "PE_Ratio": 14.1875,
-        "Reasoning": "Technical Analysis: Price (\u00a3/$) 113.50 is trading relative to the 20-period SMA (112.48) and 50-period SMA (106.05), classifying the current market phase as a bullish structural uptrend. 1-month momentum is measured at 4.32%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 369 points. Fundamental Valuation: Trailing P/E ratio registers at 14.1875. Expert Verdict: Systematic multi-factor rules assign a 'STRONG BUY' directive based on dynamic moving-average alignment and volatility thresholds."
+        "Reasoning": "Technical Analysis: Price is trading relative to the 20-period SMA (112.48) and 50-period SMA (106.05), classifying the market phase as a bullish structural uptrend. 1-month momentum is measured at 4.32%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 369 points. Fundamental Valuation: Trailing P/E ratio registers at 14.1875. Expert Verdict: Systematic multi-factor rules assign a 'STRONG BUY' directive based on dynamic moving-average alignment and volatility thresholds."
     },
     {
         "Ticker": "LGEN.L",
         "Sector": "Financial Services",
-        "Price": 299.3,
-        "SMA_20": 292.85,
-        "SMA_50": 282.16,
-        "Momentum_1M": 5.28,
+        "Price": 299.5,
+        "SMA_20": 292.86,
+        "SMA_50": 282.17,
+        "Momentum_1M": 5.35,
         "Signal": "STRONG BUY",
         "ATR_Points": 907,
-        "PE_Ratio": 37.4125,
-        "Reasoning": "Technical Analysis: Price (\u00a3/$) 299.30 is trading relative to the 20-period SMA (292.85) and 50-period SMA (282.16), classifying the current market phase as a bullish structural uptrend. 1-month momentum is measured at 5.28%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 907 points. Fundamental Valuation: Trailing P/E ratio registers at 37.4125. Expert Verdict: Systematic multi-factor rules assign a 'STRONG BUY' directive based on dynamic moving-average alignment and volatility thresholds."
+        "PE_Ratio": 37.4375,
+        "Reasoning": "Technical Analysis: Price is trading relative to the 20-period SMA (292.86) and 50-period SMA (282.17), classifying the market phase as a bullish structural uptrend. 1-month momentum is measured at 5.35%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 907 points. Fundamental Valuation: Trailing P/E ratio registers at 37.4375. Expert Verdict: Systematic multi-factor rules assign a 'STRONG BUY' directive based on dynamic moving-average alignment and volatility thresholds."
     },
     {
         "Ticker": "BA.L",
         "Sector": "Industrials",
-        "Price": 1960.82,
-        "SMA_20": 1898.48,
-        "SMA_50": 1900.44,
-        "Momentum_1M": 8.45,
+        "Price": 1961.5,
+        "SMA_20": 1898.51,
+        "SMA_50": 1900.45,
+        "Momentum_1M": 8.49,
         "Signal": "BUY",
         "ATR_Points": 14473,
-        "PE_Ratio": 28.835588,
-        "Reasoning": "Technical Analysis: Price (\u00a3/$) 1960.82 is trading relative to the 20-period SMA (1898.48) and 50-period SMA (1900.44), classifying the current market phase as a bullish structural uptrend. 1-month momentum is measured at 8.45%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 14473 points. Fundamental Valuation: Trailing P/E ratio registers at 28.835588. Expert Verdict: Systematic multi-factor rules assign a 'BUY' directive based on dynamic moving-average alignment and volatility thresholds."
+        "PE_Ratio": 28.845587,
+        "Reasoning": "Technical Analysis: Price is trading relative to the 20-period SMA (1898.51) and 50-period SMA (1900.45), classifying the market phase as a bullish structural uptrend. 1-month momentum is measured at 8.49%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 14473 points. Fundamental Valuation: Trailing P/E ratio registers at 28.845587. Expert Verdict: Systematic multi-factor rules assign a 'BUY' directive based on dynamic moving-average alignment and volatility thresholds."
     },
     {
         "Ticker": "OXIG.L",
         "Sector": "Industrials",
-        "Price": 3046.0,
-        "SMA_20": 2944.42,
-        "SMA_50": 2986.21,
-        "Momentum_1M": 3.4,
+        "Price": 3048.0,
+        "SMA_20": 2944.52,
+        "SMA_50": 2986.25,
+        "Momentum_1M": 3.47,
         "Signal": "BUY",
         "ATR_Points": 18173,
-        "PE_Ratio": 39.55844,
-        "Reasoning": "Technical Analysis: Price (\u00a3/$) 3046.00 is trading relative to the 20-period SMA (2944.42) and 50-period SMA (2986.21), classifying the current market phase as a bullish structural uptrend. 1-month momentum is measured at 3.40%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 18173 points. Fundamental Valuation: Trailing P/E ratio registers at 39.55844. Expert Verdict: Systematic multi-factor rules assign a 'BUY' directive based on dynamic moving-average alignment and volatility thresholds."
+        "PE_Ratio": 39.584415,
+        "Reasoning": "Technical Analysis: Price is trading relative to the 20-period SMA (2944.52) and 50-period SMA (2986.25), classifying the market phase as a bullish structural uptrend. 1-month momentum is measured at 3.47%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 18173 points. Fundamental Valuation: Trailing P/E ratio registers at 39.584415. Expert Verdict: Systematic multi-factor rules assign a 'BUY' directive based on dynamic moving-average alignment and volatility thresholds."
     },
     {
         "Ticker": "SHEL.L",
         "Sector": "Energy",
-        "Price": 3310.59,
-        "SMA_20": 3089.05,
-        "SMA_50": 3120.77,
-        "Momentum_1M": 14.14,
+        "Price": 3309.0,
+        "SMA_20": 3088.97,
+        "SMA_50": 3120.74,
+        "Momentum_1M": 14.08,
         "Signal": "BUY",
         "ATR_Points": 19768,
-        "PE_Ratio": 13.794137,
-        "Reasoning": "Technical Analysis: Price (\u00a3/$) 3310.59 is trading relative to the 20-period SMA (3089.05) and 50-period SMA (3120.77), classifying the current market phase as a bullish structural uptrend. 1-month momentum is measured at 14.14%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 19768 points. Fundamental Valuation: Trailing P/E ratio registers at 13.794137. Expert Verdict: Systematic multi-factor rules assign a 'BUY' directive based on dynamic moving-average alignment and volatility thresholds."
+        "PE_Ratio": 13.787499,
+        "Reasoning": "Technical Analysis: Price is trading relative to the 20-period SMA (3088.97) and 50-period SMA (3120.74), classifying the market phase as a bullish structural uptrend. 1-month momentum is measured at 14.08%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 19768 points. Fundamental Valuation: Trailing P/E ratio registers at 13.787499. Expert Verdict: Systematic multi-factor rules assign a 'BUY' directive based on dynamic moving-average alignment and volatility thresholds."
     },
     {
         "Ticker": "BP.L",
         "Sector": "Energy",
-        "Price": 547.2,
+        "Price": 547.3,
         "SMA_20": 498.76,
-        "SMA_50": 515.73,
-        "Momentum_1M": 15.76,
+        "SMA_50": 515.74,
+        "Momentum_1M": 15.78,
         "Signal": "BUY",
         "ATR_Points": 2028,
-        "PE_Ratio": 36.48,
-        "Reasoning": "Technical Analysis: Price (\u00a3/$) 547.20 is trading relative to the 20-period SMA (498.76) and 50-period SMA (515.73), classifying the current market phase as a bullish structural uptrend. 1-month momentum is measured at 15.76%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 2028 points. Fundamental Valuation: Trailing P/E ratio registers at 36.48. Expert Verdict: Systematic multi-factor rules assign a 'BUY' directive based on dynamic moving-average alignment and volatility thresholds."
+        "PE_Ratio": 36.486664,
+        "Reasoning": "Technical Analysis: Price is trading relative to the 20-period SMA (498.76) and 50-period SMA (515.74), classifying the market phase as a bullish structural uptrend. 1-month momentum is measured at 15.78%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 2028 points. Fundamental Valuation: Trailing P/E ratio registers at 36.486664. Expert Verdict: Systematic multi-factor rules assign a 'BUY' directive based on dynamic moving-average alignment and volatility thresholds."
     },
     {
         "Ticker": "GLEN.L",
         "Sector": "Basic Materials",
-        "Price": 538.1,
-        "SMA_20": 517.39,
-        "SMA_50": 549.94,
-        "Momentum_1M": 5.3,
+        "Price": 539.0,
+        "SMA_20": 517.44,
+        "SMA_50": 549.96,
+        "Momentum_1M": 5.48,
         "Signal": "BUY",
-        "ATR_Points": 3599,
-        "PE_Ratio": 269.05,
-        "Reasoning": "Technical Analysis: Price (\u00a3/$) 538.10 is trading relative to the 20-period SMA (517.39) and 50-period SMA (549.94), classifying the current market phase as a defensive range. 1-month momentum is measured at 5.30%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 3599 points. Fundamental Valuation: Trailing P/E ratio registers at 269.05. Expert Verdict: Systematic multi-factor rules assign a 'BUY' directive based on dynamic moving-average alignment and volatility thresholds."
+        "ATR_Points": 3606,
+        "PE_Ratio": 269.5,
+        "Reasoning": "Technical Analysis: Price is trading relative to the 20-period SMA (517.44) and 50-period SMA (549.96), classifying the market phase as a defensive range. 1-month momentum is measured at 5.48%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 3606 points. Fundamental Valuation: Trailing P/E ratio registers at 269.5. Expert Verdict: Systematic multi-factor rules assign a 'BUY' directive based on dynamic moving-average alignment and volatility thresholds."
     },
     {
         "Ticker": "TGA.JO",
         "Sector": "Basic Materials",
-        "Price": 10730.0,
-        "SMA_20": 9739.8,
-        "SMA_50": 11835.38,
-        "Momentum_1M": 7.84,
+        "Price": 10716.0,
+        "SMA_20": 9739.1,
+        "SMA_50": 11835.1,
+        "Momentum_1M": 7.7,
         "Signal": "BUY",
         "ATR_Points": 81021,
         "PE_Ratio": "N/A",
-        "Reasoning": "Technical Analysis: Price (\u00a3/$) 10730.00 is trading relative to the 20-period SMA (9739.80) and 50-period SMA (11835.38), classifying the current market phase as a defensive range. 1-month momentum is measured at 7.84%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 81021 points. Fundamental Valuation: Trailing P/E ratio registers at N/A. Expert Verdict: Systematic multi-factor rules assign a 'BUY' directive based on dynamic moving-average alignment and volatility thresholds."
+        "Reasoning": "Technical Analysis: Price is trading relative to the 20-period SMA (9739.10) and 50-period SMA (11835.10), classifying the market phase as a defensive range. 1-month momentum is measured at 7.70%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 81021 points. Fundamental Valuation: Trailing P/E ratio registers at N/A. Expert Verdict: Systematic multi-factor rules assign a 'BUY' directive based on dynamic moving-average alignment and volatility thresholds."
     },
     {
         "Ticker": "ITH.L",
         "Sector": "Energy",
-        "Price": 256.0,
-        "SMA_20": 231.06,
-        "SMA_50": 236.83,
-        "Momentum_1M": 19.29,
+        "Price": 255.4,
+        "SMA_20": 231.03,
+        "SMA_50": 236.82,
+        "Momentum_1M": 19.01,
         "Signal": "BUY",
         "ATR_Points": 1469,
         "PE_Ratio": "N/A",
-        "Reasoning": "Technical Analysis: Price (\u00a3/$) 256.00 is trading relative to the 20-period SMA (231.06) and 50-period SMA (236.83), classifying the current market phase as a bullish structural uptrend. 1-month momentum is measured at 19.29%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 1469 points. Fundamental Valuation: Trailing P/E ratio registers at N/A. Expert Verdict: Systematic multi-factor rules assign a 'BUY' directive based on dynamic moving-average alignment and volatility thresholds."
+        "Reasoning": "Technical Analysis: Price is trading relative to the 20-period SMA (231.03) and 50-period SMA (236.82), classifying the market phase as a bullish structural uptrend. 1-month momentum is measured at 19.01%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 1469 points. Fundamental Valuation: Trailing P/E ratio registers at N/A. Expert Verdict: Systematic multi-factor rules assign a 'BUY' directive based on dynamic moving-average alignment and volatility thresholds."
     },
     {
         "Ticker": "DGE.L",
         "Sector": "Consumer Defensive",
-        "Price": 1542.07,
-        "SMA_20": 1540.55,
-        "SMA_50": 1536.88,
-        "Momentum_1M": -1.56,
+        "Price": 1541.18,
+        "SMA_20": 1540.51,
+        "SMA_50": 1536.86,
+        "Momentum_1M": -1.62,
         "Signal": "STRONG BUY",
         "ATR_Points": 13065,
-        "PE_Ratio": 19.037865,
-        "Reasoning": "Technical Analysis: Price (\u00a3/$) 1542.07 is trading relative to the 20-period SMA (1540.55) and 50-period SMA (1536.88), classifying the current market phase as a bullish structural uptrend. 1-month momentum is measured at -1.56%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 13065 points. Fundamental Valuation: Trailing P/E ratio registers at 19.037865. Expert Verdict: Systematic multi-factor rules assign a 'STRONG BUY' directive based on dynamic moving-average alignment and volatility thresholds."
+        "PE_Ratio": 19.026854,
+        "Reasoning": "Technical Analysis: Price is trading relative to the 20-period SMA (1540.51) and 50-period SMA (1536.86), classifying the market phase as a bullish structural uptrend. 1-month momentum is measured at -1.62%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 13065 points. Fundamental Valuation: Trailing P/E ratio registers at 19.026854. Expert Verdict: Systematic multi-factor rules assign a 'STRONG BUY' directive based on dynamic moving-average alignment and volatility thresholds."
     },
     {
         "Ticker": "CROX",
@@ -213,6 +213,6 @@
         "Signal": "STRONG BUY",
         "ATR_Points": 701,
         "PE_Ratio": "N/A",
-        "Reasoning": "Technical Analysis: Price (\u00a3/$) 132.47 is trading relative to the 20-period SMA (129.26) and 50-period SMA (120.99), classifying the current market phase as a bullish structural uptrend. 1-month momentum is measured at 11.43%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 701 points. Fundamental Valuation: Trailing P/E ratio registers at N/A. Expert Verdict: Systematic multi-factor rules assign a 'STRONG BUY' directive based on dynamic moving-average alignment and volatility thresholds."
+        "Reasoning": "Technical Analysis: Price is trading relative to the 20-period SMA (129.26) and 50-period SMA (120.99), classifying the market phase as a bullish structural uptrend. 1-month momentum is measured at 11.43%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 701 points. Fundamental Valuation: Trailing P/E ratio registers at N/A. Expert Verdict: Systematic multi-factor rules assign a 'STRONG BUY' directive based on dynamic moving-average alignment and volatility thresholds."
     }
 ]
