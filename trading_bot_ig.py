@@ -174,7 +174,7 @@ def execute_trades():
                 limit_distance=None, 
                 limit_level=None, 
                 quote_id=None,
-                stop_distance=None, 
+                stop_distance=stop_distance,  # Updated to pass calculated stop distance and prevent instant closures
                 stop_level=None,
                 trailing_stop=False, 
                 trailing_stop_increment=None
