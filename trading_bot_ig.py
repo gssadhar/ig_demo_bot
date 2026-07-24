@@ -206,7 +206,7 @@ def execute_trades():
                 "timestamp": datetime.now(timezone.utc).isoformat(),
                 "ticker": ticker, 
                 "epic": epic, 
-                | "sector": sector,
+                "sector": sector,
                 "regime": regime, 
                 "strategy": "Universal Multi-Factor Momentum", 
                 "stake": total_stake, 
