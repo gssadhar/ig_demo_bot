@@ -9,12 +9,15 @@ jobs:
   run-trading-pipeline:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: setup-python@v5
         with:
           python-version: '3.10'
 
@@ -38,11 +41,10 @@ jobs:
           IG_ACC_TYPE: ${{ secrets.IG_ACC_TYPE }}
         run: python trading_bot_ig.py
 
-      - name: Upload Screener Results and Logs
-        uses: actions/upload-artifact@v4
-        with:
-          name: trading-results
-          path: |
-            top_candidates.json
-            trade_log.json
-            index.html
+      - name: Commit and Push Updated Dashboard
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add index.html top_candidates.json trade_log.json
+          git commit -m "Auto-update trading dashboard and reports [skip ci]" || exit 0
+          git push
