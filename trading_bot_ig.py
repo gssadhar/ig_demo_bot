@@ -1,7 +1,7 @@
-import os
+from datetime import datetime, timezone
 import json
 import logging
-from datetime import datetime, timezone
+import os
 from trading_ig import IGService
 
 # Setup Logging
@@ -15,196 +15,238 @@ IG_ACC_NUMBER = os.getenv("IG_ACC_NUMBER")
 IG_ACC_TYPE = os.getenv("IG_ACC_TYPE") or "DEMO"
 
 # Quantitative Risk Settings
-MAX_RISK_PER_TRADE_GBP = 75.0  
+MAX_RISK_PER_TRADE_GBP = 75.0
 MAX_POSITIONS_PER_SECTOR = 2
 LOG_FILE = "trade_log.json"
 
 
 def connect_ig():
-    if not all([IG_USERNAME, IG_PASSWORD, IG_API_KEY, IG_ACC_NUMBER]):
-        print("❌ Missing IG Environment Variables!")
-        return None
-    try:
-        ig_service = IGService(
-            username=IG_USERNAME, password=IG_PASSWORD,
-            api_key=IG_API_KEY, acc_type=IG_ACC_TYPE.upper(),
-            acc_number=IG_ACC_NUMBER
-        )
-        ig_service.create_session()
-        print(f"⚡ Connected to IG API successfully ({IG_ACC_TYPE.upper()} Mode)!")
-        return ig_service
-    except Exception as e:
-        print(f"❌ Connection error: {e}")
-        return None
-
-
-def resolve_ig_epic(ig_service, ticker):
-    """
-    Dynamic Spread Bet Epic Search: Queries IG's market search directory 
-    and returns the first valid tradeable epic matching the account type.
-    """
-    clean_symbol = ticker.replace(".L", "").strip().upper()
-    search_queries = [clean_symbol, ticker]
-    
-    for query in search_queries:
-        try:
-            search_results = ig_service.search_markets(query)
-            if hasattr(search_results, "iterrows") and not search_results.empty:
-                for _, row in search_results.iterrows():
-                    epic = str(row.get("epic", ""))
-                    itype = str(row.get("instrumentType", ""))
-                    # Target valid share/equity spread betting epics
-                    if any(t in itype for t in ["SHARES", "EQUITIES", "SHARE"]) and (".D." in epic or "CASH" in epic or "DAILY" in epic):
-                        return epic
-                # If no specific tag matched, take the top search result epic safely
-                top_epic = search_results.iloc[0].get("epic")
-                if top_epic:
-                    return top_epic
-        except Exception as e:
-            print(f"⚠️ Search attempt failed for query '{query}': {e}")
-            
+  if not all([IG_USERNAME, IG_PASSWORD, IG_API_KEY, IG_ACC_NUMBER]):
+    print("❌ Missing IG Environment Variables!")
+    return None
+  try:
+    ig_service = IGService(
+        username=IG_USERNAME,
+        password=IG_PASSWORD,
+        api_key=IG_API_KEY,
+        acc_type=IG_ACC_TYPE.upper(),
+        acc_number=IG_ACC_NUMBER,
+    )
+    ig_service.create_session()
+    print(f"⚡ Connected to IG API successfully ({IG_ACC_TYPE.upper()} Mode)!")
+    return ig_service
+  except Exception as e:
+    print(f"❌ Connection error: {e}")
     return None
 
 
-def get_volatility_regime_adjustments(ig_service, epic):
+def resolve_ig_epic(ig_service, ticker):
+  """Dynamic Spread Bet Epic Search: Queries IG's market search directory
+
+  and returns the first valid tradeable epic matching the account type.
+  """
+  clean_symbol = ticker.replace(".L", "").strip().upper()
+  search_queries = [clean_symbol, ticker]
+
+  for query in search_queries:
     try:
-        hist = ig_service.fetch_historical_prices_by_epic_and_num_points(epic=epic, resolution="D", num_points=10)
-        prices_df = hist.get("prices")
-        if prices_df is not None and not prices_df.empty:
-            highs = prices_df["highPrice"]["ask"].astype(float)
-            lows = prices_df["lowPrice"]["ask"].astype(float)
-            recent_range = (highs - lows).mean()
-            baseline_range = (highs - lows).median()
-            
-            if recent_range > (baseline_range * 1.25):
-                return {"regime": "EXPANDED_TREND", "target_mult": 2.0}
-            elif recent_range < (baseline_range * 0.8):
-                return {"regime": "COMPRESSED_RANGE", "target_mult": 1.2}
-    except Exception:
-        pass
-    
-    return {"regime": "NORMAL", "target_mult": 1.5}
+      search_results = ig_service.search_markets(query)
+      if hasattr(search_results, "iterrows") and not search_results.empty:
+        for _, row in search_results.iterrows():
+          epic = str(row.get("epic", ""))
+          itype = str(row.get("instrumentType", ""))
+          # Target valid share/equity spread betting epics
+          if any(t in itype for t in ["SHARES", "EQUITIES", "SHARE"]) and (
+              ".D." in epic or "CASH" in epic or "DAILY" in epic
+          ):
+            return epic
+        # If no specific tag matched, take the top search result epic safely
+        top_epic = search_results.iloc[0].get("epic")
+        if top_epic:
+          return top_epic
+    except Exception as e:
+      print(f"⚠️ Search attempt failed for query '{query}': {e}")
+
+  return None
+
+
+def get_volatility_regime_adjustments(ig_service, epic):
+  try:
+    hist = ig_service.fetch_historical_prices_by_epic_and_num_points(
+        epic=epic, resolution="D", num_points=20
+    )
+    prices_df = hist.get("prices")
+    if prices_df is not None and not prices_df.empty:
+      highs = prices_df["highPrice"]["ask"].astype(float)
+      lows = prices_df["lowPrice"]["ask"].astype(float)
+      recent_range = (highs - lows).mean()
+      baseline_range = (highs - lows).median()
+
+      # Compute Average True Range (ATR) approximation for advanced exits
+      atr = float((highs - lows).iloc[-10:].mean())
+
+      if recent_range > (baseline_range * 1.25):
+        return {
+            "regime": "EXPANDED_TREND",
+            "target_mult": 2.0,
+            "atr": atr,
+        }
+      elif recent_range < (baseline_range * 0.8):
+        return {
+            "regime": "COMPRESSED_RANGE",
+            "target_mult": 1.2,
+            "atr": atr,
+        }
+      return {"regime": "NORMAL", "target_mult": 1.5, "atr": atr}
+  except Exception:
+    pass
+
+  return {"regime": "NORMAL", "target_mult": 1.5, "atr": 1.0}
 
 
 def log_trade(trade_data):
-    logs = []
-    if os.path.exists(LOG_FILE):
-        try:
-            with open(LOG_FILE, "r") as f:
-                logs = json.load(f)
-        except Exception:
-            logs = []
-    logs.append(trade_data)
-    with open(LOG_FILE, "w") as f:
-        json.dump(logs, f, indent=4)
-    print(f"📜 Trade logged to {LOG_FILE}")
+  logs = []
+  if os.path.exists(LOG_FILE):
+    try:
+      with open(LOG_FILE, "r") as f:
+        logs = json.load(f)
+    except Exception:
+      logs = []
+  logs.append(trade_data)
+  with open(LOG_FILE, "w") as f:
+    json.dump(logs, f, indent=4)
+  print(f"📜 Trade logged to {LOG_FILE}")
 
 
 def execute_trades():
-    if not os.path.exists("top_candidates.json"):
-        print("⚠️ No top_candidates.json file found.")
-        return
+  if not os.path.exists("top_candidates.json"):
+    print("⚠️ No top_candidates.json file found.")
+    return
 
-    with open("top_candidates.json", "r") as f:
-        candidates = json.load(f)
+  with open("top_candidates.json", "r") as f:
+    candidates = json.load(f)
 
-    if not candidates:
-        print("ℹ️ Candidates list is empty.")
-        return
+  if not candidates:
+    print("ℹ️ Candidates list is empty.")
+    return
 
-    ig_service = connect_ig()
-    if not ig_service:
-        return
+  ig_service = connect_ig()
+  if not ig_service:
+    return
 
-    sector_counts = {}
+  sector_counts = {}
 
-    print("\n=== EXECUTING DYNAMIC SPREAD BETTING PIPELINE ===")
-    for c in candidates:
-        ticker = c["Ticker"]
-        sector = c["Sector"]
-        signal = c["Signal"]
+  print("\n=== EXECUTING ADVANCED DYNAMIC SPREAD BETTING PIPELINE ===")
+  for c in candidates:
+    ticker = c["Ticker"]
+    sector = c["Sector"]
+    signal = c["Signal"]
 
-        if signal not in ["STRONG BUY", "BUY"]:
-            print(f"ℹ️ Skipping {ticker}: Signal is '{signal}' (Required: BUY or STRONG BUY).")
-            continue
+    if signal not in ["STRONG BUY", "BUY"]:
+      print(
+          f"ℹ️ Skipping {ticker}: Signal is '{signal}' (Required: BUY or STRONG"
+          " BUY)."
+      )
+      continue
 
-        if sector_counts.get(sector, 0) >= MAX_POSITIONS_PER_SECTOR:
-            print(f"🛡️ Sector Limit Reached: {sector} already active. Skipping {ticker}.")
-            continue
+    if sector_counts.get(sector, 0) >= MAX_POSITIONS_PER_SECTOR:
+      print(
+          f"🛡️ Sector Limit Reached: {sector} already active. Skipping"
+          f" {ticker}."
+      )
+      continue
 
-        epic = resolve_ig_epic(ig_service, ticker)
-        if not epic:
-            print(f"❌ Skipped {ticker}: Could not resolve dynamic Spread Bet Epic.")
-            continue
+    epic = resolve_ig_epic(ig_service, ticker)
+    if not epic:
+      print(f"❌ Skipped {ticker}: Could not resolve dynamic Spread Bet Epic.")
+      continue
 
-        regime_data = get_volatility_regime_adjustments(ig_service, epic)
-        regime = regime_data["regime"]
+    regime_data = get_volatility_regime_adjustments(ig_service, epic)
+    regime = regime_data["regime"]
+    atr = regime_data.get("atr", 1.0)
 
-        try:
-            market_details = ig_service.fetch_market_by_epic(epic)
-            snapshot = market_details.get("snapshot", {})
-            bid_price = float(snapshot.get("bid", 0))
-            offer_price = float(snapshot.get("offer", 0))
-            current_spread = offer_price - bid_price
-            
-            if bid_price <= 0:
-                print(f"⚠️ Skipped {ticker}: Invalid bid price.")
-                continue
+    try:
+      market_details = ig_service.fetch_market_by_epic(epic)
+      snapshot = market_details.get("snapshot", {})
+      bid_price = float(snapshot.get("bid", 0))
+      offer_price = float(snapshot.get("offer", 0))
+      current_spread = offer_price - bid_price
 
-            stop_distance = round(bid_price * 0.03, 1)
-            
-            max_allowed_spread = stop_distance * 0.40  
-            if current_spread > max_allowed_spread:
-                print(f"⚠️ Skipped {ticker}: Spread ({current_spread} pts) exceeds allowed limit.")
-                continue
-        except Exception as e:
-            print(f"⚠️ Market detail error for {ticker}: {e}")
-            continue
+      if bid_price <= 0:
+        print(f"⚠️ Skipped {ticker}: Invalid bid price.")
+        continue
 
-        calculated_size = round(MAX_RISK_PER_TRADE_GBP / stop_distance, 2)
-        is_uk = ticker.endswith(".L") or "." not in ticker
-        min_size = 0.5 if is_uk else 1.0
-        total_stake = max(calculated_size, min_size)
+      # 🛡️ Advanced Exit Integration: Chandelier Stop & Target Calculations
+      # Stop distance is set via Chandelier volatility multiples (e.g., 3.0x ATR)
+      stop_distance = round(max(bid_price * 0.03, atr * 3.0), 1)
 
-        print(f"🚀 Executing Spread Bet Position on {ticker} [{epic}] | Regime: {regime} | Stake: £{total_stake}/point")
-        try:
-            response = ig_service.create_open_position(
-                currency_code="GBP", 
-                direction="BUY", 
-                epic=epic, 
-                expiry="DFB", 
-                force_open=True,
-                guaranteed_stop=False, 
-                order_type="MARKET", 
-                size=total_stake, 
-                level=None,
-                limit_distance=None, 
-                limit_level=None, 
-                quote_id=None,
-                stop_distance=stop_distance,  
-                stop_level=None,
-                trailing_stop=False, 
-                trailing_stop_increment=None
-            )
-            deal_ref = response.get("dealReference", "N/A")
-            print(f"✅ Spread Bet Successfully Placed! | Ref: {deal_ref}")
-            sector_counts[sector] = sector_counts.get(sector, 0) + 1
-            
-            log_trade({
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-                "ticker": ticker, 
-                "epic": epic, 
-                "sector": sector,
-                "regime": regime, 
-                "strategy": "Dynamic Spread Bet Momentum", 
-                "stake": total_stake, 
-                "deal_reference": deal_ref
-            })
-        except Exception as e:
-            print(f"❌ Spread Bet execution failed for {ticker}: {e}")
+      max_allowed_spread = stop_distance * 0.40
+      if current_spread > max_allowed_spread:
+        print(
+            f"⚠️ Skipped {ticker}: Spread ({current_spread} pts) exceeds allowed"
+            " limit."
+        )
+        continue
+    except Exception as e:
+      print(f"⚠️ Market detail error for {ticker}: {e}")
+      continue
 
-    print("\n=== EXECUTION COMPLETE ===")
+    calculated_size = round(MAX_RISK_PER_TRADE_GBP / stop_distance, 2)
+    is_uk = ticker.endswith(".L") or "." not in ticker
+    min_size = 0.5 if is_uk else 1.0
+    total_stake = max(calculated_size, min_size)
+
+    # Calculate advanced profit target scaling levels for logging/tracking reference
+    partial_profit_target = round(bid_price + (2.0 * atr), 2)
+
+    print(
+        f"🚀 Executing Spread Bet Position on {ticker} [{epic}] | Regime:"
+        f" {regime} | Stop: {stop_distance} pts | Partial Target: >"
+        f"{partial_profit_target} | Stake: £{total_stake}/point"
+    )
+
+    try:
+      response = ig_service.create_open_position(
+          currency_code="GBP",
+          direction="BUY",
+          epic=epic,
+          expiry="DFB",
+          force_open=True,
+          guaranteed_stop=False,
+          order_type="MARKET",
+          size=total_stake,
+          level=None,
+          limit_distance=None,  # Uncapped upside trend following
+          limit_level=None,
+          quote_id=None,
+          stop_distance=stop_distance,
+          stop_level=None,
+          trailing_stop=False,
+          trailing_stop_increment=None,
+      )
+      deal_ref = response.get("dealReference", "N/A")
+      print(f"✅ Spread Bet Successfully Placed! | Ref: {deal_ref}")
+      sector_counts[sector] = sector_counts.get(sector, 0) + 1
+
+      log_trade({
+          "timestamp": datetime.now(timezone.utc).isoformat(),
+          "ticker": ticker,
+          "epic": epic,
+          "sector": sector,
+          "regime": regime,
+          "strategy": (
+              "Advanced Dynamic Momentum + Chandelier/ATR Scale-Out Rules"
+          ),
+          "stake": total_stake,
+          "stop_distance": stop_distance,
+          "partial_scale_target": partial_profit_target,
+          "deal_reference": deal_ref,
+      })
+    except Exception as e:
+      print(f"❌ Spread Bet execution failed for {ticker}: {e}")
+
+  print("\n=== EXECUTION COMPLETE ===")
 
 
 if __name__ == "__main__":
-    execute_trades()
+  execute_trades()
