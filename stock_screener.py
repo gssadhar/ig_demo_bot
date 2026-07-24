@@ -54,7 +54,7 @@ def format_large_number(val):
     return f"${val:,.2f}"
 
 def process_single_equity(ticker_symbol, sector):
-    """Processes technical indicators and fundamentals with upgraded filters for risk mitigation."""
+    """Processes technical indicators, fundamentals, and embedded entry/exit execution rules."""
     try:
         df = yf.download(ticker_symbol, period="1y", interval="1d", progress=False, multi_level_index=False)
         if df.empty or len(df) < 50:
@@ -78,13 +78,18 @@ def process_single_equity(ticker_symbol, sector):
         tr = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
         atr_value = float(tr.rolling(14).mean().iloc[-1])
 
+        # Entry & Exit Strategy Calculations
+        risk_distance = atr_value * 1.2
+        stop_loss_price = current_price - risk_distance
+        profit_target_15r = current_price + (risk_distance * 1.5)
+
         is_uk = ticker_symbol.endswith(".L")
         if is_uk:
-            atr_points = max(int(round(atr_value * 1.2 * 100)), 15)
+            atr_points = max(int(round(risk_distance * 100)), 15)
         else:
-            atr_points = max(int(round(atr_value * 1.2 * 100)), 100)
+            atr_points = max(int(round(risk_distance * 100)), 100)
 
-        # UPGRADED STRICTER STRATEGY FILTERS
+        # STRICTER STRATEGY FILTERS
         signal = "HOLD"
         if current_price > sma_20 and current_price > sma_50 and sma_20 > sma_50 and momentum_1m > 1.0:
             signal = "STRONG BUY"
@@ -143,16 +148,13 @@ def process_single_equity(ticker_symbol, sector):
             projected = base_rev * ((1 + max(rev_growth, 0.04)) ** yr)
             forecasts.append(f"<b>Year {yr}:</b> Projected Revenue {format_large_number(projected)} (Est. Growth Trend: +{rev_growth*100:.1f}%)")
 
-        trend_phase = "Primary Bull Market (Strictly Above 50 & 200 SMA)" if current_price > sma_200 else "Tactical Recovery Range"
-        conviction_weight = "High Conviction Filtered Momentum" if signal == "STRONG BUY" else "Moderate Tactical Upside"
-        
         reasoning = (
-            f"<b>Upgraded Institutional Thesis & Risk Structure:</b> Price action confirms a {trend_phase}, supported by a strict 1-month momentum print of {momentum_1m:.2f}%. "
-            f"The asset trades above both the 20-day SMA (${sma_20:.2f}) and 50-day SMA (${sma_50:.2f}), triggering a filtered <b>{signal}</b> directive. "
-            f"<br><br><b>Fundamental Balance Sheet & Solvency:</b> Operating with a market capitalization of {market_cap}, trailing revenues register at {revenue} with net income of {net_income}. "
-            f"Capital structure reveals total debt of {total_debt} against liquid cash reserves of {total_cash}. "
-            f"<br><br><b>Valuation & Risk Architecture:</b> Trailing P/E is positioned at {pe_ratio_str} ({pe_eval}), backed by a tightened ATR stop-loss buffer of {atr_points} points. "
-            f"<b>Verdict:</b> {conviction_weight} backed by strict trend alignment to minimize early drawdown exposure."
+            f"<b>Institutional Thesis & Rules-Based Execution:</b> Price action confirms a primary trend above both the 20-day SMA (${sma_20:.2f}) and 50-day SMA (${sma_50:.2f}), "
+            f"backed by a 1-month momentum print of {momentum_1m:.2f}% ({signal}). "
+            f"<br><br><b>🎯 Strict Entry Plan:</b> Wait for a minor pullback toward the 20-day SMA or an intraday volume breakout above resistance before opening position. "
+            f"<br><br><b>🛡️ Defensive Exit Plan (Stop-Loss):</b> Set automated stop-loss at <b>${stop_loss_price:.2f}</b> (1.2 × ATR buffer). If hit, exit immediately to protect capital. "
+            f"<br><br><b>💰 Profit Management Plan:</b> Scale out 50% of the position upon reaching Target 1 at <b>${profit_target_15r:.2f}</b> (1.5R) and move remaining stop to break-even. "
+            f"Trail the rest of the position along the 20-day SMA."
         )
 
         return {
@@ -164,6 +166,8 @@ def process_single_equity(ticker_symbol, sector):
             "Momentum_1M": round(momentum_1m, 2),
             "Signal": signal,
             "ATR_Points": atr_points,
+            "StopLoss": round(stop_loss_price, 2),
+            "Target15R": round(profit_target_15r, 2),
             "MarketCap": market_cap,
             "Revenue": revenue,
             "NetIncome": net_income,
@@ -210,9 +214,7 @@ def build_interactive_html_report(candidates):
             .right-sidebar {{ background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 20px; max-height: 850px; overflow-y: auto; }}
             
             .sidebar-title {{ font-size: 13px; color: #38bdf8; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px; border-bottom: 1px solid #1e293b; padding-bottom: 8px; margin-bottom: 15px; }}
-            .metric-card {{ background: #131c31; padding: 12px 14px; border-radius: 8px; border: 1px solid #1e293b; margin-bottom: 10px; position: relative; cursor: help; }}
-            .metric-card:hover .tooltip {{ visibility: visible; opacity: 1; }}
-            .tooltip {{ visibility: hidden; opacity: 0; width: 280px; background-color: #1e293b; color: #f8fafc; text-align: left; border-radius: 6px; padding: 12px; position: absolute; z-index: 10; bottom: 105%; right: 0; transition: opacity 0.3s; font-size: 11px; line-height: 1.5; border: 1px solid #334155; box-shadow: 0 6px 15px rgba(0,0,0,0.5); pointer-events: none; }}
+            .metric-card {{ background: #131c31; padding: 12px 14px; border-radius: 8px; border: 1px solid #1e293b; margin-bottom: 10px; }}
             .metric-label {{ font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }}
             .metric-value {{ font-size: 15px; font-weight: bold; color: #38bdf8; margin-top: 4px; }}
             .metric-eval {{ font-size: 10px; font-weight: bold; color: #34d399; margin-top: 2px; }}
@@ -226,8 +228,8 @@ def build_interactive_html_report(candidates):
     </head>
     <body>
         <div class="container">
-            <h2>🌍 Global Multi-Sector Quantitative Terminal (Upgraded Risk Filters)</h2>
-            <p style="color: #94a3b8; font-size: 13px;">Showing high-conviction assets filtered through strict multi-moving average trend parameters.</p>
+            <h2>🌍 Global Multi-Sector Quantitative Terminal (Entry & Exit Rules Enabled)</h2>
+            <p style="color: #94a3b8; font-size: 13px;">Click any asset below to view its precise entry triggers, automated stop-loss levels, and 1.5R profit targets.</p>
             <table>
                 <thead>
                     <tr>
@@ -235,9 +237,9 @@ def build_interactive_html_report(candidates):
                         <th>Sector</th>
                         <th>Price</th>
                         <th>Signal</th>
+                        <th>Stop-Loss</th>
+                        <th>1.5R Target</th>
                         <th>Market Cap</th>
-                        <th>Trailing P/E</th>
-                        <th>Stop Distance</th>
                     </tr>
                 </thead>
                 <tbody id="table-body"></tbody>
@@ -255,7 +257,7 @@ def build_interactive_html_report(candidates):
                         <div id="tradingview_widget" class="tv-container"></div>
                         <a id="tvExternalLink" href="#" target="_blank" class="tv-link-btn">Open Full Chart directly on TradingView ↗</a>
 
-                        <div class="section-title">Institutional Analytical Conviction & Rationale</div>
+                        <div class="section-title">Rules-Based Execution & Strategic Rationale</div>
                         <div class="reasoning-box" id="mReasoning"></div>
 
                         <div class="section-title">Corporate News Catalysts & Major Contract Wins</div>
@@ -266,8 +268,20 @@ def build_interactive_html_report(candidates):
                     </div>
 
                     <div class="right-sidebar">
-                        <div class="sidebar-title">Key Valuation & Market Metrics</div>
+                        <div class="sidebar-title">Execution & Risk Architecture</div>
                         
+                        <div class="metric-card" style="border-color: #ef4444;">
+                            <div class="metric-label">Automated Stop-Loss</div>
+                            <div class="metric-value" id="mStopLoss" style="color: #ef4444;"></div>
+                            <div class="metric-eval">Defensive Capital Exit</div>
+                        </div>
+
+                        <div class="metric-card" style="border-color: #34d399;">
+                            <div class="metric-label">Target 1 (1.5R Scale-Out)</div>
+                            <div class="metric-value" id="mTarget" style="color: #34d399;"></div>
+                            <div class="metric-eval">Lock in 50% Profit</div>
+                        </div>
+
                         <div class="metric-card">
                             <div class="metric-label">Current Price</div>
                             <div class="metric-value" id="mPrice"></div>
@@ -277,7 +291,7 @@ def build_interactive_html_report(candidates):
                         <div class="metric-card">
                             <div class="metric-label">Signal Directive</div>
                             <div class="metric-value" id="mSignal"></div>
-                            <div class="metric-eval">Upgraded Quant Model</div>
+                            <div class="metric-eval">Strict Trend Filter</div>
                         </div>
 
                         <div class="metric-card">
@@ -299,45 +313,9 @@ def build_interactive_html_report(candidates):
                         </div>
 
                         <div class="metric-card">
-                            <div class="metric-label">Net Income</div>
-                            <div class="metric-value" id="mNetIncome"></div>
-                            <div class="metric-eval">Bottom-Line Profit</div>
-                        </div>
-
-                        <div class="metric-card">
-                            <div class="metric-label">Total Debt</div>
-                            <div class="metric-value" id="mDebt"></div>
-                            <div class="metric-eval">Liabilities</div>
-                        </div>
-
-                        <div class="metric-card">
                             <div class="metric-label">Cash Reserves</div>
                             <div class="metric-value" id="mCash"></div>
                             <div class="metric-eval">Liquidity Cushion</div>
-                        </div>
-
-                        <div class="metric-card">
-                            <div class="metric-label">Return on Equity (ROE)</div>
-                            <div class="metric-value" id="mRoe"></div>
-                            <div class="metric-eval" id="mRoeEval"></div>
-                        </div>
-
-                        <div class="metric-card">
-                            <div class="metric-label">Profit Margin</div>
-                            <div class="metric-value" id="mMargin"></div>
-                            <div class="metric-eval" id="mMarginEval"></div>
-                        </div>
-
-                        <div class="metric-card">
-                            <div class="metric-label">20-Day SMA</div>
-                            <div class="metric-value" id="mSma20"></div>
-                            <div class="metric-eval">Short-Term Trend</div>
-                        </div>
-
-                        <div class="metric-card">
-                            <div class="metric-label">50-Day SMA</div>
-                            <div class="metric-value" id="mSma50"></div>
-                            <div class="metric-eval">Medium-Term Trend</div>
                         </div>
                     </div>
                 </div>
@@ -352,7 +330,7 @@ def build_interactive_html_report(candidates):
                 const tbody = document.getElementById('table-body');
                 tbody.innerHTML = '';
                 if (candidates.length === 0) {{
-                    tbody.innerHTML = '<tr><td colspan="7" style="padding: 20px; text-align: center; color: #94a3b8;">No assets currently meet the strict upgraded trend filters. Try running again later.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="7" style="padding: 20px; text-align: center; color: #94a3b8;">No assets currently meet the strict entry filters. Try running again later.</td></tr>';
                     return;
                 }}
                 candidates.forEach((c) => {{
@@ -364,9 +342,9 @@ def build_interactive_html_report(candidates):
                         <td style="padding: 14px; border-bottom: 1px solid #1e293b; color: #94a3b8;">${{c.Sector}}</td>
                         <td style="padding: 14px; border-bottom: 1px solid #1e293b;">${{c.Price}}</td>
                         <td style="padding: 14px; border-bottom: 1px solid #1e293b;"><span style="background-color: ${{badgeColor}}; color: white; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold;">${{c.Signal}}</span></td>
+                        <td style="padding: 14px; border-bottom: 1px solid #1e293b; color: #ef4444;">${{c.StopLoss}}</td>
+                        <td style="padding: 14px; border-bottom: 1px solid #1e293b; color: #34d399;">${{c.Target15R}}</td>
                         <td style="padding: 14px; border-bottom: 1px solid #1e293b;">${{c.MarketCap}}</td>
-                        <td style="padding: 14px; border-bottom: 1px solid #1e293b;">${{c.PE_Ratio}}</td>
-                        <td style="padding: 14px; border-bottom: 1px solid #1e293b;">${{c.ATR_Points}} pts</td>
                     `;
                     row.onclick = () => openModal(c);
                     tbody.appendChild(row);
@@ -374,22 +352,16 @@ def build_interactive_html_report(candidates):
             }}
 
             function openModal(data) {{
-                document.getElementById('modalTitle').innerText = data.Ticker + ' — Upgraded Due Diligence Suite';
+                document.getElementById('modalTitle').innerText = data.Ticker + ' — Execution & Due Diligence Suite';
                 document.getElementById('mPrice').innerText = data.Price;
                 document.getElementById('mSignal').innerText = data.Signal;
+                document.getElementById('mStopLoss').innerText = data.StopLoss;
+                document.getElementById('mTarget').innerText = data.Target15R;
                 document.getElementById('mMarketCap').innerText = data.MarketCap;
                 document.getElementById('mPe').innerText = data.PE_Ratio;
                 document.getElementById('mPeEval').innerText = data.PE_Eval;
                 document.getElementById('mRevenue').innerText = data.Revenue;
-                document.getElementById('mNetIncome').innerText = data.NetIncome;
-                document.getElementById('mDebt').innerText = data.TotalDebt;
                 document.getElementById('mCash').innerText = data.TotalCash;
-                document.getElementById('mRoe').innerText = data.ROE;
-                document.getElementById('mRoeEval').innerText = data.ROE_Eval;
-                document.getElementById('mMargin').innerText = data.ProfitMargin;
-                document.getElementById('mMarginEval').innerText = data.Margin_Eval;
-                document.getElementById('mSma20').innerText = data.SMA_20;
-                document.getElementById('mSma50').innerText = data.SMA_50;
                 document.getElementById('mReasoning').innerHTML = data.Reasoning;
                 document.getElementById('mNews').innerHTML = data.News.join('<br><br>');
                 document.getElementById('mForecasts').innerHTML = data.Forecasts.join('<br>');
@@ -448,7 +420,7 @@ def build_interactive_html_report(candidates):
     """
 
 def run_screener():
-    print("=== RUNNING UPGRADED GLOBAL QUANTITATIVE SCREENER ===")
+    print("=== RUNNING UPGRADED GLOBAL QUANTITATIVE SCREENER (WITH EXECUTION RULES) ===")
     candidates = []
 
     for item in WATCHLIST:
@@ -467,7 +439,7 @@ def run_screener():
     html_report = build_interactive_html_report(candidates)
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(html_report)
-    print("-> Successfully updated index.html dashboard with upgraded parameters!")
+    print("-> Successfully updated index.html dashboard with entry and exit guidelines!")
 
 if __name__ == "__main__":
     run_screener()
