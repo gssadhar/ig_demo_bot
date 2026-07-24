@@ -39,27 +39,48 @@ def connect_ig():
 
 
 def resolve_ig_epic(ig_service, ticker):
+    """
+    Universal Epic Resolution: Handles both UK (.L suffix) and USA tickers seamlessly 
+    by querying the IG market search API dynamically with multiple term variants.
+    """
+    # Universal fallback mapping for known assets
+    fallback_epics = {
+        "LLOY.L": "IX.D.LLOY.CASH.IP",
+        "LGEN.L": "IX.D.LGEN.CASH.IP",
+        "SHEL.L": "IX.D.SHEL.CASH.IP",
+        "BP.L": "IX.D.BP.CASH.IP",
+        "GLEN.L": "IX.D.GLEN.CASH.IP",
+        "AAPL": "UA.D.AAPL.CASH.IP",
+        "NVDA": "UA.D.NVDA.CASH.IP"
+    }
+    if ticker in fallback_epics:
+        return fallback_epics[ticker]
+
+    # Clean ticker for universal search query
     clean_symbol = ticker.replace(".L", "").strip().upper()
-    try:
-        search_results = ig_service.search_markets(clean_symbol)
-        if hasattr(search_results, "iterrows"):
-            for _, row in search_results.iterrows():
-                epic = str(row.get("epic", ""))
-                itype = str(row.get("instrumentType", ""))
-                if "SHARES" in itype and ("DAILY" in epic or "DFB" in epic):
-                    return epic
-            if not search_results.empty:
-                return search_results.iloc[0].get("epic")
-    except Exception as e:
-        print(f"⚠️ Dynamic search error for {ticker}: {e}")
+    search_queries = [clean_symbol, ticker]
+    
+    for query in search_queries:
+        try:
+            search_results = ig_service.search_markets(query)
+            if hasattr(search_results, "iterrows") and not search_results.empty:
+                for _, row in search_results.iterrows():
+                    epic = str(row.get("epic", ""))
+                    itype = str(row.get("instrumentType", ""))
+                    # Accept SHARES or EQUITIES across cash, daily, or DFB formats
+                    if any(t in itype for t in ["SHARES", "EQUITIES"]) and any(tag in epic for tag in ["CASH", "DAILY", "DFB", ".IP"]):
+                        return epic
+                # If filtered loop didn't catch an exact match, grab the top search row
+                top_epic = search_results.iloc[0].get("epic")
+                if top_epic:
+                    return top_epic
+        except Exception as e:
+            print(f"⚠️ Search attempt failed for query '{query}': {e}")
+            
     return None
 
 
 def get_volatility_regime_adjustments(ig_service, epic):
-    """
-    Volatility Regime Filtering: Determines market state based on recent high-low spread 
-    vs historical range, adapting target multipliers dynamically per academic frameworks.
-    """
     try:
         hist = ig_service.fetch_historical_prices_by_epic_and_num_points(epic=epic, resolution="D", num_points=10)
         prices_df = hist.get("prices")
@@ -109,17 +130,18 @@ def execute_trades():
     if not ig_service:
         return
 
-    accounts = ig_service.fetch_accounts()
-    if hasattr(accounts, "iterrows"):
-        balance = accounts.iloc[0].get("available", 0)
-        print(f"💰 Current Available Capital: £{balance:,.2f}")
-
     sector_counts = {}
 
-    print("\n=== EXECUTING INSTITUTIONAL QUANTITATIVE PIPELINE ===")
+    print("\n=== EXECUTING UNIVERSAL QUANTITATIVE PIPELINE (UK & USA) ===")
     for c in candidates:
         ticker = c["Ticker"]
         sector = c["Sector"]
+        signal = c["Signal"]
+
+        # Universal execution: Process both STRONG BUY and BUY signals to maximize pipeline coverage
+        if signal not in ["STRONG BUY", "BUY"]:
+            print(f"ℹ️ Skipping {ticker}: Signal is '{signal}' (Required: BUY or STRONG BUY).")
+            continue
 
         if sector_counts.get(sector, 0) >= MAX_POSITIONS_PER_SECTOR:
             print(f"🛡️ Sector Limit Reached: {sector} already active. Skipping {ticker}.")
@@ -127,7 +149,7 @@ def execute_trades():
 
         epic = resolve_ig_epic(ig_service, ticker)
         if not epic:
-            print(f"❌ Skipped {ticker}: Could not resolve IG Epic.")
+            print(f"❌ Skipped {ticker}: Could not resolve IG Epic for UK/USA channels.")
             continue
 
         regime_data = get_volatility_regime_adjustments(ig_service, epic)
@@ -144,22 +166,24 @@ def execute_trades():
                 print(f"⚠️ Skipped {ticker}: Invalid bid price.")
                 continue
 
-            # Normalized 3% risk boundary calculation for quantitative stake sizing
+            # Normalized risk boundary calculation
             stop_distance = round(bid_price * 0.03, 1)
-            max_allowed_spread = stop_distance * 0.12  
+            
+            # Flexible spread tolerance to accommodate volatile demo feeds across international exchanges
+            max_allowed_spread = stop_distance * 0.35  
             if current_spread > max_allowed_spread:
-                print(f"⚠️ Skipped {ticker}: Spread ({current_spread} pts) exceeds institutional 12% limit.")
+                print(f"⚠️ Skipped {ticker}: Spread ({current_spread} pts) exceeds allowed limit.")
                 continue
         except Exception as e:
             print(f"⚠️ Market detail error for {ticker}: {e}")
             continue
 
         calculated_size = round(MAX_RISK_PER_TRADE_GBP / stop_distance, 2)
-        is_uk = ticker.endswith(".L")
+        is_uk = ticker.endswith(".L") or "." not in ticker # Adapt sizing based on asset origin
         min_size = 0.1 if is_uk else 0.5
         total_stake = max(calculated_size, min_size)
 
-        print(f"🚀 Executing Quant-Validated Position on {ticker} [{epic}] | Regime: {regime} | Stake: {total_stake}")
+        print(f"🚀 Executing Universal Position on {ticker} [{epic}] | Regime: {regime} | Stake: {total_stake}")
         try:
             response = ig_service.create_open_position(
                 currency_code="GBP", 
@@ -174,7 +198,7 @@ def execute_trades():
                 limit_distance=None, 
                 limit_level=None, 
                 quote_id=None,
-                stop_distance=stop_distance,  # Updated to pass calculated stop distance and prevent instant closures
+                stop_distance=stop_distance,  
                 stop_level=None,
                 trailing_stop=False, 
                 trailing_stop_increment=None
@@ -189,7 +213,7 @@ def execute_trades():
                 "epic": epic, 
                 "sector": sector,
                 "regime": regime, 
-                "strategy": "Adaptive Multi-Factor Momentum", 
+                "strategy": "Universal Multi-Factor Momentum", 
                 "stake": total_stake, 
                 "deal_reference": deal_ref
             })
