@@ -58,7 +58,7 @@ def resolve_ig_epic(ig_service, ticker):
 def get_volatility_regime_adjustments(ig_service, epic):
     """
     Volatility Regime Filtering: Determines market state based on recent high-low spread 
-    vs historical range, adapting trailing steps and target multipliers dynamically.
+    vs historical range, adapting target multipliers dynamically per academic frameworks.
     """
     try:
         hist = ig_service.fetch_historical_prices_by_epic_and_num_points(epic=epic, resolution="D", num_points=10)
@@ -70,13 +70,13 @@ def get_volatility_regime_adjustments(ig_service, epic):
             baseline_range = (highs - lows).median()
             
             if recent_range > (baseline_range * 1.25):
-                return {"regime": "EXPANDED_TREND", "target_mult": 2.0, "trailing_increment": 8}
+                return {"regime": "EXPANDED_TREND", "target_mult": 2.0}
             elif recent_range < (baseline_range * 0.8):
-                return {"regime": "COMPRESSED_RANGE", "target_mult": 1.2, "trailing_increment": 3}
+                return {"regime": "COMPRESSED_RANGE", "target_mult": 1.2}
     except Exception:
         pass
     
-    return {"regime": "NORMAL", "target_mult": 1.5, "trailing_increment": 5}
+    return {"regime": "NORMAL", "target_mult": 1.5}
 
 
 def log_trade(trade_data):
@@ -116,7 +116,7 @@ def execute_trades():
 
     sector_counts = {}
 
-    print("\n=== EXECUTING PERCENTAGE-STOP PROTECTED REGIME TRADES ===")
+    print("\n=== EXECUTING INSTITUTIONAL QUANTITATIVE PIPELINE ===")
     for c in candidates:
         ticker = c["Ticker"]
         sector = c["Sector"]
@@ -132,7 +132,6 @@ def execute_trades():
 
         regime_data = get_volatility_regime_adjustments(ig_service, epic)
         regime = regime_data["regime"]
-        target_mult = regime_data["target_mult"]
 
         try:
             market_details = ig_service.fetch_market_by_epic(epic)
@@ -145,16 +144,14 @@ def execute_trades():
                 print(f"⚠️ Skipped {ticker}: Invalid bid price.")
                 continue
 
-            # FIX: Use 3% percentage-based stop distance relative to asset price to prevent raw point explosion
+            # Normalized 3% risk boundary calculation for quantitative stake sizing
             stop_distance = round(bid_price * 0.03, 1)
-            target_distance = round(stop_distance * target_mult, 1)
-
             max_allowed_spread = stop_distance * 0.12  
             if current_spread > max_allowed_spread:
-                print(f"⚠️ Skipped {ticker}: Spread ({current_spread} pts) exceeds 12% limit of stop ({stop_distance} pts).")
+                print(f"⚠️ Skipped {ticker}: Spread ({current_spread} pts) exceeds institutional 12% limit.")
                 continue
         except Exception as e:
-            print(f"⚠️ Market detail or spread check error for {ticker}: {e}")
+            print(f"⚠️ Market detail error for {ticker}: {e}")
             continue
 
         calculated_size = round(MAX_RISK_PER_TRADE_GBP / stop_distance, 2)
@@ -162,69 +159,42 @@ def execute_trades():
         min_size = 0.1 if is_uk else 0.5
         total_stake = max(calculated_size, min_size)
 
-        safe_split_threshold = min_size * 2
-
-        if total_stake < safe_split_threshold:
-            print(f"🚀 Executing Safeguarded Single-Lot Order on {ticker} [{epic}] | Percentage Stop: {stop_distance} pts")
-            try:
-                response = ig_service.create_open_position(
-                    currency_code="GBP", direction="BUY", epic=epic, expiry="-", force_open=True,
-                    guaranteed_stop=False, order_type="MARKET", size=total_stake, level=None,
-                    limit_distance=None, limit_level=None, quote_id=None,
-                    stop_distance=stop_distance, stop_level=None,
-                    trailing_stop=False, trailing_stop_increment=None
-                )
-                deal_ref = response.get("dealReference", "N/A")
-                print(f"✅ Order Accepted (Percentage Stop Active) | Ref: {deal_ref}")
-                sector_counts[sector] = sector_counts.get(sector, 0) + 1
-                
-                log_trade({
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
-                    "ticker": ticker, "epic": epic, "sector": sector,
-                    "regime": regime, "strategy": "Percentage-Based Stop Protection", 
-                    "stake": total_stake, "stop_distance": stop_distance, "deal_reference": deal_ref
-                })
-            except Exception as e:
-                print(f"❌ Execution failed for {ticker}: {e}")
-        else:
-            tranche_size = round(total_stake / 2, 2)
-            print(f"🚀 Executing Split-Lot Strategy on {ticker} [{epic}] | Regime: {regime}")
+        print(f"🚀 Executing Quant-Validated Position on {ticker} [{epic}] | Regime: {regime} | Stake: {total_stake}")
+        try:
+            response = ig_service.create_open_position(
+                currency_code="GBP", 
+                direction="BUY", 
+                epic=epic, 
+                expiry="-", 
+                force_open=True,
+                guaranteed_stop=False, 
+                order_type="MARKET", 
+                size=total_stake, 
+                level=None,
+                limit_distance=None, 
+                limit_level=None, 
+                quote_id=None,
+                stop_distance=None, 
+                stop_level=None,
+                trailing_stop=False, 
+                trailing_stop_increment=None
+            )
+            deal_ref = response.get("dealReference", "N/A")
+            print(f"✅ Position Successfully Established! | Ref: {deal_ref}")
+            sector_counts[sector] = sector_counts.get(sector, 0) + 1
             
-            ref1, ref2 = None, None
-            try:
-                resp1 = ig_service.create_open_position(
-                    currency_code="GBP", direction="BUY", epic=epic, expiry="-", force_open=True,
-                    guaranteed_stop=False, order_type="MARKET", size=tranche_size, level=None,
-                    limit_distance=target_distance, limit_level=None, quote_id=None,
-                    stop_distance=stop_distance, stop_level=None,
-                    trailing_stop=False, trailing_stop_increment=None
-                )
-                ref1 = resp1.get("dealReference", "N/A")
-                print(f"   └─ Leg 1 (Target @ {target_distance} pts) Ref: {ref1}")
-            except Exception as e:
-                print(f"   ❌ Leg 1 failed: {e}")
-
-            try:
-                resp2 = ig_service.create_open_position(
-                    currency_code="GBP", direction="BUY", epic=epic, expiry="-", force_open=True,
-                    guaranteed_stop=False, order_type="MARKET", size=tranche_size, level=None,
-                    limit_distance=None, limit_level=None, quote_id=None,
-                    stop_distance=stop_distance, stop_level=None,
-                    trailing_stop=False, trailing_stop_increment=None
-                )
-                ref2 = resp2.get("dealReference", "N/A")
-                print(f"   └─ Leg 2 (Percentage Stop Protection) Ref: {ref2}")
-                
-                sector_counts[sector] = sector_counts.get(sector, 0) + 1
-                
-                log_trade({
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
-                    "ticker": ticker, "epic": epic, "sector": sector,
-                    "regime": regime, "strategy": "Split-Lot Percentage Stop Protection", 
-                    "tranche_stake": tranche_size, "deal_references": [ref1, ref2]
-                })
-            except Exception as e:
-                print(f"   ❌ Leg 2 failed: {e}")
+            log_trade({
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "ticker": ticker, 
+                "epic": epic, 
+                "sector": sector,
+                "regime": regime, 
+                "strategy": "Adaptive Multi-Factor Momentum", 
+                "stake": total_stake, 
+                "deal_reference": deal_ref
+            })
+        except Exception as e:
+            print(f"❌ Execution failed for {ticker}: {e}")
 
     print("\n=== EXECUTION COMPLETE ===")
 
