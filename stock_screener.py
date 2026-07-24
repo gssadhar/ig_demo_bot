@@ -4,38 +4,18 @@ import pandas as pd
 import yfinance as yf
 
 WATCHLIST = [
-    {"ticker": "MSFT", "sector": "Technology"},
-    {"ticker": "GOOGL", "sector": "Communication Services"},
-    {"ticker": "AMZN", "sector": "Consumer Cyclical"},
-    {"ticker": "NVDA", "sector": "Technology"},
-    {"ticker": "META", "sector": "Communication Services"},
-    {"ticker": "AAPL", "sector": "Technology"},
-    {"ticker": "AMD", "sector": "Technology"},
-    {"ticker": "AVGO", "sector": "Technology"},
-    {"ticker": "ORCL", "sector": "Technology"},
-    {"ticker": "JPM", "sector": "Financial Services"},
-    {"ticker": "BAC", "sector": "Financial Services"},
-    {"ticker": "HSBA.L", "sector": "Financial Services"},
     {"ticker": "LLOY.L", "sector": "Financial Services"},
     {"ticker": "LGEN.L", "sector": "Financial Services"},
     {"ticker": "RR.L", "sector": "Industrials"},
-    {"ticker": "CAT", "sector": "Industrials"},
-    {"ticker": "GE", "sector": "Industrials"},
-    {"ticker": "BA.L", "sector": "Industrials"},
-    {"ticker": "OXIG.L", "sector": "Industrials"},
     {"ticker": "SHEL.L", "sector": "Energy"},
     {"ticker": "BP.L", "sector": "Energy"},
     {"ticker": "GLEN.L", "sector": "Basic Materials"},
-    {"ticker": "TGA.JO", "sector": "Basic Materials"},
-    {"ticker": "ITH.L", "sector": "Energy"},
     {"ticker": "GSK.L", "sector": "Healthcare"},
     {"ticker": "AZN.L", "sector": "Healthcare"},
-    {"ticker": "DGE.L", "sector": "Consumer Defensive"},
-    {"ticker": "KO", "sector": "Consumer Defensive"},
-    {"ticker": "COST", "sector": "Consumer Defensive"},
-    {"ticker": "WINE.L", "sector": "Consumer Cyclical"},
-    {"ticker": "EZJ.L", "sector": "Consumer Cyclical"},
-    {"ticker": "CROX", "sector": "Consumer Cyclical"}
+    {"ticker": "MSFT", "sector": "Technology"},
+    {"ticker": "GOOGL", "sector": "Communication Services"},
+    {"ticker": "AAPL", "sector": "Technology"},
+    {"ticker": "NVDA", "sector": "Technology"}
 ]
 
 def format_large_number(val):
@@ -118,7 +98,6 @@ def calculate_technical_signal(ticker_symbol):
         margin_str = f"{profit_margins * 100:.2f}%" if isinstance(profit_margins, (int, float)) else "N/A"
         margin_eval = "High Margin Business Model" if isinstance(profit_margins, (int, float)) and profit_margins > 0.2 else "Standard Industry Margin"
 
-        # Extract news catalysts and forecasts
         news_items = ticker_obj.news[:3] if hasattr(ticker_obj, "news") and ticker_obj.news else []
         formatted_news = []
         for n in news_items:
@@ -130,7 +109,6 @@ def calculate_technical_signal(ticker_symbol):
         if not formatted_news:
             formatted_news.append("• Strategic expansion underway with robust institutional order books and active contract pipelines.")
 
-        # Multi-year forward forecasts based on current growth trajectory
         rev_growth = info.get("revenueGrowth", 0.08)
         if not isinstance(rev_growth, (int, float)): rev_growth = 0.08
         
@@ -198,27 +176,34 @@ def build_interactive_html_report(candidates):
             tr.clickable-row {{ cursor: pointer; transition: background 0.2s ease; }}
             tr.clickable-row:hover {{ background-color: #1e293b; }}
             .modal {{ display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(5,7,12,0.85); backdrop-filter: blur(6px); overflow-y: auto; }}
-            .modal-content {{ background: #131c31; margin: 3% auto; padding: 35px; border: 1px solid #334155; width: 90%; max-width: 950px; border-radius: 16px; color: #f8fafc; box-shadow: 0 15px 40px rgba(0,0,0,0.8); }}
+            .modal-content {{ background: #131c31; margin: 2% auto; padding: 30px; border: 1px solid #334155; width: 95%; max-width: 1350px; border-radius: 16px; color: #f8fafc; box-shadow: 0 15px 40px rgba(0,0,0,0.8); }}
             .close {{ color: #94a3b8; float: right; font-size: 32px; font-weight: bold; cursor: pointer; line-height: 20px; }}
             .close:hover {{ color: #fff; }}
-            .modal-grid {{ display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 20px 0; }}
-            .metric-box {{ background: #0f172a; padding: 14px; border-radius: 8px; border: 1px solid #1e293b; position: relative; cursor: help; }}
-            .metric-box:hover .tooltip {{ visibility: visible; opacity: 1; }}
-            .tooltip {{ visibility: hidden; opacity: 0; width: 240px; background-color: #1e293b; color: #f8fafc; text-align: left; border-radius: 6px; padding: 10px; position: absolute; z-index: 10; bottom: 110%; left: 50%; transform: translateX(-50%); transition: opacity 0.3s; font-size: 11px; border: 1px solid #334155; box-shadow: 0 4px 10px rgba(0,0,0,0.4); pointer-events: none; }}
+            
+            /* Two Column Professional Modal Layout */
+            .modal-layout {{ display: grid; grid-template-columns: 1.3fr 0.7fr; gap: 24px; margin-top: 20px; }}
+            .left-column {{ display: flex; flex-direction: column; gap: 20px; }}
+            .right-sidebar {{ background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 20px; max-height: 850px; overflow-y: auto; }}
+            
+            .sidebar-title {{ font-size: 13px; color: #38bdf8; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px; border-bottom: 1px solid #1e293b; padding-bottom: 8px; margin-bottom: 15px; }}
+            .metric-card {{ background: #131c31; padding: 12px 14px; border-radius: 8px; border: 1px solid #1e293b; margin-bottom: 10px; position: relative; cursor: help; }}
+            .metric-card:hover .tooltip {{ visibility: visible; opacity: 1; }}
+            .tooltip {{ visibility: hidden; opacity: 0; width: 280px; background-color: #1e293b; color: #f8fafc; text-align: left; border-radius: 6px; padding: 12px; position: absolute; z-index: 10; bottom: 105%; right: 0; transition: opacity 0.3s; font-size: 11px; line-height: 1.5; border: 1px solid #334155; box-shadow: 0 6px 15px rgba(0,0,0,0.5); pointer-events: none; }}
             .metric-label {{ font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }}
-            .metric-value {{ font-size: 15px; font-weight: bold; color: #38bdf8; margin-top: 6px; }}
-            .metric-eval {{ font-size: 10px; font-weight: bold; color: #34d399; margin-top: 4px; }}
-            .section-title {{ font-size: 13px; color: #38bdf8; text-transform: uppercase; margin-top: 25px; margin-bottom: 10px; font-weight: bold; letter-spacing: 0.5px; border-bottom: 1px solid #1e293b; padding-bottom: 6px; }}
-            .reasoning-box, .info-box {{ background: #0f172a; padding: 18px; border-radius: 8px; border-left: 4px solid #38bdf8; font-size: 13px; line-height: 1.7; color: #cbd5e1; }}
-            .tv-container {{ margin-top: 20px; width: 100%; height: 500px; border-radius: 8px; overflow: hidden; border: 1px solid #1e293b; background: #0f172a; }}
-            .tv-link-btn {{ display: inline-block; background: #0284c7; color: #fff; padding: 10px 20px; border-radius: 6px; font-weight: bold; font-size: 13px; text-decoration: none; margin-top: 15px; transition: background 0.2s; }}
+            .metric-value {{ font-size: 15px; font-weight: bold; color: #38bdf8; margin-top: 4px; }}
+            .metric-eval {{ font-size: 10px; font-weight: bold; color: #34d399; margin-top: 2px; }}
+            
+            .section-title {{ font-size: 13px; color: #38bdf8; text-transform: uppercase; margin-top: 20px; margin-bottom: 8px; font-weight: bold; letter-spacing: 0.5px; border-bottom: 1px solid #1e293b; padding-bottom: 6px; }}
+            .reasoning-box, .info-box {{ background: #0f172a; padding: 16px; border-radius: 8px; border-left: 4px solid #38bdf8; font-size: 13px; line-height: 1.7; color: #cbd5e1; }}
+            .tv-container {{ width: 100%; height: 460px; border-radius: 8px; overflow: hidden; border: 1px solid #1e293b; background: #0f172a; }}
+            .tv-link-btn {{ display: inline-block; background: #0284c7; color: #fff; padding: 10px 20px; border-radius: 6px; font-weight: bold; font-size: 13px; text-decoration: none; text-align: center; transition: background 0.2s; }}
             .tv-link-btn:hover {{ background: #0369a1; }}
         </style>
     </head>
     <body>
         <div class="container">
-            <h2>📈 Institutional Multi-Sector Quantitative Terminal</h2>
-            <p style="color: #94a3b8; font-size: 13px;">Click any asset row to access deep due diligence, hover tooltips with sector comparison valuations, live news catalysts, multi-year forecasts, and advanced TradingView indicator charts.</p>
+            <h2>📈 Institutional Multi-Sector Quantitative Terminal (GBP LSE Focus)</h2>
+            <p style="color: #94a3b8; font-size: 13px;">Click any asset row to launch the professional due diligence suite with side-by-side valuation metric definitions and technical charts.</p>
             <table>
                 <thead>
                     <tr>
@@ -240,94 +225,113 @@ def build_interactive_html_report(candidates):
                 <span class="close" onclick="closeModal()">&times;</span>
                 <h3 id="modalTitle" style="color: #38bdf8; margin-top:0; font-size: 20px;">Asset Deep Dive</h3>
                 
-                <div class="section-title">Key Market & Valuation Metrics (Hover boxes for institutional definitions & sector comparisons)</div>
-                <div class="modal-grid">
-                    <div class="metric-box">
-                        <div class="metric-label">Current Price</div>
-                        <div class="metric-value" id="mPrice"></div>
-                        <div class="metric-eval">Live Market Quote</div>
-                        <div class="tooltip">Latest execution market price. Evaluated against moving average trend structure.</div>
+                <div class="modal-layout">
+                    <!-- Left Column: Charts & Analysis -->
+                    <div class="left-column">
+                        <div class="section-title" style="margin-top:0;">Advanced Technical Charting (RSI, Bollinger Bands, Moving Averages & Volume)</div>
+                        <div id="tradingview_widget" class="tv-container"></div>
+                        <a id="tvExternalLink" href="#" target="_blank" class="tv-link-btn">Open Full Chart directly on TradingView ↗</a>
+
+                        <div class="section-title">Institutional Analytical Conviction & Rationale</div>
+                        <div class="reasoning-box" id="mReasoning"></div>
+
+                        <div class="section-title">Corporate News Catalysts & Major Contract Wins</div>
+                        <div class="info-box" id="mNews"></div>
+
+                        <div class="section-title">1 to 5-Year Forward Financial Performance Forecasts</div>
+                        <div class="info-box" id="mForecasts"></div>
                     </div>
-                    <div class="metric-box">
-                        <div class="metric-label">Signal Directive</div>
-                        <div class="metric-value" id="mSignal"></div>
-                        <div class="metric-eval">Quant Model Verdict</div>
-                        <div class="tooltip">Systematic recommendation based on multi-factor momentum and moving average alignment.</div>
-                    </div>
-                    <div class="metric-box">
-                        <div class="metric-label">Market Capitalization</div>
-                        <div class="metric-value" id="mMarketCap"></div>
-                        <div class="metric-eval">Enterprise Scale</div>
-                        <div class="tooltip">Total dollar market value of a company's outstanding shares. Mega-cap > $200B.</div>
-                    </div>
-                    <div class="metric-box">
-                        <div class="metric-label">Trailing P/E Ratio</div>
-                        <div class="metric-value" id="mPe"></div>
-                        <div class="metric-eval" id="mPeEval"></div>
-                        <div class="tooltip">Price-to-Earnings ratio. Sector average: ~22x. Above 30x indicates growth premium / overvalued territory.</div>
-                    </div>
-                    <div class="metric-box">
-                        <div class="metric-label">Total Revenue</div>
-                        <div class="metric-value" id="mRevenue"></div>
-                        <div class="metric-eval">Trailing 12-Month Top-Line</div>
-                        <div class="tooltip">Total amount of income generated by the sale of goods or services related to the company's primary operations.</div>
-                    </div>
-                    <div class="metric-box">
-                        <div class="metric-label">Net Income</div>
-                        <div class="metric-value" id="mNetIncome"></div>
-                        <div class="metric-eval">Bottom-Line Profit</div>
-                        <div class="tooltip">Total earnings after all expenses, taxes, and costs have been deducted from total revenue.</div>
-                    </div>
-                    <div class="metric-box">
-                        <div class="metric-label">Total Debt</div>
-                        <div class="metric-value" id="mDebt"></div>
-                        <div class="metric-eval">Balance Sheet Liabilities</div>
-                        <div class="tooltip">Sum of all short-term and long-term obligations owed to creditors. Evaluated against liquid reserves.</div>
-                    </div>
-                    <div class="metric-box">
-                        <div class="metric-label">Cash Reserves</div>
-                        <div class="metric-value" id="mCash"></div>
-                        <div class="metric-eval">Liquidity Cushion</div>
-                        <div class="tooltip">Total cash, cash equivalents, and marketable securities available for operational contingencies.</div>
-                    </div>
-                    <div class="metric-box">
-                        <div class="metric-label">Return on Equity (ROE)</div>
-                        <div class="metric-value" id="mRoe"></div>
-                        <div class="metric-eval" id="mRoeEval"></div>
-                        <div class="tooltip">Net income divided by shareholder equity. Sector average: ~12%. >15% signifies excellent capital efficiency.</div>
-                    </div>
-                    <div class="metric-box">
-                        <div class="metric-label">Profit Margin</div>
-                        <div class="metric-value" id="mMargin"></div>
-                        <div class="metric-eval" id="mMarginEval"></div>
-                        <div class="tooltip">Percentage of revenue turning into net profit. Sector average: ~10%. >20% represents high pricing power.</div>
-                    </div>
-                    <div class="metric-box">
-                        <div class="metric-label">20-Day SMA</div>
-                        <div class="metric-value" id="mSma20"></div>
-                        <div class="metric-eval">Short-Term Trend</div>
-                        <div class="tooltip">20-period Simple Moving Average representing immediate momentum and short-term trend control.</div>
-                    </div>
-                    <div class="metric-box">
-                        <div class="metric-label">50-Day SMA</div>
-                        <div class="metric-value" id="mSma50"></div>
-                        <div class="metric-eval">Medium-Term Support</div>
-                        <div class="tooltip">50-period Simple Moving Average representing intermediate institutional accumulation trend line.</div>
+
+                    <!-- Right Column: Neat Clean Professional Sidebar with Detailed Tooltips -->
+                    <div class="right-sidebar">
+                        <div class="sidebar-title">Key Valuation & Market Metrics</div>
+                        <p style="font-size: 11px; color: #94a3b8; margin-top:0; margin-bottom: 15px;">Hover over any metric card to review complete institutional definitions, sector comparisons, and performance thresholds.</p>
+                        
+                        <div class="metric-card">
+                            <div class="metric-label">Current Price</div>
+                            <div class="metric-value" id="mPrice"></div>
+                            <div class="metric-eval">Live Market Quote</div>
+                            <div class="tooltip"><b>Definition:</b> Live market execution price of a single share.<br><b>Sector Context:</b> Evaluated relative to moving average trend bands.<br><b>Assessment:</b> Rising prices above moving averages confirm bullish momentum.</div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-label">Signal Directive</div>
+                            <div class="metric-value" id="mSignal"></div>
+                            <div class="metric-eval">Quant Model Verdict</div>
+                            <div class="tooltip"><b>Definition:</b> Systematic multi-factor momentum and moving average verdict.<br><b>Sector Context:</b> Compared against broad market health.<br><b>Assessment:</b> Strong Buy / Buy indicates institutional accumulation.</div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-label">Market Capitalization</div>
+                            <div class="metric-value" id="mMarketCap"></div>
+                            <div class="metric-eval">Enterprise Scale</div>
+                            <div class="tooltip"><b>Definition:</b> Total dollar value of outstanding shares (Price × Shares).<br><b>Sector Context:</b> Mega-Cap ($200B+), Large ($10B+), Mid/Small.<br><b>Assessment:</b> Larger caps provide higher liquidity and economic resilience.</div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-label">Trailing P/E Ratio</div>
+                            <div class="metric-value" id="mPe"></div>
+                            <div class="metric-eval" id="mPeEval"></div>
+                            <div class="tooltip"><b>Definition:</b> Price divided by trailing 12-month EPS.<br><b>Sector Context:</b> Market historical average sits around 20x–22x.<br><b>Assessment:</b> <15x Undervalued/Value; >30x Overvalued/Growth Premium.</div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-label">Total Revenue</div>
+                            <div class="metric-value" id="mRevenue"></div>
+                            <div class="metric-eval">Trailing 12-Month Top-Line</div>
+                            <div class="tooltip"><b>Definition:</b> Total income from primary business operations over 12 months.<br><b>Sector Context:</b> Benchmarked against direct industry competitors.<br><b>Assessment:</b> Expanding top-line revenue indicates growing market demand.</div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-label">Net Income</div>
+                            <div class="metric-value" id="mNetIncome"></div>
+                            <div class="metric-eval">Bottom-Line Profit</div>
+                            <div class="tooltip"><b>Definition:</b> Profit remaining after all operating expenses, taxes, and costs.<br><b>Sector Context:</b> Compared against sector median net profit conversions.<br><b>Assessment:</b> Positive earnings validate a sustainable business model.</div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-label">Total Debt</div>
+                            <div class="metric-value" id="mDebt"></div>
+                            <div class="metric-eval">Balance Sheet Liabilities</div>
+                            <div class="tooltip"><b>Definition:</b> Sum of all short-term and long-term financial obligations.<br><b>Sector Context:</b> Capital-intensive sectors naturally carry higher debt.<br><b>Assessment:</b> High debt is risky if it exceeds liquid cash reserves.</div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-label">Cash Reserves</div>
+                            <div class="metric-value" id="mCash"></div>
+                            <div class="metric-eval">Liquidity Cushion</div>
+                            <div class="tooltip"><b>Definition:</b> Total liquid cash and marketable securities available.<br><b>Sector Context:</b> Benchmarked against total debt and quarterly burn rate.<br><b>Assessment:</b> High cash cushions provide safety buffers during downturns.</div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-label">Return on Equity (ROE)</div>
+                            <div class="metric-value" id="mRoe"></div>
+                            <div class="metric-eval" id="mRoeEval"></div>
+                            <div class="tooltip"><b>Definition:</b> Net income divided by shareholder equity.<br><b>Sector Context:</b> Broader market average sits around 12%–15%.<br><b>Assessment:</b> >15% signals excellent management capital efficiency.</div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-label">Profit Margin</div>
+                            <div class="metric-value" id="mMargin"></div>
+                            <div class="metric-eval" id="mMarginEval"></div>
+                            <div class="tooltip"><b>Definition:</b> Percentage of revenue turning into actual net profit.<br><b>Sector Context:</b> Cross-industry average hovers around 8%–10%.<br><b>Assessment:</b> >20% represents high pricing power and business quality.</div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-label">20-Day SMA</div>
+                            <div class="metric-value" id="mSma20"></div>
+                            <div class="metric-eval">Short-Term Trend</div>
+                            <div class="tooltip"><b>Definition:</b> Average closing price over the last 20 trading days.<br><b>Sector Context:</b> Tactical benchmark for short-term institutional momentum.<br><b>Assessment:</b> Trading above indicates immediate bullish momentum.</div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-label">50-Day SMA</div>
+                            <div class="metric-value" id="mSma50"></div>
+                            <div class="metric-eval">Medium-Term Support</div>
+                            <div class="tooltip"><b>Definition:</b> Average closing price over the last 50 trading days.<br><b>Sector Context:</b> Foundational line for intermediate trend health.<br><b>Assessment:</b> Price holding above 50 SMA confirms a healthy bull market.</div>
+                        </div>
                     </div>
                 </div>
-
-                <div class="section-title">Institutional Analytical Conviction & Rationale</div>
-                <div class="reasoning-box" id="mReasoning"></div>
-
-                <div class="section-title">Corporate News Catalysts & Major Contract Wins</div>
-                <div class="info-box" id="mNews"></div>
-
-                <div class="section-title">1 to 5-Year Forward Financial Performance Forecasts</div>
-                <div class="info-box" id="mForecasts"></div>
-
-                <div class="section-title">Advanced Technical Charting (RSI, Bollinger Bands, Moving Averages & Volume)</div>
-                <div id="tradingview_widget" class="tv-container"></div>
-                <a id="tvExternalLink" href="#" target="_blank" class="tv-link-btn">Open Full Advanced Chart on TradingView ↗</a>
             </div>
         </div>
 
@@ -345,7 +349,7 @@ def build_interactive_html_report(candidates):
                     row.innerHTML = `
                         <td style="padding: 14px; border-bottom: 1px solid #1e293b;"><b>${{c.Ticker}}</b></td>
                         <td style="padding: 14px; border-bottom: 1px solid #1e293b; color: #94a3b8;">${{c.Sector}}</td>
-                        <td style="padding: 14px; border-bottom: 1px solid #1e293b;">$${{c.Price}}</td>
+                        <td style="padding: 14px; border-bottom: 1px solid #1e293b;">${{c.Price}}</td>
                         <td style="padding: 14px; border-bottom: 1px solid #1e293b;"><span style="background-color: ${{badgeColor}}; color: white; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold;">${{c.Signal}}</span></td>
                         <td style="padding: 14px; border-bottom: 1px solid #1e293b;">${{c.MarketCap}}</td>
                         <td style="padding: 14px; border-bottom: 1px solid #1e293b;">${{c.PE_Ratio}}</td>
@@ -357,8 +361,8 @@ def build_interactive_html_report(candidates):
             }}
 
             function openModal(data) {{
-                document.getElementById('modalTitle').innerText = data.Ticker + ' — Institutional Due Diligence & Technical Analysis';
-                document.getElementById('mPrice').innerText = '$' + data.Price;
+                document.getElementById('modalTitle').innerText = data.Ticker + ' — LSE GBP Due Diligence & Technical Analysis';
+                document.getElementById('mPrice').innerText = data.Price;
                 document.getElementById('mSignal').innerText = data.Signal;
                 document.getElementById('mMarketCap').innerText = data.MarketCap;
                 document.getElementById('mPe').innerText = data.PE_Ratio;
@@ -371,8 +375,8 @@ def build_interactive_html_report(candidates):
                 document.getElementById('mRoeEval').innerText = data.ROE_Eval;
                 document.getElementById('mMargin').innerText = data.ProfitMargin;
                 document.getElementById('mMarginEval').innerText = data.Margin_Eval;
-                document.getElementById('mSma20').innerText = '$' + data.SMA_20;
-                document.getElementById('mSma50').innerText = '$' + data.SMA_50;
+                document.getElementById('mSma20').innerText = data.SMA_20;
+                document.getElementById('mSma50').innerText = data.SMA_50;
                 document.getElementById('mReasoning').innerHTML = data.Reasoning;
                 document.getElementById('mNews').innerHTML = data.News.join('<br><br>');
                 document.getElementById('mForecasts').innerHTML = data.Forecasts.join('<br>');
@@ -380,35 +384,37 @@ def build_interactive_html_report(candidates):
                 let tvSymbol = data.Ticker;
                 if (tvSymbol.endsWith('.L')) {{
                     tvSymbol = 'LSE:' + tvSymbol.replace('.L', '');
-                }} else if (tvSymbol.endsWith('.JO')) {{
-                    tvSymbol = 'JSE:' + tvSymbol.replace('.JO', '');
                 }}
 
                 document.getElementById('tvExternalLink').href = 'https://www.tradingview.com/chart/?symbol=' + encodeURIComponent(tvSymbol);
                 document.getElementById('stockModal').style.display = 'block';
 
                 document.getElementById('tradingview_widget').innerHTML = '';
-                new TradingView.widget({{
-                    "width": "100%",
-                    "height": "500",
-                    "symbol": tvSymbol,
-                    "interval": "D",
-                    "timezone": "Etc/UTC",
-                    "theme": "dark",
-                    "style": "1",
-                    "locale": "en",
-                    "toolbar_bg": "#0f172a",
-                    "enable_publishing": false,
-                    "hide_side_toolbar": false,
-                    "allow_symbol_change": false,
-                    "studies": [
-                        "MASimple@tv-basicstudies",
-                        "RSI@tv-basicstudies",
-                        "BB@tv-basicstudies",
-                        "Volume@tv-basicstudies"
-                    ],
-                    "container_id": "tradingview_widget"
-                }});
+                try {{
+                    new TradingView.widget({{
+                        "width": "100%",
+                        "height": "460",
+                        "symbol": tvSymbol,
+                        "interval": "D",
+                        "timezone": "Etc/UTC",
+                        "theme": "dark",
+                        "style": "1",
+                        "locale": "en",
+                        "toolbar_bg": "#0f172a",
+                        "enable_publishing": false,
+                        "hide_side_toolbar": false,
+                        "allow_symbol_change": true,
+                        "studies": [
+                            "MASimple@tv-basicstudies",
+                            "RSI@tv-basicstudies",
+                            "BB@tv-basicstudies",
+                            "Volume@tv-basicstudies"
+                        ],
+                        "container_id": "tradingview_widget"
+                    }});
+                }} catch(err) {{
+                    document.getElementById('tradingview_widget').innerHTML = '<div style="padding: 40px; text-align: center; color: #94a3b8;">Embedded data feed restricted for this specific exchange ticker. Please use the button below to view instantly on TradingView.</div>';
+                }}
             }}
 
             function closeModal() {{
@@ -429,7 +435,7 @@ def build_interactive_html_report(candidates):
     """
 
 def run_screener():
-    print("=== RUNNING INSTITUTIONAL ADVANCED TERMINAL SCREENER ===")
+    print("=== RUNNING LSE GBP FOCUSED SCREENER ===")
     candidates = []
 
     for item in WATCHLIST:
@@ -449,12 +455,12 @@ def run_screener():
 
     with open("top_candidates.json", "w") as f:
         json.dump(candidates, f, indent=4)
-    print(f"-> Saved {len(candidates)} advanced institutional candidates to top_candidates.json!")
+    print(f"-> Saved {len(candidates)} candidates to top_candidates.json!")
 
     html_report = build_interactive_html_report(candidates)
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(html_report)
-    print("-> Successfully generated professional terminal dashboard!")
+    print("-> Successfully updated dashboard!")
 
 if __name__ == "__main__":
     run_screener()
