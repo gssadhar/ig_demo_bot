@@ -172,7 +172,7 @@ def execute_trades():
                 currency_code="GBP", 
                 direction="BUY", 
                 epic=epic, 
-                expiry="-", 
+                expiry="DFB", 
                 force_open=True,
                 guaranteed_stop=False, 
                 order_type="MARKET", 
