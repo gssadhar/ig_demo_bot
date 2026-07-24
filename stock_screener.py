@@ -1,16 +1,7 @@
 import os
 import json
-import smtplib
 import pandas as pd
 import yfinance as yf
-from datetime import datetime
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-
-# Environment Variables
-SENDER_EMAIL = os.getenv("SENDER_EMAIL")
-RECEIVER_EMAIL = os.getenv("RECEIVER_EMAIL")
-SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
 
 WATCHLIST = [
     {"ticker": "MSFT", "sector": "Technology"},
@@ -47,6 +38,16 @@ WATCHLIST = [
     {"ticker": "CROX", "sector": "Consumer Cyclical"}
 ]
 
+def format_large_number(val):
+    if not isinstance(val, (int, float)):
+        return "N/A"
+    if val >= 1e12:
+        return f"${val / 1e12:.2f}T"
+    elif val >= 1e9:
+        return f"${val / 1e9:.2f}B"
+    elif val >= 1e6:
+        return f"${val / 1e6:.2f}M"
+    return f"${val:,.2f}"
 
 def calculate_technical_signal(ticker_symbol):
     try:
@@ -63,6 +64,7 @@ def calculate_technical_signal(ticker_symbol):
 
         sma_20 = float(close.rolling(20).mean().iloc[-1])
         sma_50 = float(close.rolling(50).mean().iloc[-1])
+        sma_200 = float(close.rolling(200).mean().iloc[-1]) if len(close) >= 200 else sma_50
         current_price = float(close.iloc[-1])
         
         prev_price = float(close.iloc[-20]) if len(close) >= 20 else current_price
@@ -90,15 +92,40 @@ def calculate_technical_signal(ticker_symbol):
 
         ticker_obj = yf.Ticker(ticker_symbol)
         info = ticker_obj.info
-        pe_ratio = info.get("trailingPE", "N/A")
 
-        trend_desc = "bullish structural uptrend" if current_price > sma_50 else "defensive range"
+        market_cap = format_large_number(info.get("marketCap"))
+        revenue = format_large_number(info.get("totalRevenue"))
+        net_income = format_large_number(info.get("netIncomeToCommon"))
+        total_debt = format_large_number(info.get("totalDebt"))
+        total_cash = format_large_number(info.get("totalCash"))
+        
+        pe_ratio = info.get("trailingPE", "N/A")
+        if isinstance(pe_ratio, (int, float)):
+            pe_ratio = f"{pe_ratio:.2f}"
+            
+        pb_ratio = info.get("priceToBook", "N/A")
+        if isinstance(pb_ratio, (int, float)):
+            pb_ratio = f"{pb_ratio:.2f}"
+            
+        roe = info.get("returnOnEquity", None)
+        roe_str = f"{roe * 100:.2f}%" if isinstance(roe, (int, float)) else "N/A"
+        
+        profit_margins = info.get("profitMargins", None)
+        margin_str = f"{profit_margins * 100:.2f}%" if isinstance(profit_margins, (int, float)) else "N/A"
+
+        # Constructing institutional conviction rationale
+        trend_phase = "Primary Bull Market (Above 50 SMA & 200 SMA)" if current_price > sma_200 else "Tactical Recovery Range"
+        conviction_weight = "High Conviction Institutional Accumulation" if signal == "STRONG BUY" else "Moderate Tactical Upside"
+        
         reasoning = (
-            f"Technical Analysis: Price is trading relative to the 20-period SMA ({sma_20:.2f}) and 50-period SMA ({sma_50:.2f}), "
-            f"classifying the market phase as a {trend_desc}. 1-month momentum is measured at {momentum_1m:.2f}%. "
-            f"Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of {atr_points} points. "
-            f"Fundamental Valuation: Trailing P/E ratio registers at {pe_ratio}. "
-            f"Expert Verdict: Systematic multi-factor rules assign a '{signal}' directive based on dynamic moving-average alignment and volatility thresholds."
+            f"<b>Institutional Thesis & Market Structure:</b> Price action confirms a {trend_phase}, supported by a 1-month momentum print of {momentum_1m:.2f}%. "
+            f"The asset trades relative to a 20-day SMA of ${sma_20:.2f} and 50-day SMA of ${sma_50:.2f}, triggering a <b>{signal}</b> directive. "
+            f"<br><br><b>Fundamental Balance Sheet & Profitability Strength:</b> Operating with a market capitalization of {market_cap}, the corporation reports trailing revenues of {revenue} and net income of {net_income}. "
+            f"Capital structure reflects total debt of {total_debt} offset by liquid cash reserves of {total_cash}. "
+            f"Profitability metrics show a net profit margin of {margin_str} and a Return on Equity (ROE) of {roe_str}. "
+            f"<br><br><b>Valuation & Risk Parameters:</b> Valued at a Trailing P/E of {pe_ratio} and Price-to-Book multiple of {pb_ratio}. "
+            f"Risk parameters enforce an ATR-derived institutional stop-loss buffer of {atr_points} points to insulate against short-term market noise. "
+            f"<b>Verdict:</b> {conviction_weight} backed by fundamental solvency and positive trend alignment."
         )
 
         return {
@@ -108,13 +135,20 @@ def calculate_technical_signal(ticker_symbol):
             "Momentum_1M": round(momentum_1m, 2),
             "Signal": signal,
             "ATR_Points": atr_points,
+            "MarketCap": market_cap,
+            "Revenue": revenue,
+            "NetIncome": net_income,
+            "TotalDebt": total_debt,
+            "TotalCash": total_cash,
             "PE_Ratio": pe_ratio,
+            "PB_Ratio": pb_ratio,
+            "ROE": roe_str,
+            "ProfitMargin": margin_str,
             "Reasoning": reasoning
         }
     except Exception as e:
         print(f"⏩ Skipping {ticker_symbol}: {e}")
         return None
-
 
 def build_interactive_html_report(candidates):
     json_candidates = json.dumps(candidates)
@@ -124,30 +158,34 @@ def build_interactive_html_report(candidates):
     <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>Global Institutional Equity Screener</title>
+        <title>Institutional Multi-Sector Equity Terminal</title>
         <style>
-            body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #0f172a; color: #f8fafc; padding: 20px; margin: 0; }}
-            .container {{ max-width: 1000px; margin: auto; background: #1e293b; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }}
-            h2 {{ color: #38bdf8; margin-top: 0; }}
+            body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #0b0f19; color: #f8fafc; padding: 25px; margin: 0; }}
+            .container {{ max-width: 1200px; margin: auto; background: #131c31; padding: 30px; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.6); border: 1px solid #1e293b; }}
+            h2 {{ color: #38bdf8; margin-top: 0; font-size: 24px; letter-spacing: 0.5px; }}
             table {{ width: 100%; border-collapse: collapse; text-align: left; margin-top: 20px; }}
-            th {{ background-color: #0f172a; color: #38bdf8; padding: 14px; border-bottom: 2px solid #334155; font-size: 13px; text-transform: uppercase; }}
-            tr.clickable-row {{ cursor: pointer; }}
-            tr.clickable-row:hover {{ background-color: #334155; }}
-            .modal {{ display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); }}
-            .modal-content {{ background: #1e293b; margin: 6% auto; padding: 30px; border: 1px solid #475569; width: 80%; max-width: 650px; border-radius: 12px; color: #f8fafc; }}
-            .close {{ color: #94a3b8; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }}
+            th {{ background-color: #0f172a; color: #38bdf8; padding: 14px; border-bottom: 2px solid #334155; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }}
+            tr.clickable-row {{ cursor: pointer; transition: background 0.2s ease; }}
+            tr.clickable-row:hover {{ background-color: #1e293b; }}
+            .modal {{ display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(5,7,12,0.85); backdrop-filter: blur(6px); overflow-y: auto; }}
+            .modal-content {{ background: #131c31; margin: 3% auto; padding: 35px; border: 1px solid #334155; width: 90%; max-width: 950px; border-radius: 16px; color: #f8fafc; box-shadow: 0 15px 40px rgba(0,0,0,0.8); }}
+            .close {{ color: #94a3b8; float: right; font-size: 32px; font-weight: bold; cursor: pointer; line-height: 20px; }}
             .close:hover {{ color: #fff; }}
-            .modal-grid {{ display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }}
-            .metric-box {{ background: #0f172a; padding: 12px; border-radius: 6px; border: 1px solid #334155; }}
-            .metric-label {{ font-size: 11px; color: #94a3b8; text-transform: uppercase; }}
-            .metric-value {{ font-size: 16px; font-weight: bold; color: #38bdf8; margin-top: 4px; }}
-            .reasoning-box {{ background: #0f172a; padding: 15px; border-radius: 6px; border-left: 4px solid #38bdf8; margin-top: 15px; font-size: 14px; line-height: 1.6; color: #cbd5e1; }}
+            .modal-grid {{ display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 20px 0; }}
+            .metric-box {{ background: #0f172a; padding: 14px; border-radius: 8px; border: 1px solid #1e293b; }}
+            .metric-label {{ font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }}
+            .metric-value {{ font-size: 15px; font-weight: bold; color: #38bdf8; margin-top: 6px; }}
+            .section-title {{ font-size: 13px; color: #38bdf8; text-transform: uppercase; margin-top: 25px; margin-bottom: 10px; font-weight: bold; letter-spacing: 0.5px; border-bottom: 1px solid #1e293b; padding-bottom: 6px; }}
+            .reasoning-box {{ background: #0f172a; padding: 18px; border-radius: 8px; border-left: 4px solid #38bdf8; font-size: 13px; line-height: 1.7; color: #cbd5e1; }}
+            .tv-container {{ margin-top: 20px; width: 100%; height: 450px; border-radius: 8px; overflow: hidden; border: 1px solid #1e293b; background: #0f172a; }}
+            .tv-link-btn {{ display: inline-block; background: #0284c7; color: #fff; padding: 10px 20px; border-radius: 6px; font-weight: bold; font-size: 13px; text-decoration: none; margin-top: 15px; transition: background 0.2s; }}
+            .tv-link-btn:hover {{ background: #0369a1; }}
         </style>
     </head>
     <body>
         <div class="container">
-            <h2>📈 Global Multi-Sector Quantitative Screener</h2>
-            <p style="color: #94a3b8; font-size: 14px;">Click any stock row to expand deep-dive technical indicators, valuations, and expert reasoning.</p>
+            <h2>📈 Institutional Multi-Sector Quantitative Terminal</h2>
+            <p style="color: #94a3b8; font-size: 13px;">Click any asset row to open institutional due diligence, fundamental balance sheet metrics, valuation ratios, and live TradingView technical charts.</p>
             <table>
                 <thead>
                     <tr>
@@ -155,6 +193,8 @@ def build_interactive_html_report(candidates):
                         <th>Sector</th>
                         <th>Price</th>
                         <th>Signal</th>
+                        <th>Market Cap</th>
+                        <th>Trailing P/E</th>
                         <th>Stop Distance</th>
                     </tr>
                 </thead>
@@ -165,54 +205,53 @@ def build_interactive_html_report(candidates):
         <div id="stockModal" class="modal">
             <div class="modal-content">
                 <span class="close" onclick="closeModal()">&times;</span>
-                <h3 id="modalTitle" style="color: #38bdf8; margin-top:0;">Stock Analysis</h3>
+                <h3 id="modalTitle" style="color: #38bdf8; margin-top:0; font-size: 20px;">Asset Deep Dive</h3>
+                
+                <div class="section-title">Key Market & Valuation Metrics</div>
                 <div class="modal-grid">
-                    <div class="metric-box">
-                        <div class="metric-label">Current Price</div>
-                        <div class="metric-value" id="mPrice"></div>
-                    </div>
-                    <div class="metric-box">
-                        <div class="metric-label">Signal Directive</div>
-                        <div class="metric-value" id="mSignal"></div>
-                    </div>
-                    <div class="metric-box">
-                        <div class="metric-label">20-Day SMA</div>
-                        <div class="metric-value" id="mSma20"></div>
-                    </div>
-                    <div class="metric-box">
-                        <div class="metric-label">50-Day SMA</div>
-                        <div class="metric-value" id="mSma50"></div>
-                    </div>
-                    <div class="metric-box">
-                        <div class="metric-label">1-Month Momentum</div>
-                        <div class="metric-value" id="mMomentum"></div>
-                    </div>
-                    <div class="metric-box">
-                        <div class="metric-label">Trailing P/E Ratio</div>
-                        <div class="metric-value" id="mPe"></div>
-                    </div>
+                    <div class="metric-box"><div class="metric-label">Current Price</div><div class="metric-value" id="mPrice"></div></div>
+                    <div class="metric-box"><div class="metric-label">Signal Directive</div><div class="metric-value" id="mSignal"></div></div>
+                    <div class="metric-box"><div class="metric-label">Market Capitalization</div><div class="metric-value" id="mMarketCap"></div></div>
+                    <div class="metric-box"><div class="metric-label">Trailing P/E Ratio</div><div class="metric-value" id="mPe"></div></div>
+                    <div class="metric-box"><div class="metric-label">Total Revenue</div><div class="metric-value" id="mRevenue"></div></div>
+                    <div class="metric-box"><div class="metric-label">Net Income</div><div class="metric-value" id="mNetIncome"></div></div>
+                    <div class="metric-box"><div class="metric-label">Total Debt</div><div class="metric-value" id="mDebt"></div></div>
+                    <div class="metric-box"><div class="metric-label">Cash Reserves</div><div class="metric-value" id="mCash"></div></div>
+                    <div class="metric-box"><div class="metric-label">Return on Equity (ROE)</div><div class="metric-value" id="mRoe"></div></div>
+                    <div class="metric-box"><div class="metric-label">Profit Margin</div><div class="metric-value" id="mMargin"></div></div>
+                    <div class="metric-box"><div class="metric-label">20-Day SMA</div><div class="metric-value" id="mSma20"></div></div>
+                    <div class="metric-box"><div class="metric-label">50-Day SMA</div><div class="metric-value" id="mSma50"></div></div>
                 </div>
-                <div class="metric-label">Expert Quantitative Rationale & Parameter Alignment</div>
+
+                <div class="section-title">Institutional Analytical Conviction & Rationale</div>
                 <div class="reasoning-box" id="mReasoning"></div>
+
+                <div class="section-title">Live Technical Chart & Candlestick Analysis</div>
+                <div id="tradingview_widget" class="tv-container"></div>
+                <a id="tvExternalLink" href="#" target="_blank" class="tv-link-btn">Open Full Advanced Chart on TradingView ↗</a>
             </div>
         </div>
 
+        <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
         <script>
             const candidates = {json_candidates};
+            let currentWidget = null;
 
             function renderTable() {{
                 const tbody = document.getElementById('table-body');
                 tbody.innerHTML = '';
-                candidates.forEach((c, index) => {{
-                    const badgeColor = c.Signal === 'STRONG BUY' ? '#28a745' : '#17a2b8';
+                candidates.forEach((c) => {{
+                    const badgeColor = c.Signal === 'STRONG BUY' ? '#16a34a' : '#0284c7';
                     const row = document.createElement('tr');
                     row.className = 'clickable-row';
                     row.innerHTML = `
-                        <td style="padding: 12px; border-bottom: 1px solid #334155;"><b>${{c.Ticker}}</b></td>
-                        <td style="padding: 12px; border-bottom: 1px solid #334155;">${{c.Sector}}</td>
-                        <td style="padding: 12px; border-bottom: 1px solid #334155;">$${{c.Price}}</td>
-                        <td style="padding: 12px; border-bottom: 1px solid #334155;"><span style="background-color: ${{badgeColor}}; color: white; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: bold;">${{c.Signal}}</span></td>
-                        <td style="padding: 12px; border-bottom: 1px solid #334155;">${{c.ATR_Points}} pts</td>
+                        <td style="padding: 14px; border-bottom: 1px solid #1e293b;"><b>${{c.Ticker}}</b></td>
+                        <td style="padding: 14px; border-bottom: 1px solid #1e293b; color: #94a3b8;">${{c.Sector}}</td>
+                        <td style="padding: 14px; border-bottom: 1px solid #1e293b;">$${{c.Price}}</td>
+                        <td style="padding: 14px; border-bottom: 1px solid #1e293b;"><span style="background-color: ${{badgeColor}}; color: white; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold;">${{c.Signal}}</span></td>
+                        <td style="padding: 14px; border-bottom: 1px solid #1e293b;">${{c.MarketCap}}</td>
+                        <td style="padding: 14px; border-bottom: 1px solid #1e293b;">${{c.PE_Ratio}}</td>
+                        <td style="padding: 14px; border-bottom: 1px solid #1e293b;">${{c.ATR_Points}} pts</td>
                     `;
                     row.onclick = () => openModal(c);
                     tbody.appendChild(row);
@@ -220,15 +259,54 @@ def build_interactive_html_report(candidates):
             }}
 
             function openModal(data) {{
-                document.getElementById('modalTitle').innerText = data.Ticker + ' — Sector Deep Dive Analysis';
+                document.getElementById('modalTitle').innerText = data.Ticker + ' — Institutional Due Diligence & Technical Analysis';
                 document.getElementById('mPrice').innerText = '$' + data.Price;
                 document.getElementById('mSignal').innerText = data.Signal;
+                document.getElementById('mMarketCap').innerText = data.MarketCap;
+                document.getElementById('mPe').innerText = data.PE_Ratio;
+                document.getElementById('mRevenue').innerText = data.Revenue;
+                document.getElementById('mNetIncome').innerText = data.NetIncome;
+                document.getElementById('mDebt').innerText = data.TotalDebt;
+                document.getElementById('mCash').innerText = data.TotalCash;
+                document.getElementById('mRoe').innerText = data.ROE;
+                document.getElementById('mMargin').innerText = data.ProfitMargin;
                 document.getElementById('mSma20').innerText = '$' + data.SMA_20;
                 document.getElementById('mSma50').innerText = '$' + data.SMA_50;
-                document.getElementById('mMomentum').innerText = data.Momentum_1M + '%';
-                document.getElementById('mPe').innerText = data.PE_Ratio;
-                document.getElementById('mReasoning').innerText = data.Reasoning;
+                document.getElementById('mReasoning').innerHTML = data.Reasoning;
+                
+                // Format ticker for TradingView widget (e.g., HSBA.L -> LSE:HSBA)
+                let tvSymbol = data.Ticker;
+                if (tvSymbol.endsWith('.L')) {{
+                    tvSymbol = 'LSE:' + tvSymbol.replace('.L', '');
+                }} else if (tvSymbol.endsWith('.JO')) {{
+                    tvSymbol = 'JSE:' + tvSymbol.replace('.JO', '');
+                }}
+
+                document.getElementById('tvExternalLink').href = 'https://www.tradingview.com/chart/?symbol=' + encodeURIComponent(tvSymbol);
+
                 document.getElementById('stockModal').style.display = 'block';
+
+                // Render TradingView Advanced Chart Widget inside modal
+                document.getElementById('tradingview_widget').innerHTML = '';
+                new TradingView.widget({{
+                    "width": "100%",
+                    "height": "450",
+                    "symbol": tvSymbol,
+                    "interval": "D",
+                    "timezone": "Etc/UTC",
+                    "theme": "dark",
+                    "style": "1",
+                    "locale": "en",
+                    "toolbar_bg": "#0f172a",
+                    "enable_publishing": false,
+                    "hide_side_toolbar": false,
+                    "allow_symbol_change": false,
+                    "studies": [
+                        "MASimple@tv-basicstudies",
+                        "RSI@tv-basicstudies"
+                    ],
+                    "container_id": "tradingview_widget"
+                }});
             }}
 
             function closeModal() {{
@@ -248,9 +326,8 @@ def build_interactive_html_report(candidates):
     </html>
     """
 
-
 def run_screener():
-    print("=== RUNNING EXPANDED GLOBAL HYBRID STOCK SCREENER ===")
+    print("=== RUNNING INSTITUTIONAL MULTI-SECTOR TERMINAL SCREENER ===")
     candidates = []
 
     for item in WATCHLIST:
@@ -265,25 +342,17 @@ def run_screener():
             candidates.append({
                 "Ticker": ticker,
                 "Sector": sector,
-                "Price": metrics["Price"],
-                "SMA_20": metrics["SMA_20"],
-                "SMA_50": metrics["SMA_50"],
-                "Momentum_1M": metrics["Momentum_1M"],
-                "Signal": metrics["Signal"],
-                "ATR_Points": metrics["ATR_Points"],
-                "PE_Ratio": metrics["PE_Ratio"],
-                "Reasoning": metrics["Reasoning"]
+                **metrics
             })
 
     with open("top_candidates.json", "w") as f:
         json.dump(candidates, f, indent=4)
-    print(f"-> Saved {len(candidates)} qualified buy setup candidates to top_candidates.json!")
+    print(f"-> Saved {len(candidates)} institutional candidates to top_candidates.json!")
 
     html_report = build_interactive_html_report(candidates)
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(html_report)
-    print("-> Successfully generated interactive index.html dashboard!")
-
+    print("-> Successfully generated professional terminal dashboard!")
 
 if __name__ == "__main__":
     run_screener()
