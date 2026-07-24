@@ -708,5 +708,15 @@
         "strategy": "Universal Multi-Factor Momentum",
         "stake": 0.1,
         "deal_reference": "U7TNLLUNPUYTYSB"
+    },
+    {
+        "timestamp": "2026-07-24T13:40:39.418510+00:00",
+        "ticker": "AAPL",
+        "epic": "UA.D.AAPL.CASH.IP",
+        "sector": "Technology",
+        "regime": "NORMAL",
+        "strategy": "Universal Multi-Factor Momentum",
+        "stake": 0.1,
+        "deal_reference": "NKD5CQ2ESZUTYSB"
     }
 ]
