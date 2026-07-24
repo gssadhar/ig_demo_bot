@@ -1,109 +1,250 @@
 
-    <html>
-    <body style="font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px;">
-        <div style="max-width: 700px; margin: auto; background: white; padding: 20px; border-radius: 8px;">
-            <h2 style="color: #333;">📈 Daily Market Screener Candidates</h2>
-            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Global Institutional Equity Screener</title>
+        <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #0f172a; color: #f8fafc; padding: 20px; margin: 0; }
+            .container { max-width: 1000px; margin: auto; background: #1e293b; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+            h2 { color: #38bdf8; margin-top: 0; }
+            table { width: 100%; border-collapse: collapse; text-align: left; margin-top: 20px; }
+            th { background-color: #0f172a; color: #38bdf8; padding: 14px; border-bottom: 2px solid #334155; font-size: 13px; text-transform: uppercase; }
+            tr:hover { background-color: #334155; }
+            /* Modal Design */
+            .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); }
+            .modal-content { background: #1e293b; margin: 6% auto; padding: 30px; border: 1px solid #475569; width: 80%; max-width: 650px; border-radius: 12px; color: #f8fafc; }
+            .close { color: #94a3b8; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+            .close:hover { color: #fff; }
+            .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
+            .metric-box { background: #0f172a; padding: 12px; border-radius: 6px; border: 1px solid #334155; }
+            .metric-label { font-size: 11px; color: #94a3b8; text-transform: uppercase; }
+            .metric-value { font-size: 16px; font-weight: bold; color: #38bdf8; margin-top: 4px; }
+            .reasoning-box { background: #0f172a; padding: 15px; border-radius: 6px; border-left: 4px solid #38bdf8; margin-top: 15px; font-size: 14px; line-height: 1.6; color: #cbd5e1; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h2>📈 Global Multi-Sector Quantitative Screener</h2>
+            <p style="color: #94a3b8; font-size: 14px;">Click any stock row to expand deep-dive technical indicators, valuations, and expert reasoning.</p>
+            <table>
                 <thead>
-                    <tr style="background-color: #f8f9fa;">
-                        <th style="padding: 10px; border-bottom: 2px solid #ddd;">Ticker</th>
-                        <th style="padding: 10px; border-bottom: 2px solid #ddd;">Sector</th>
-                        <th style="padding: 10px; border-bottom: 2px solid #ddd;">Price</th>
-                        <th style="padding: 10px; border-bottom: 2px solid #ddd;">Signal</th>
-                        <th style="padding: 10px; border-bottom: 2px solid #ddd;">Stop Distance</th>
+                    <tr>
+                        <th>Ticker</th>
+                        <th>Sector</th>
+                        <th>Price</th>
+                        <th>Signal</th>
+                        <th>Stop Distance</th>
                     </tr>
                 </thead>
                 <tbody>
-        <tr>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;"><b>AAPL</b></td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;">Technology</td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;">$321.66</td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;"><span style="background-color: #28a745; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">STRONG BUY</span></td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;">1118 pts</td>
+        <tr onclick='openModal({"Ticker": "NVDA", "Sector": "Technology", "Price": 208.76, "SMA_20": 202.78, "SMA_50": 209.38, "Momentum_1M": 6.65, "Signal": "BUY", "ATR_Points": 1102, "PE_Ratio": 31.96937, "Reasoning": "Technical Analysis: Price (\u00a3/$) 208.76 is trading relative to the 20-period SMA (202.78) and 50-period SMA (209.38), classifying the current market phase as a defensive range. 1-month momentum is measured at 6.65%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 1102 points. Fundamental Valuation: Trailing P/E ratio registers at 31.96937. Expert Verdict: Systematic multi-factor rules assign a 'BUY' directive based on dynamic moving-average alignment and volatility thresholds."})' style="cursor: pointer;">
+            <td style="padding: 12px; border-bottom: 1px solid #334155;"><b>NVDA</b></td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">Technology</td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">$208.76</td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;"><span style="background-color: #17a2b8; color: white; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: bold;">BUY</span></td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">1102 pts</td>
         </tr>
         
-        <tr>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;"><b>NVDA</b></td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;">Technology</td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;">$208.76</td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;"><span style="background-color: #17a2b8; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">BUY</span></td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;">1102 pts</td>
+        <tr onclick='openModal({"Ticker": "AAPL", "Sector": "Technology", "Price": 321.66, "SMA_20": 311.49, "SMA_50": 305.47, "Momentum_1M": 16.9, "Signal": "STRONG BUY", "ATR_Points": 1118, "PE_Ratio": 38.8948, "Reasoning": "Technical Analysis: Price (\u00a3/$) 321.66 is trading relative to the 20-period SMA (311.49) and 50-period SMA (305.47), classifying the current market phase as a bullish structural uptrend. 1-month momentum is measured at 16.90%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 1118 points. Fundamental Valuation: Trailing P/E ratio registers at 38.8948. Expert Verdict: Systematic multi-factor rules assign a 'STRONG BUY' directive based on dynamic moving-average alignment and volatility thresholds."})' style="cursor: pointer;">
+            <td style="padding: 12px; border-bottom: 1px solid #334155;"><b>AAPL</b></td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">Technology</td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">$321.66</td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;"><span style="background-color: #28a745; color: white; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: bold;">STRONG BUY</span></td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">1118 pts</td>
         </tr>
         
-        <tr>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;"><b>AMD</b></td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;">Technology</td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;">$539.69</td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;"><span style="background-color: #28a745; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">STRONG BUY</span></td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;">5694 pts</td>
+        <tr onclick='openModal({"Ticker": "AMD", "Sector": "Technology", "Price": 539.69, "SMA_20": 533.59, "SMA_50": 507.01, "Momentum_1M": 1.34, "Signal": "STRONG BUY", "ATR_Points": 5694, "PE_Ratio": 185.46048, "Reasoning": "Technical Analysis: Price (\u00a3/$) 539.69 is trading relative to the 20-period SMA (533.59) and 50-period SMA (507.01), classifying the current market phase as a bullish structural uptrend. 1-month momentum is measured at 1.34%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 5694 points. Fundamental Valuation: Trailing P/E ratio registers at 185.46048. Expert Verdict: Systematic multi-factor rules assign a 'STRONG BUY' directive based on dynamic moving-average alignment and volatility thresholds."})' style="cursor: pointer;">
+            <td style="padding: 12px; border-bottom: 1px solid #334155;"><b>AMD</b></td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">Technology</td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">$539.69</td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;"><span style="background-color: #28a745; color: white; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: bold;">STRONG BUY</span></td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">5694 pts</td>
         </tr>
         
-        <tr>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;"><b>AVGO</b></td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;">Technology</td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;">$392.47</td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;"><span style="background-color: #17a2b8; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">BUY</span></td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;">2398 pts</td>
+        <tr onclick='openModal({"Ticker": "AVGO", "Sector": "Technology", "Price": 392.47, "SMA_20": 381.25, "SMA_50": 399.74, "Momentum_1M": 3.58, "Signal": "BUY", "ATR_Points": 2398, "PE_Ratio": 66.183815, "Reasoning": "Technical Analysis: Price (\u00a3/$) 392.47 is trading relative to the 20-period SMA (381.25) and 50-period SMA (399.74), classifying the current market phase as a defensive range. 1-month momentum is measured at 3.58%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 2398 points. Fundamental Valuation: Trailing P/E ratio registers at 66.183815. Expert Verdict: Systematic multi-factor rules assign a 'BUY' directive based on dynamic moving-average alignment and volatility thresholds."})' style="cursor: pointer;">
+            <td style="padding: 12px; border-bottom: 1px solid #334155;"><b>AVGO</b></td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">Technology</td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">$392.47</td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;"><span style="background-color: #17a2b8; color: white; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: bold;">BUY</span></td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">2398 pts</td>
         </tr>
         
-        <tr>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;"><b>JPM</b></td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;">Financial Services</td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;">$349.9</td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;"><span style="background-color: #28a745; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">STRONG BUY</span></td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;">1144 pts</td>
+        <tr onclick='openModal({"Ticker": "JPM", "Sector": "Financial Services", "Price": 349.9, "SMA_20": 337.54, "SMA_50": 320.38, "Momentum_1M": 4.88, "Signal": "STRONG BUY", "ATR_Points": 1144, "PE_Ratio": 14.99143, "Reasoning": "Technical Analysis: Price (\u00a3/$) 349.90 is trading relative to the 20-period SMA (337.54) and 50-period SMA (320.38), classifying the current market phase as a bullish structural uptrend. 1-month momentum is measured at 4.88%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 1144 points. Fundamental Valuation: Trailing P/E ratio registers at 14.99143. Expert Verdict: Systematic multi-factor rules assign a 'STRONG BUY' directive based on dynamic moving-average alignment and volatility thresholds."})' style="cursor: pointer;">
+            <td style="padding: 12px; border-bottom: 1px solid #334155;"><b>JPM</b></td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">Financial Services</td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">$349.9</td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;"><span style="background-color: #28a745; color: white; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: bold;">STRONG BUY</span></td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">1144 pts</td>
         </tr>
         
-        <tr>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;"><b>BAC</b></td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;">Financial Services</td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;">$61.28</td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;"><span style="background-color: #28a745; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">STRONG BUY</span></td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;">187 pts</td>
+        <tr onclick='openModal({"Ticker": "BAC", "Sector": "Financial Services", "Price": 61.28, "SMA_20": 59.7, "SMA_50": 55.76, "Momentum_1M": 5.31, "Signal": "STRONG BUY", "ATR_Points": 187, "PE_Ratio": 14.152425, "Reasoning": "Technical Analysis: Price (\u00a3/$) 61.28 is trading relative to the 20-period SMA (59.70) and 50-period SMA (55.76), classifying the current market phase as a bullish structural uptrend. 1-month momentum is measured at 5.31%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 187 points. Fundamental Valuation: Trailing P/E ratio registers at 14.152425. Expert Verdict: Systematic multi-factor rules assign a 'STRONG BUY' directive based on dynamic moving-average alignment and volatility thresholds."})' style="cursor: pointer;">
+            <td style="padding: 12px; border-bottom: 1px solid #334155;"><b>BAC</b></td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">Financial Services</td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">$61.28</td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;"><span style="background-color: #28a745; color: white; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: bold;">STRONG BUY</span></td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">187 pts</td>
         </tr>
         
-        <tr>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;"><b>CROX</b></td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;">Consumer Cyclical</td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;">$132.47</td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;"><span style="background-color: #28a745; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">STRONG BUY</span></td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;">701 pts</td>
+        <tr onclick='openModal({"Ticker": "HSBA.L", "Sector": "Financial Services", "Price": 1545.8, "SMA_20": 1475.67, "SMA_50": 1420.82, "Momentum_1M": 8.57, "Signal": "STRONG BUY", "ATR_Points": 5310, "PE_Ratio": 17.175556, "Reasoning": "Technical Analysis: Price (\u00a3/$) 1545.80 is trading relative to the 20-period SMA (1475.67) and 50-period SMA (1420.82), classifying the current market phase as a bullish structural uptrend. 1-month momentum is measured at 8.57%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 5310 points. Fundamental Valuation: Trailing P/E ratio registers at 17.175556. Expert Verdict: Systematic multi-factor rules assign a 'STRONG BUY' directive based on dynamic moving-average alignment and volatility thresholds."})' style="cursor: pointer;">
+            <td style="padding: 12px; border-bottom: 1px solid #334155;"><b>HSBA.L</b></td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">Financial Services</td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">$1545.8</td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;"><span style="background-color: #28a745; color: white; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: bold;">STRONG BUY</span></td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">5310 pts</td>
         </tr>
         
-        <tr>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;"><b>GLEN.L</b></td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;">Basic Materials</td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;">$537.51</td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;"><span style="background-color: #17a2b8; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">BUY</span></td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;">3595 pts</td>
+        <tr onclick='openModal({"Ticker": "LLOY.L", "Sector": "Financial Services", "Price": 113.5, "SMA_20": 112.48, "SMA_50": 106.05, "Momentum_1M": 4.32, "Signal": "STRONG BUY", "ATR_Points": 369, "PE_Ratio": 14.1875, "Reasoning": "Technical Analysis: Price (\u00a3/$) 113.50 is trading relative to the 20-period SMA (112.48) and 50-period SMA (106.05), classifying the current market phase as a bullish structural uptrend. 1-month momentum is measured at 4.32%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 369 points. Fundamental Valuation: Trailing P/E ratio registers at 14.1875. Expert Verdict: Systematic multi-factor rules assign a 'STRONG BUY' directive based on dynamic moving-average alignment and volatility thresholds."})' style="cursor: pointer;">
+            <td style="padding: 12px; border-bottom: 1px solid #334155;"><b>LLOY.L</b></td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">Financial Services</td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">$113.5</td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;"><span style="background-color: #28a745; color: white; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: bold;">STRONG BUY</span></td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">369 pts</td>
         </tr>
         
-        <tr>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;"><b>SHEL.L</b></td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;">Energy</td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;">$3310.0</td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;"><span style="background-color: #17a2b8; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">BUY</span></td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;">19768 pts</td>
+        <tr onclick='openModal({"Ticker": "LGEN.L", "Sector": "Financial Services", "Price": 299.3, "SMA_20": 292.85, "SMA_50": 282.16, "Momentum_1M": 5.28, "Signal": "STRONG BUY", "ATR_Points": 907, "PE_Ratio": 37.4125, "Reasoning": "Technical Analysis: Price (\u00a3/$) 299.30 is trading relative to the 20-period SMA (292.85) and 50-period SMA (282.16), classifying the current market phase as a bullish structural uptrend. 1-month momentum is measured at 5.28%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 907 points. Fundamental Valuation: Trailing P/E ratio registers at 37.4125. Expert Verdict: Systematic multi-factor rules assign a 'STRONG BUY' directive based on dynamic moving-average alignment and volatility thresholds."})' style="cursor: pointer;">
+            <td style="padding: 12px; border-bottom: 1px solid #334155;"><b>LGEN.L</b></td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">Financial Services</td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">$299.3</td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;"><span style="background-color: #28a745; color: white; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: bold;">STRONG BUY</span></td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">907 pts</td>
         </tr>
         
-        <tr>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;"><b>BP.L</b></td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;">Energy</td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;">$546.8</td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;"><span style="background-color: #17a2b8; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">BUY</span></td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;">2028 pts</td>
+        <tr onclick='openModal({"Ticker": "BA.L", "Sector": "Industrials", "Price": 1960.82, "SMA_20": 1898.48, "SMA_50": 1900.44, "Momentum_1M": 8.45, "Signal": "BUY", "ATR_Points": 14473, "PE_Ratio": 28.835588, "Reasoning": "Technical Analysis: Price (\u00a3/$) 1960.82 is trading relative to the 20-period SMA (1898.48) and 50-period SMA (1900.44), classifying the current market phase as a bullish structural uptrend. 1-month momentum is measured at 8.45%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 14473 points. Fundamental Valuation: Trailing P/E ratio registers at 28.835588. Expert Verdict: Systematic multi-factor rules assign a 'BUY' directive based on dynamic moving-average alignment and volatility thresholds."})' style="cursor: pointer;">
+            <td style="padding: 12px; border-bottom: 1px solid #334155;"><b>BA.L</b></td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">Industrials</td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">$1960.82</td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;"><span style="background-color: #17a2b8; color: white; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: bold;">BUY</span></td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">14473 pts</td>
         </tr>
         
-        <tr>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;"><b>HSBA.L</b></td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;">Financial Services</td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;">$1544.8</td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;"><span style="background-color: #28a745; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">STRONG BUY</span></td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;">5310 pts</td>
+        <tr onclick='openModal({"Ticker": "OXIG.L", "Sector": "Industrials", "Price": 3046.0, "SMA_20": 2944.42, "SMA_50": 2986.21, "Momentum_1M": 3.4, "Signal": "BUY", "ATR_Points": 18173, "PE_Ratio": 39.55844, "Reasoning": "Technical Analysis: Price (\u00a3/$) 3046.00 is trading relative to the 20-period SMA (2944.42) and 50-period SMA (2986.21), classifying the current market phase as a bullish structural uptrend. 1-month momentum is measured at 3.40%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 18173 points. Fundamental Valuation: Trailing P/E ratio registers at 39.55844. Expert Verdict: Systematic multi-factor rules assign a 'BUY' directive based on dynamic moving-average alignment and volatility thresholds."})' style="cursor: pointer;">
+            <td style="padding: 12px; border-bottom: 1px solid #334155;"><b>OXIG.L</b></td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">Industrials</td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">$3046.0</td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;"><span style="background-color: #17a2b8; color: white; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: bold;">BUY</span></td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">18173 pts</td>
+        </tr>
+        
+        <tr onclick='openModal({"Ticker": "SHEL.L", "Sector": "Energy", "Price": 3310.59, "SMA_20": 3089.05, "SMA_50": 3120.77, "Momentum_1M": 14.14, "Signal": "BUY", "ATR_Points": 19768, "PE_Ratio": 13.794137, "Reasoning": "Technical Analysis: Price (\u00a3/$) 3310.59 is trading relative to the 20-period SMA (3089.05) and 50-period SMA (3120.77), classifying the current market phase as a bullish structural uptrend. 1-month momentum is measured at 14.14%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 19768 points. Fundamental Valuation: Trailing P/E ratio registers at 13.794137. Expert Verdict: Systematic multi-factor rules assign a 'BUY' directive based on dynamic moving-average alignment and volatility thresholds."})' style="cursor: pointer;">
+            <td style="padding: 12px; border-bottom: 1px solid #334155;"><b>SHEL.L</b></td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">Energy</td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">$3310.59</td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;"><span style="background-color: #17a2b8; color: white; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: bold;">BUY</span></td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">19768 pts</td>
+        </tr>
+        
+        <tr onclick='openModal({"Ticker": "BP.L", "Sector": "Energy", "Price": 547.2, "SMA_20": 498.76, "SMA_50": 515.73, "Momentum_1M": 15.76, "Signal": "BUY", "ATR_Points": 2028, "PE_Ratio": 36.48, "Reasoning": "Technical Analysis: Price (\u00a3/$) 547.20 is trading relative to the 20-period SMA (498.76) and 50-period SMA (515.73), classifying the current market phase as a bullish structural uptrend. 1-month momentum is measured at 15.76%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 2028 points. Fundamental Valuation: Trailing P/E ratio registers at 36.48. Expert Verdict: Systematic multi-factor rules assign a 'BUY' directive based on dynamic moving-average alignment and volatility thresholds."})' style="cursor: pointer;">
+            <td style="padding: 12px; border-bottom: 1px solid #334155;"><b>BP.L</b></td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">Energy</td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">$547.2</td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;"><span style="background-color: #17a2b8; color: white; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: bold;">BUY</span></td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">2028 pts</td>
+        </tr>
+        
+        <tr onclick='openModal({"Ticker": "GLEN.L", "Sector": "Basic Materials", "Price": 538.1, "SMA_20": 517.39, "SMA_50": 549.94, "Momentum_1M": 5.3, "Signal": "BUY", "ATR_Points": 3599, "PE_Ratio": 269.05, "Reasoning": "Technical Analysis: Price (\u00a3/$) 538.10 is trading relative to the 20-period SMA (517.39) and 50-period SMA (549.94), classifying the current market phase as a defensive range. 1-month momentum is measured at 5.30%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 3599 points. Fundamental Valuation: Trailing P/E ratio registers at 269.05. Expert Verdict: Systematic multi-factor rules assign a 'BUY' directive based on dynamic moving-average alignment and volatility thresholds."})' style="cursor: pointer;">
+            <td style="padding: 12px; border-bottom: 1px solid #334155;"><b>GLEN.L</b></td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">Basic Materials</td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">$538.1</td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;"><span style="background-color: #17a2b8; color: white; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: bold;">BUY</span></td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">3599 pts</td>
+        </tr>
+        
+        <tr onclick='openModal({"Ticker": "TGA.JO", "Sector": "Basic Materials", "Price": 10730.0, "SMA_20": 9739.8, "SMA_50": 11835.38, "Momentum_1M": 7.84, "Signal": "BUY", "ATR_Points": 81021, "PE_Ratio": "N/A", "Reasoning": "Technical Analysis: Price (\u00a3/$) 10730.00 is trading relative to the 20-period SMA (9739.80) and 50-period SMA (11835.38), classifying the current market phase as a defensive range. 1-month momentum is measured at 7.84%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 81021 points. Fundamental Valuation: Trailing P/E ratio registers at N/A. Expert Verdict: Systematic multi-factor rules assign a 'BUY' directive based on dynamic moving-average alignment and volatility thresholds."})' style="cursor: pointer;">
+            <td style="padding: 12px; border-bottom: 1px solid #334155;"><b>TGA.JO</b></td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">Basic Materials</td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">$10730.0</td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;"><span style="background-color: #17a2b8; color: white; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: bold;">BUY</span></td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">81021 pts</td>
+        </tr>
+        
+        <tr onclick='openModal({"Ticker": "ITH.L", "Sector": "Energy", "Price": 256.0, "SMA_20": 231.06, "SMA_50": 236.83, "Momentum_1M": 19.29, "Signal": "BUY", "ATR_Points": 1469, "PE_Ratio": "N/A", "Reasoning": "Technical Analysis: Price (\u00a3/$) 256.00 is trading relative to the 20-period SMA (231.06) and 50-period SMA (236.83), classifying the current market phase as a bullish structural uptrend. 1-month momentum is measured at 19.29%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 1469 points. Fundamental Valuation: Trailing P/E ratio registers at N/A. Expert Verdict: Systematic multi-factor rules assign a 'BUY' directive based on dynamic moving-average alignment and volatility thresholds."})' style="cursor: pointer;">
+            <td style="padding: 12px; border-bottom: 1px solid #334155;"><b>ITH.L</b></td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">Energy</td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">$256.0</td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;"><span style="background-color: #17a2b8; color: white; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: bold;">BUY</span></td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">1469 pts</td>
+        </tr>
+        
+        <tr onclick='openModal({"Ticker": "DGE.L", "Sector": "Consumer Defensive", "Price": 1542.07, "SMA_20": 1540.55, "SMA_50": 1536.88, "Momentum_1M": -1.56, "Signal": "STRONG BUY", "ATR_Points": 13065, "PE_Ratio": 19.037865, "Reasoning": "Technical Analysis: Price (\u00a3/$) 1542.07 is trading relative to the 20-period SMA (1540.55) and 50-period SMA (1536.88), classifying the current market phase as a bullish structural uptrend. 1-month momentum is measured at -1.56%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 13065 points. Fundamental Valuation: Trailing P/E ratio registers at 19.037865. Expert Verdict: Systematic multi-factor rules assign a 'STRONG BUY' directive based on dynamic moving-average alignment and volatility thresholds."})' style="cursor: pointer;">
+            <td style="padding: 12px; border-bottom: 1px solid #334155;"><b>DGE.L</b></td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">Consumer Defensive</td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">$1542.07</td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;"><span style="background-color: #28a745; color: white; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: bold;">STRONG BUY</span></td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">13065 pts</td>
+        </tr>
+        
+        <tr onclick='openModal({"Ticker": "CROX", "Sector": "Consumer Cyclical", "Price": 132.47, "SMA_20": 129.26, "SMA_50": 120.99, "Momentum_1M": 11.43, "Signal": "STRONG BUY", "ATR_Points": 701, "PE_Ratio": "N/A", "Reasoning": "Technical Analysis: Price (\u00a3/$) 132.47 is trading relative to the 20-period SMA (129.26) and 50-period SMA (120.99), classifying the current market phase as a bullish structural uptrend. 1-month momentum is measured at 11.43%. Risk Management: The 14-period Average True Range (ATR) computes an institutional stop distance of 701 points. Fundamental Valuation: Trailing P/E ratio registers at N/A. Expert Verdict: Systematic multi-factor rules assign a 'STRONG BUY' directive based on dynamic moving-average alignment and volatility thresholds."})' style="cursor: pointer;">
+            <td style="padding: 12px; border-bottom: 1px solid #334155;"><b>CROX</b></td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">Consumer Cyclical</td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">$132.47</td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;"><span style="background-color: #28a745; color: white; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: bold;">STRONG BUY</span></td>
+            <td style="padding: 12px; border-bottom: 1px solid #334155;">701 pts</td>
         </tr>
         </tbody>
             </table>
         </div>
+
+        <!-- Expansion Modal -->
+        <div id="stockModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <h3 id="modalTitle" style="color: #38bdf8; margin-top:0;">Stock Analysis</h3>
+                <div class="modal-grid">
+                    <div class="metric-box">
+                        <div class="metric-label">Current Price</div>
+                        <div class="metric-value" id="mPrice"></div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Signal Directive</div>
+                        <div class="metric-value" id="mSignal"></div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">20-Day SMA</div>
+                        <div class="metric-value" id="mSma20"></div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">50-Day SMA</div>
+                        <div class="metric-value" id="mSma50"></div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">1-Month Momentum</div>
+                        <div class="metric-value" id="mMomentum"></div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Trailing P/E Ratio</div>
+                        <div class="metric-value" id="mPe"></div>
+                    </div>
+                </div>
+                <div class="metric-label">Expert Quantitative Rationale & Parameter Alignment</div>
+                <div class="reasoning-box" id="mReasoning"></div>
+            </div>
+        </div>
+
+        <script>
+            function openModal(data) {
+                document.getElementById('modalTitleinnerText').innerText = data.Ticker + ' — Sector Deep Dive';
+                document.getElementById('mPrice').innerText = '$' + data.Price;
+                document.getElementById('mSignal').innerText = data.Signal;
+                document.getElementById('mSma20').innerText = '$' + data.SMA_20;
+                document.getElementById('mSma50').innerText = '$' + data.SMA_50;
+                document.getElementById('mMomentum').innerText = data.Momentum_1M + '%';
+                document.getElementById('mPe').innerText = data.PE_Ratio;
+                document.getElementById('mReasoning').innerText = data.Reasoning;
+                document.getElementById('stockModal').style.display = 'block';
+            }
+
+            function closeModal() {
+                document.getElementById('stockModal').style.display = 'none';
+            }
+
+            window.onclick = function(event) {
+                var modal = document.getElementById('stockModal');
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                }
+            }
+        </script>
     </body>
     </html>
     
