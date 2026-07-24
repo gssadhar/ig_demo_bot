@@ -40,29 +40,35 @@ def connect_ig():
 
 def resolve_ig_epic(ig_service, ticker):
     """
-    Robust Universal Epic Resolution: Dynamically queries the IG market search API 
-    for any UK or US equity and filters for valid tradable share epics.
+    Spread Bet Epic Resolution: Specifically targets Spread Betting epics 
+    compatible with your Demo-SpreadBet account profile.
     """
+    # Direct Spread Bet Epic mappings for your portfolio items
+    spread_bet_epics = {
+        "LLOY.L": "IX.D.LLOY.CASH.IP",
+        "LGEN.L": "IX.D.LGEN.CASH.IP",
+        "SHEL.L": "IX.D.SHEL.CASH.IP",
+        "BP.L": "IX.D.BP.CASH.IP",
+        "GLEN.L": "IX.D.GLEN.CASH.IP",
+        "AAPL": "UA.D.AAPL.CASH.IP",
+        "NVDA": "UA.D.NVDA.CASH.IP"
+    }
+    if ticker in spread_bet_epics:
+        return spread_bet_epics[ticker]
+
     clean_symbol = ticker.replace(".L", "").strip().upper()
-    search_queries = [clean_symbol, ticker]
-    
-    for query in search_queries:
-        try:
-            search_results = ig_service.search_markets(query)
-            if hasattr(search_results, "iterrows") and not search_results.empty:
-                for _, row in search_results.iterrows():
-                    epic = str(row.get("epic", ""))
-                    itype = str(row.get("instrumentType", ""))
-                    # Look for shares/equities matching active cash or daily CFDs
-                    if any(t in itype for t in ["SHARES", "EQUITIES", "SHARE"]) and any(tag in epic for tag in ["CASH", "DAILY", "DFB", ".IP"]):
-                        return epic
-                # Fallback to top result if no strict tag match was found
-                top_epic = search_results.iloc[0].get("epic")
-                if top_epic:
-                    return top_epic
-        except Exception as e:
-            print(f"⚠️ Search attempt failed for query '{query}': {e}")
-            
+    try:
+        search_results = ig_service.search_markets(clean_symbol)
+        if hasattr(search_results, "iterrows") and not search_results.empty:
+            for _, row in search_results.iterrows():
+                epic = str(row.get("epic", ""))
+                # Look specifically for spread betting keys (usually start with IX.D or contain .B / .IP without CFD tags)
+                if "IX.D" in epic or "SB" in epic or epic.startswith("I."):
+                    return epic
+            return search_results.iloc[0].get("epic")
+    except Exception as e:
+        print(f"⚠️ Spread bet epic search error for {ticker}: {e}")
+        
     return None
 
 
@@ -118,7 +124,7 @@ def execute_trades():
 
     sector_counts = {}
 
-    print("\n=== EXECUTING UNIVERSAL QUANTITATIVE PIPELINE (UK & USA) ===")
+    print("\n=== EXECUTING SPREAD BETTING QUANTITATIVE PIPELINE ===")
     for c in candidates:
         ticker = c["Ticker"]
         sector = c["Sector"]
@@ -134,7 +140,7 @@ def execute_trades():
 
         epic = resolve_ig_epic(ig_service, ticker)
         if not epic:
-            print(f"❌ Skipped {ticker}: Could not resolve IG Epic for UK/USA channels.")
+            print(f"❌ Skipped {ticker}: Could not resolve Spread Bet Epic.")
             continue
 
         regime_data = get_volatility_regime_adjustments(ig_service, epic)
@@ -163,10 +169,10 @@ def execute_trades():
 
         calculated_size = round(MAX_RISK_PER_TRADE_GBP / stop_distance, 2)
         is_uk = ticker.endswith(".L") or "." not in ticker
-        min_size = 0.1 if is_uk else 0.5
+        min_size = 0.5 if is_uk else 1.0  # Standard minimum point stakes for Spread Betting accounts
         total_stake = max(calculated_size, min_size)
 
-        print(f"🚀 Executing Universal Position on {ticker} [{epic}] | Regime: {regime} | Stake: {total_stake}")
+        print(f"🚀 Executing Spread Bet Position on {ticker} [{epic}] | Regime: {regime} | Stake: £{total_stake}/point")
         try:
             response = ig_service.create_open_position(
                 currency_code="GBP", 
@@ -187,7 +193,7 @@ def execute_trades():
                 trailing_stop_increment=None
             )
             deal_ref = response.get("dealReference", "N/A")
-            print(f"✅ Position Successfully Established! | Ref: {deal_ref}")
+            print(f"✅ Spread Bet Successfully Placed! | Ref: {deal_ref}")
             sector_counts[sector] = sector_counts.get(sector, 0) + 1
             
             log_trade({
@@ -196,12 +202,12 @@ def execute_trades():
                 "epic": epic, 
                 "sector": sector,
                 "regime": regime, 
-                "strategy": "Universal Multi-Factor Momentum", 
+                "strategy": "Spread Bet Multi-Factor Momentum", 
                 "stake": total_stake, 
                 "deal_reference": deal_ref
             })
         except Exception as e:
-            print(f"❌ Execution failed for {ticker}: {e}")
+            print(f"❌ Spread Bet execution failed for {ticker}: {e}")
 
     print("\n=== EXECUTION COMPLETE ===")
 
