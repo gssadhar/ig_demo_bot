@@ -31,23 +31,23 @@
             "<b>Year 4:</b> Projected Revenue $834.44B (Est. Growth Trend: +16.6%)",
             "<b>Year 5:</b> Projected Revenue $972.96B (Est. Growth Trend: +16.6%)"
         ],
-        "Reasoning": "<b>Global Institutional Thesis:</b> Price action confirms a Primary Bull Market (Above 50 SMA & 200 SMA), supported by a 1-month momentum print of 17.30%. Trading relative to 20-day SMA of $314.38 and 50-day SMA of $306.23, triggering a <b>STRONG BUY</b> directive. <br><br><b>Fundamental Balance Sheet:</b> Market capitalization registers at $4.89T with revenues at $451.44B and net income of $122.58B. Total debt stands at $84.71B against liquid cash reserves of $68.51B. <br><br><b>Valuation & Risk:</b> Trailing P/E is positioned at 40.25 (Overvalued / Growth Premium), backed by an institutional ATR stop-loss buffer of 1177 points."
+        "Reasoning": "<b>Global Institutional Thesis & Market Structure:</b> Price action confirms a Primary Bull Market (Above 50 SMA & 200 SMA), supported by a 1-month momentum print of 17.30%. The asset trades relative to a 20-day SMA of $314.38 and 50-day SMA of $306.23, triggering a <b>STRONG BUY</b> directive. <br><br><b>Fundamental Balance Sheet & Solvency:</b> Operating with a market capitalization of $4.89T, trailing revenues register at $451.44B with net income of $122.58B. Capital structure reveals total debt of $84.71B against liquid cash reserves of $68.51B, confirming robust liquidity coverage. <br><br><b>Valuation & Risk Architecture:</b> Trailing P/E is positioned at 40.25 (Overvalued / Growth Premium), backed by an institutional ATR stop-loss buffer of 1177 points. <b>Verdict:</b> High Conviction Institutional Accumulation supported by solid cash flow generation and alignment across multi-factor technical models."
     },
     {
         "Ticker": "NVDA",
         "Sector": "Technology",
-        "Price": 210.39,
+        "Price": 210.34,
         "SMA_20": 203.51,
         "SMA_50": 209.18,
-        "Momentum_1M": 9.28,
+        "Momentum_1M": 9.25,
         "Signal": "BUY",
         "ATR_Points": 1131,
-        "MarketCap": "$5.10T",
+        "MarketCap": "$5.09T",
         "Revenue": "$253.49B",
         "NetIncome": "$159.61B",
         "TotalDebt": "$12.81B",
         "TotalCash": "$53.17B",
-        "PE_Ratio": "32.22",
+        "PE_Ratio": "32.21",
         "PE_Eval": "Overvalued / Growth Premium",
         "ROE": "114.29%",
         "ROE_Eval": "Strong Capital Efficiency",
@@ -65,23 +65,23 @@
             "<b>Year 4:</b> Projected Revenue $2.98T (Est. Growth Trend: +85.2%)",
             "<b>Year 5:</b> Projected Revenue $5.52T (Est. Growth Trend: +85.2%)"
         ],
-        "Reasoning": "<b>Global Institutional Thesis:</b> Price action confirms a Primary Bull Market (Above 50 SMA & 200 SMA), supported by a 1-month momentum print of 9.28%. Trading relative to 20-day SMA of $203.51 and 50-day SMA of $209.18, triggering a <b>BUY</b> directive. <br><br><b>Fundamental Balance Sheet:</b> Market capitalization registers at $5.10T with revenues at $253.49B and net income of $159.61B. Total debt stands at $12.81B against liquid cash reserves of $53.17B. <br><br><b>Valuation & Risk:</b> Trailing P/E is positioned at 32.22 (Overvalued / Growth Premium), backed by an institutional ATR stop-loss buffer of 1131 points."
+        "Reasoning": "<b>Global Institutional Thesis & Market Structure:</b> Price action confirms a Primary Bull Market (Above 50 SMA & 200 SMA), supported by a 1-month momentum print of 9.25%. The asset trades relative to a 20-day SMA of $203.51 and 50-day SMA of $209.18, triggering a <b>BUY</b> directive. <br><br><b>Fundamental Balance Sheet & Solvency:</b> Operating with a market capitalization of $5.09T, trailing revenues register at $253.49B with net income of $159.61B. Capital structure reveals total debt of $12.81B against liquid cash reserves of $53.17B, confirming robust liquidity coverage. <br><br><b>Valuation & Risk Architecture:</b> Trailing P/E is positioned at 32.21 (Overvalued / Growth Premium), backed by an institutional ATR stop-loss buffer of 1131 points. <b>Verdict:</b> Moderate Tactical Upside supported by solid cash flow generation and alignment across multi-factor technical models."
     },
     {
         "Ticker": "AMD",
         "Sector": "Technology",
-        "Price": 536.88,
-        "SMA_20": 533.81,
-        "SMA_50": 508.78,
-        "Momentum_1M": 2.93,
+        "Price": 535.32,
+        "SMA_20": 533.73,
+        "SMA_50": 508.75,
+        "Momentum_1M": 2.63,
         "Signal": "STRONG BUY",
         "ATR_Points": 5439,
-        "MarketCap": "$875.21B",
+        "MarketCap": "$872.89B",
         "Revenue": "$37.45B",
         "NetIncome": "$4.93B",
         "TotalDebt": "$3.87B",
         "TotalCash": "$12.35B",
-        "PE_Ratio": "177.73",
+        "PE_Ratio": "177.26",
         "PE_Eval": "Overvalued / Growth Premium",
         "ROE": "8.06%",
         "ROE_Eval": "Moderate Return",
@@ -99,7 +99,7 @@
             "<b>Year 4:</b> Projected Revenue $135.05B (Est. Growth Trend: +37.8%)",
             "<b>Year 5:</b> Projected Revenue $186.10B (Est. Growth Trend: +37.8%)"
         ],
-        "Reasoning": "<b>Global Institutional Thesis:</b> Price action confirms a Primary Bull Market (Above 50 SMA & 200 SMA), supported by a 1-month momentum print of 2.93%. Trading relative to 20-day SMA of $533.81 and 50-day SMA of $508.78, triggering a <b>STRONG BUY</b> directive. <br><br><b>Fundamental Balance Sheet:</b> Market capitalization registers at $875.21B with revenues at $37.45B and net income of $4.93B. Total debt stands at $3.87B against liquid cash reserves of $12.35B. <br><br><b>Valuation & Risk:</b> Trailing P/E is positioned at 177.73 (Overvalued / Growth Premium), backed by an institutional ATR stop-loss buffer of 5439 points."
+        "Reasoning": "<b>Global Institutional Thesis & Market Structure:</b> Price action confirms a Primary Bull Market (Above 50 SMA & 200 SMA), supported by a 1-month momentum print of 2.63%. The asset trades relative to a 20-day SMA of $533.73 and 50-day SMA of $508.75, triggering a <b>STRONG BUY</b> directive. <br><br><b>Fundamental Balance Sheet & Solvency:</b> Operating with a market capitalization of $872.89B, trailing revenues register at $37.45B with net income of $4.93B. Capital structure reveals total debt of $3.87B against liquid cash reserves of $12.35B, confirming robust liquidity coverage. <br><br><b>Valuation & Risk Architecture:</b> Trailing P/E is positioned at 177.26 (Overvalued / Growth Premium), backed by an institutional ATR stop-loss buffer of 5439 points. <b>Verdict:</b> High Conviction Institutional Accumulation supported by solid cash flow generation and alignment across multi-factor technical models."
     },
     {
         "Ticker": "LLOY.L",
@@ -133,7 +133,7 @@
             "<b>Year 4:</b> Projected Revenue $29.57B (Est. Growth Trend: +11.5%)",
             "<b>Year 5:</b> Projected Revenue $32.97B (Est. Growth Trend: +11.5%)"
         ],
-        "Reasoning": "<b>Global Institutional Thesis:</b> Price action confirms a Primary Bull Market (Above 50 SMA & 200 SMA), supported by a 1-month momentum print of 4.32%. Trading relative to 20-day SMA of $112.48 and 50-day SMA of $106.05, triggering a <b>STRONG BUY</b> directive. <br><br><b>Fundamental Balance Sheet:</b> Market capitalization registers at $65.92B with revenues at $19.13B and net income of $4.60B. Total debt stands at $161.33B against liquid cash reserves of $323.06B. <br><br><b>Valuation & Risk:</b> Trailing P/E is positioned at 14.19 (Undervalued / Value Play), backed by an institutional ATR stop-loss buffer of 369 points."
+        "Reasoning": "<b>Global Institutional Thesis & Market Structure:</b> Price action confirms a Primary Bull Market (Above 50 SMA & 200 SMA), supported by a 1-month momentum print of 4.32%. The asset trades relative to a 20-day SMA of $112.48 and 50-day SMA of $106.05, triggering a <b>STRONG BUY</b> directive. <br><br><b>Fundamental Balance Sheet & Solvency:</b> Operating with a market capitalization of $65.92B, trailing revenues register at $19.13B with net income of $4.60B. Capital structure reveals total debt of $161.33B against liquid cash reserves of $323.06B, confirming robust liquidity coverage. <br><br><b>Valuation & Risk Architecture:</b> Trailing P/E is positioned at 14.19 (Undervalued / Value Play), backed by an institutional ATR stop-loss buffer of 369 points. <b>Verdict:</b> High Conviction Institutional Accumulation supported by solid cash flow generation and alignment across multi-factor technical models."
     },
     {
         "Ticker": "LGEN.L",
@@ -167,7 +167,7 @@
             "<b>Year 4:</b> Projected Revenue $18.50B (Est. Growth Trend: +13.9%)",
             "<b>Year 5:</b> Projected Revenue $21.08B (Est. Growth Trend: +13.9%)"
         ],
-        "Reasoning": "<b>Global Institutional Thesis:</b> Price action confirms a Primary Bull Market (Above 50 SMA & 200 SMA), supported by a 1-month momentum print of 5.38%. Trading relative to 20-day SMA of $292.86 and 50-day SMA of $282.17, triggering a <b>STRONG BUY</b> directive. <br><br><b>Fundamental Balance Sheet:</b> Market capitalization registers at $16.37B with revenues at $10.99B and net income of $475.00M. Total debt stands at $57.28B against liquid cash reserves of $528.84B. <br><br><b>Valuation & Risk:</b> Trailing P/E is positioned at 37.45 (Overvalued / Growth Premium), backed by an institutional ATR stop-loss buffer of 907 points."
+        "Reasoning": "<b>Global Institutional Thesis & Market Structure:</b> Price action confirms a Primary Bull Market (Above 50 SMA & 200 SMA), supported by a 1-month momentum print of 5.38%. The asset trades relative to a 20-day SMA of $292.86 and 50-day SMA of $282.17, triggering a <b>STRONG BUY</b> directive. <br><br><b>Fundamental Balance Sheet & Solvency:</b> Operating with a market capitalization of $16.37B, trailing revenues register at $10.99B with net income of $475.00M. Capital structure reveals total debt of $57.28B against liquid cash reserves of $528.84B, confirming robust liquidity coverage. <br><br><b>Valuation & Risk Architecture:</b> Trailing P/E is positioned at 37.45 (Overvalued / Growth Premium), backed by an institutional ATR stop-loss buffer of 907 points. <b>Verdict:</b> High Conviction Institutional Accumulation supported by solid cash flow generation and alignment across multi-factor technical models."
     },
     {
         "Ticker": "SHEL.L",
@@ -201,7 +201,7 @@
             "<b>Year 4:</b> Projected Revenue $312.75B (Est. Growth Trend: +0.7%)",
             "<b>Year 5:</b> Projected Revenue $325.26B (Est. Growth Trend: +0.7%)"
         ],
-        "Reasoning": "<b>Global Institutional Thesis:</b> Price action confirms a Primary Bull Market (Above 50 SMA & 200 SMA), supported by a 1-month momentum print of 13.96%. Trading relative to 20-day SMA of $3088.80 and 50-day SMA of $3120.67, triggering a <b>BUY</b> directive. <br><br><b>Fundamental Balance Sheet:</b> Market capitalization registers at $182.92B with revenues at $267.34B and net income of $18.75B. Total debt stands at $75.65B against liquid cash reserves of $23.12B. <br><br><b>Valuation & Risk:</b> Trailing P/E is positioned at 13.77 (Undervalued / Value Play), backed by an institutional ATR stop-loss buffer of 19918 points."
+        "Reasoning": "<b>Global Institutional Thesis & Market Structure:</b> Price action confirms a Primary Bull Market (Above 50 SMA & 200 SMA), supported by a 1-month momentum print of 13.96%. The asset trades relative to a 20-day SMA of $3088.80 and 50-day SMA of $3120.67, triggering a <b>BUY</b> directive. <br><br><b>Fundamental Balance Sheet & Solvency:</b> Operating with a market capitalization of $182.92B, trailing revenues register at $267.34B with net income of $18.75B. Capital structure reveals total debt of $75.65B against liquid cash reserves of $23.12B, confirming robust liquidity coverage. <br><br><b>Valuation & Risk Architecture:</b> Trailing P/E is positioned at 13.77 (Undervalued / Value Play), backed by an institutional ATR stop-loss buffer of 19918 points. <b>Verdict:</b> Moderate Tactical Upside supported by solid cash flow generation and alignment across multi-factor technical models."
     },
     {
         "Ticker": "BP.L",
@@ -235,7 +235,7 @@
             "<b>Year 4:</b> Projected Revenue $299.38B (Est. Growth Trend: +11.6%)",
             "<b>Year 5:</b> Projected Revenue $334.11B (Est. Growth Trend: +11.6%)"
         ],
-        "Reasoning": "<b>Global Institutional Thesis:</b> Price action confirms a Primary Bull Market (Above 50 SMA & 200 SMA), supported by a 1-month momentum print of 16.01%. Trading relative to 20-day SMA of $498.82 and 50-day SMA of $515.76, triggering a <b>BUY</b> directive. <br><br><b>Fundamental Balance Sheet:</b> Market capitalization registers at $84.73B with revenues at $193.00B and net income of $3.21B. Total debt stands at $74.18B against liquid cash reserves of $35.76B. <br><br><b>Valuation & Risk:</b> Trailing P/E is positioned at 36.56 (Overvalued / Growth Premium), backed by an institutional ATR stop-loss buffer of 2059 points."
+        "Reasoning": "<b>Global Institutional Thesis & Market Structure:</b> Price action confirms a Primary Bull Market (Above 50 SMA & 200 SMA), supported by a 1-month momentum print of 16.01%. The asset trades relative to a 20-day SMA of $498.82 and 50-day SMA of $515.76, triggering a <b>BUY</b> directive. <br><br><b>Fundamental Balance Sheet & Solvency:</b> Operating with a market capitalization of $84.73B, trailing revenues register at $193.00B with net income of $3.21B. Capital structure reveals total debt of $74.18B against liquid cash reserves of $35.76B, confirming robust liquidity coverage. <br><br><b>Valuation & Risk Architecture:</b> Trailing P/E is positioned at 36.56 (Overvalued / Growth Premium), backed by an institutional ATR stop-loss buffer of 2059 points. <b>Verdict:</b> Moderate Tactical Upside supported by solid cash flow generation and alignment across multi-factor technical models."
     },
     {
         "Ticker": "GLEN.L",
@@ -269,7 +269,7 @@
             "<b>Year 4:</b> Projected Revenue $422.49B (Est. Growth Trend: +14.3%)",
             "<b>Year 5:</b> Projected Revenue $482.91B (Est. Growth Trend: +14.3%)"
         ],
-        "Reasoning": "<b>Global Institutional Thesis:</b> Price action confirms a Primary Bull Market (Above 50 SMA & 200 SMA), supported by a 1-month momentum print of 5.15%. Trading relative to 20-day SMA of $517.35 and 50-day SMA of $549.92, triggering a <b>BUY</b> directive. <br><br><b>Fundamental Balance Sheet:</b> Market capitalization registers at $62.96B with revenues at $247.53B and net income of $363.00M. Total debt stands at $42.13B against liquid cash reserves of $2.99B. <br><br><b>Valuation & Risk:</b> Trailing P/E is positioned at 268.65 (Overvalued / Growth Premium), backed by an institutional ATR stop-loss buffer of 3626 points."
+        "Reasoning": "<b>Global Institutional Thesis & Market Structure:</b> Price action confirms a Primary Bull Market (Above 50 SMA & 200 SMA), supported by a 1-month momentum print of 5.15%. The asset trades relative to a 20-day SMA of $517.35 and 50-day SMA of $549.92, triggering a <b>BUY</b> directive. <br><br><b>Fundamental Balance Sheet & Solvency:</b> Operating with a market capitalization of $62.96B, trailing revenues register at $247.53B with net income of $363.00M. Capital structure reveals total debt of $42.13B against liquid cash reserves of $2.99B, confirming robust liquidity coverage. <br><br><b>Valuation & Risk Architecture:</b> Trailing P/E is positioned at 268.65 (Overvalued / Growth Premium), backed by an institutional ATR stop-loss buffer of 3626 points. <b>Verdict:</b> Moderate Tactical Upside supported by solid cash flow generation and alignment across multi-factor technical models."
     },
     {
         "Ticker": "DGE.L",
@@ -303,7 +303,7 @@
             "<b>Year 4:</b> Projected Revenue $23.17B (Est. Growth Trend: +-4.0%)",
             "<b>Year 5:</b> Projected Revenue $24.09B (Est. Growth Trend: +-4.0%)"
         ],
-        "Reasoning": "<b>Global Institutional Thesis:</b> Price action confirms a Tactical Recovery Range, supported by a 1-month momentum print of -0.26%. Trading relative to 20-day SMA of $1541.58 and 50-day SMA of $1537.29, triggering a <b>STRONG BUY</b> directive. <br><br><b>Fundamental Balance Sheet:</b> Market capitalization registers at $34.74B with revenues at $19.80B and net income of $2.41B. Total debt stands at $24.29B against liquid cash reserves of $2.21B. <br><br><b>Valuation & Risk:</b> Trailing P/E is positioned at 19.29 (Fair Value), backed by an institutional ATR stop-loss buffer of 13156 points."
+        "Reasoning": "<b>Global Institutional Thesis & Market Structure:</b> Price action confirms a Tactical Recovery Range, supported by a 1-month momentum print of -0.26%. The asset trades relative to a 20-day SMA of $1541.58 and 50-day SMA of $1537.29, triggering a <b>STRONG BUY</b> directive. <br><br><b>Fundamental Balance Sheet & Solvency:</b> Operating with a market capitalization of $34.74B, trailing revenues register at $19.80B with net income of $2.41B. Capital structure reveals total debt of $24.29B against liquid cash reserves of $2.21B, confirming robust liquidity coverage. <br><br><b>Valuation & Risk Architecture:</b> Trailing P/E is positioned at 19.29 (Fair Value), backed by an institutional ATR stop-loss buffer of 13156 points. <b>Verdict:</b> High Conviction Institutional Accumulation supported by solid cash flow generation and alignment across multi-factor technical models."
     },
     {
         "Ticker": "WTB.L",
@@ -337,6 +337,74 @@
             "<b>Year 4:</b> Projected Revenue $3.42B (Est. Growth Trend: +2.0%)",
             "<b>Year 5:</b> Projected Revenue $3.55B (Est. Growth Trend: +2.0%)"
         ],
-        "Reasoning": "<b>Global Institutional Thesis:</b> Price action confirms a Tactical Recovery Range, supported by a 1-month momentum print of 1.37%. Trading relative to 20-day SMA of $2373.70 and 50-day SMA of $2381.01, triggering a <b>BUY</b> directive. <br><br><b>Fundamental Balance Sheet:</b> Market capitalization registers at $4.07B with revenues at $2.92B and net income of $212.90M. Total debt stands at $5.47B against liquid cash reserves of $233.70M. <br><br><b>Valuation & Risk:</b> Trailing P/E is positioned at 19.98 (Fair Value), backed by an institutional ATR stop-loss buffer of 9135 points."
+        "Reasoning": "<b>Global Institutional Thesis & Market Structure:</b> Price action confirms a Tactical Recovery Range, supported by a 1-month momentum print of 1.37%. The asset trades relative to a 20-day SMA of $2373.70 and 50-day SMA of $2381.01, triggering a <b>BUY</b> directive. <br><br><b>Fundamental Balance Sheet & Solvency:</b> Operating with a market capitalization of $4.07B, trailing revenues register at $2.92B with net income of $212.90M. Capital structure reveals total debt of $5.47B against liquid cash reserves of $233.70M, confirming robust liquidity coverage. <br><br><b>Valuation & Risk Architecture:</b> Trailing P/E is positioned at 19.98 (Fair Value), backed by an institutional ATR stop-loss buffer of 9135 points. <b>Verdict:</b> Moderate Tactical Upside supported by solid cash flow generation and alignment across multi-factor technical models."
+    },
+    {
+        "Ticker": "BABA",
+        "Sector": "Consumer Cyclical",
+        "Price": 112.75,
+        "SMA_20": 108.27,
+        "SMA_50": 115.71,
+        "Momentum_1M": 18.92,
+        "Signal": "BUY",
+        "ATR_Points": 638,
+        "MarketCap": "$270.25B",
+        "Revenue": "$1.02T",
+        "NetIncome": "$105.90B",
+        "TotalDebt": "$281.72B",
+        "TotalCash": "$316.82B",
+        "PE_Ratio": "17.35",
+        "PE_Eval": "Fair Value",
+        "ROE": "9.22%",
+        "ROE_Eval": "Moderate Return",
+        "ProfitMargin": "10.12%",
+        "Margin_Eval": "Standard Industry Margin",
+        "News": [
+            "\u2022 <a href='#' target='_blank' style='color: #38bdf8; text-decoration: none;'>Corporate Update</a> <span style='color: #94a3b8; font-size: 11px;'>(Financial Wire)</span>",
+            "\u2022 <a href='#' target='_blank' style='color: #38bdf8; text-decoration: none;'>Corporate Update</a> <span style='color: #94a3b8; font-size: 11px;'>(Financial Wire)</span>",
+            "\u2022 <a href='#' target='_blank' style='color: #38bdf8; text-decoration: none;'>Corporate Update</a> <span style='color: #94a3b8; font-size: 11px;'>(Financial Wire)</span>"
+        ],
+        "Forecasts": [
+            "<b>Year 1:</b> Projected Revenue $1.06T (Est. Growth Trend: +2.9%)",
+            "<b>Year 2:</b> Projected Revenue $1.11T (Est. Growth Trend: +2.9%)",
+            "<b>Year 3:</b> Projected Revenue $1.15T (Est. Growth Trend: +2.9%)",
+            "<b>Year 4:</b> Projected Revenue $1.20T (Est. Growth Trend: +2.9%)",
+            "<b>Year 5:</b> Projected Revenue $1.25T (Est. Growth Trend: +2.9%)"
+        ],
+        "Reasoning": "<b>Global Institutional Thesis & Market Structure:</b> Price action confirms a Tactical Recovery Range, supported by a 1-month momentum print of 18.92%. The asset trades relative to a 20-day SMA of $108.27 and 50-day SMA of $115.71, triggering a <b>BUY</b> directive. <br><br><b>Fundamental Balance Sheet & Solvency:</b> Operating with a market capitalization of $270.25B, trailing revenues register at $1.02T with net income of $105.90B. Capital structure reveals total debt of $281.72B against liquid cash reserves of $316.82B, confirming robust liquidity coverage. <br><br><b>Valuation & Risk Architecture:</b> Trailing P/E is positioned at 17.35 (Fair Value), backed by an institutional ATR stop-loss buffer of 638 points. <b>Verdict:</b> Moderate Tactical Upside supported by solid cash flow generation and alignment across multi-factor technical models."
+    },
+    {
+        "Ticker": "VALE",
+        "Sector": "Basic Materials",
+        "Price": 14.8,
+        "SMA_20": 14.61,
+        "SMA_50": 15.39,
+        "Momentum_1M": -1.79,
+        "Signal": "BUY",
+        "ATR_Points": 150,
+        "MarketCap": "$62.99B",
+        "Revenue": "$214.86B",
+        "NetIncome": "$15.60B",
+        "TotalDebt": "$111.96B",
+        "TotalCash": "$27.55B",
+        "PE_Ratio": "22.42",
+        "PE_Eval": "Fair Value",
+        "ROE": "6.84%",
+        "ROE_Eval": "Moderate Return",
+        "ProfitMargin": "7.26%",
+        "Margin_Eval": "Standard Industry Margin",
+        "News": [
+            "\u2022 <a href='#' target='_blank' style='color: #38bdf8; text-decoration: none;'>Corporate Update</a> <span style='color: #94a3b8; font-size: 11px;'>(Financial Wire)</span>",
+            "\u2022 <a href='#' target='_blank' style='color: #38bdf8; text-decoration: none;'>Corporate Update</a> <span style='color: #94a3b8; font-size: 11px;'>(Financial Wire)</span>",
+            "\u2022 <a href='#' target='_blank' style='color: #38bdf8; text-decoration: none;'>Corporate Update</a> <span style='color: #94a3b8; font-size: 11px;'>(Financial Wire)</span>"
+        ],
+        "Forecasts": [
+            "<b>Year 1:</b> Projected Revenue $223.46B (Est. Growth Trend: +2.7%)",
+            "<b>Year 2:</b> Projected Revenue $232.40B (Est. Growth Trend: +2.7%)",
+            "<b>Year 3:</b> Projected Revenue $241.69B (Est. Growth Trend: +2.7%)",
+            "<b>Year 4:</b> Projected Revenue $251.36B (Est. Growth Trend: +2.7%)",
+            "<b>Year 5:</b> Projected Revenue $261.41B (Est. Growth Trend: +2.7%)"
+        ],
+        "Reasoning": "<b>Global Institutional Thesis & Market Structure:</b> Price action confirms a Primary Bull Market (Above 50 SMA & 200 SMA), supported by a 1-month momentum print of -1.79%. The asset trades relative to a 20-day SMA of $14.61 and 50-day SMA of $15.39, triggering a <b>BUY</b> directive. <br><br><b>Fundamental Balance Sheet & Solvency:</b> Operating with a market capitalization of $62.99B, trailing revenues register at $214.86B with net income of $15.60B. Capital structure reveals total debt of $111.96B against liquid cash reserves of $27.55B, confirming robust liquidity coverage. <br><br><b>Valuation & Risk Architecture:</b> Trailing P/E is positioned at 22.42 (Fair Value), backed by an institutional ATR stop-loss buffer of 150 points. <b>Verdict:</b> Moderate Tactical Upside supported by solid cash flow generation and alignment across multi-factor technical models."
     }
 ]
