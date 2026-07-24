@@ -40,21 +40,9 @@ def connect_ig():
 
 def resolve_ig_epic(ig_service, ticker):
     """
-    Universal Epic Resolution: Handles both UK (.L suffix) and USA tickers seamlessly 
-    by querying the IG market search API dynamically with multiple term variants.
+    Robust Universal Epic Resolution: Dynamically queries the IG market search API 
+    for any UK or US equity and filters for valid tradable share epics.
     """
-    fallback_epics = {
-        "LLOY.L": "IX.D.LLOY.CASH.IP",
-        "LGEN.L": "IX.D.LGEN.CASH.IP",
-        "SHEL.L": "IX.D.SHEL.CASH.IP",
-        "BP.L": "IX.D.BP.CASH.IP",
-        "GLEN.L": "IX.D.GLEN.CASH.IP",
-        "AAPL": "UA.D.AAPL.CASH.IP",
-        "NVDA": "UA.D.NVDA.CASH.IP"
-    }
-    if ticker in fallback_epics:
-        return fallback_epics[ticker]
-
     clean_symbol = ticker.replace(".L", "").strip().upper()
     search_queries = [clean_symbol, ticker]
     
@@ -65,8 +53,10 @@ def resolve_ig_epic(ig_service, ticker):
                 for _, row in search_results.iterrows():
                     epic = str(row.get("epic", ""))
                     itype = str(row.get("instrumentType", ""))
-                    if any(t in itype for t in ["SHARES", "EQUITIES"]) and any(tag in epic for tag in ["CASH", "DAILY", "DFB", ".IP"]):
+                    # Look for shares/equities matching active cash or daily CFDs
+                    if any(t in itype for t in ["SHARES", "EQUITIES", "SHARE"]) and any(tag in epic for tag in ["CASH", "DAILY", "DFB", ".IP"]):
                         return epic
+                # Fallback to top result if no strict tag match was found
                 top_epic = search_results.iloc[0].get("epic")
                 if top_epic:
                     return top_epic
@@ -134,7 +124,6 @@ def execute_trades():
         sector = c["Sector"]
         signal = c["Signal"]
 
-        # Universal pipeline acceptance for both STRONG BUY and BUY signals
         if signal not in ["STRONG BUY", "BUY"]:
             print(f"ℹ️ Skipping {ticker}: Signal is '{signal}' (Required: BUY or STRONG BUY).")
             continue
@@ -164,7 +153,6 @@ def execute_trades():
 
             stop_distance = round(bid_price * 0.03, 1)
             
-            # Flexible spread tolerance to accommodate volatile demo feeds across international exchanges
             max_allowed_spread = stop_distance * 0.35  
             if current_spread > max_allowed_spread:
                 print(f"⚠️ Skipped {ticker}: Spread ({current_spread} pts) exceeds allowed limit.")
