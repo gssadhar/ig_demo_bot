@@ -22,24 +22,37 @@ def authenticate_ig():
         print(f"IG Authentication failed: {e}")
         return None
 
+def get_valid_epic_from_ig(ig_service, search_term):
+    """
+    Factually queries IG's live system to find the correct, 
+    account-compatible epic string for a given ticker or company name.
+    """
+    try:
+        markets = ig_service.search_markets(search_term)
+        if markets is not None and not markets.empty:
+            return markets.iloc[0]["epic"]
+    except Exception as e:
+        print(f"Error searching epic for {search_term}: {e}")
+    return None
+
 def fetch_uk_market_signals():
-    """Screens UK Equities mapped to valid IG Demo Spread Betting Epics."""
+    """Screens UK Equities."""
     uk_data = [
-        {"TICKER": "RR.L", "EPIC": "SB.D.RR.DAILY.IP", "MARKET": "UK", "SECTOR": "Industrials", "PRICE": 1449.09, "SIGNAL": "BUY", "STOP-LOSS": 1392.41, "2.0R TARGET": 1563.45},
-        {"TICKER": "LLOY.L", "EPIC": "SB.D.LLOY.DAILY.IP", "MARKET": "UK", "SECTOR": "Financial Services", "PRICE": 114.72, "SIGNAL": "STRONG BUY", "STOP-LOSS": 111.77, "2.0R TARGET": 120.62},
-        {"TICKER": "LGEN.L", "EPIC": "SB.D.LGEN.DAILY.IP", "MARKET": "UK", "SECTOR": "Financial Services", "PRICE": 300.00, "SIGNAL": "STRONG BUY", "STOP-LOSS": 292.74, "2.0R TARGET": 314.52},
-        {"TICKER": "SHEL.L", "EPIC": "SB.D.SHEL.DAILY.IP", "MARKET": "UK", "SECTOR": "Energy", "PRICE": 3241.50, "SIGNAL": "BUY", "STOP-LOSS": 3085.24, "2.0R TARGET": 3554.02},
-        {"TICKER": "BP.L", "EPIC": "SB.D.BP.DAILY.IP", "MARKET": "UK", "SECTOR": "Energy", "PRICE": 526.90, "SIGNAL": "BUY", "STOP-LOSS": 509.48, "2.0R TARGET": 561.74},
-        {"TICKER": "DGE.L", "EPIC": "SB.D.DGE.DAILY.IP", "MARKET": "UK", "SECTOR": "Consumer Defensive", "PRICE": 1574.79, "SIGNAL": "STRONG BUY", "STOP-LOSS": 1474.77, "2.0R TARGET": 1774.83},
-        {"TICKER": "WTB.L", "EPIC": "SB.D.WTB.DAILY.IP", "MARKET": "UK", "SECTOR": "Consumer Cyclical", "PRICE": 2488.31, "SIGNAL": "BUY", "STOP-LOSS": 2411.41, "2.0R TARGET": 2603.65}
+        {"TICKER": "RR.L", "MARKET": "UK", "SECTOR": "Industrials", "PRICE": 1449.09, "SIGNAL": "BUY", "STOP-LOSS": 1392.41, "2.0R TARGET": 1563.45},
+        {"TICKER": "LLOY.L", "MARKET": "UK", "SECTOR": "Financial Services", "PRICE": 114.72, "SIGNAL": "STRONG BUY", "STOP-LOSS": 111.77, "2.0R TARGET": 120.62},
+        {"TICKER": "LGEN.L", "MARKET": "UK", "SECTOR": "Financial Services", "PRICE": 300.00, "SIGNAL": "STRONG BUY", "STOP-LOSS": 292.74, "2.0R TARGET": 314.52},
+        {"TICKER": "SHEL.L", "MARKET": "UK", "SECTOR": "Energy", "PRICE": 3241.50, "SIGNAL": "BUY", "STOP-LOSS": 3085.24, "2.0R TARGET": 3554.02},
+        {"TICKER": "BP.L", "MARKET": "UK", "SECTOR": "Energy", "PRICE": 526.90, "SIGNAL": "BUY", "STOP-LOSS": 509.48, "2.0R TARGET": 561.74},
+        {"TICKER": "DGE.L", "MARKET": "UK", "SECTOR": "Consumer Defensive", "PRICE": 1574.79, "SIGNAL": "STRONG BUY", "STOP-LOSS": 1474.77, "2.0R TARGET": 1774.83},
+        {"TICKER": "WTB.L", "MARKET": "UK", "SECTOR": "Consumer Cyclical", "PRICE": 2488.31, "SIGNAL": "BUY", "STOP-LOSS": 2411.41, "2.0R TARGET": 2603.65}
     ]
     return pd.DataFrame(uk_data)
 
 def fetch_us_market_signals():
-    """Screens USA Equities mapped to valid IG Demo Epics."""
+    """Screens USA Equities."""
     us_data = [
-        {"TICKER": "AAPL", "EPIC": "US.D.AAPL.CASH.IP", "MARKET": "USA", "SECTOR": "Technology", "PRICE": 220.50, "SIGNAL": "STRONG BUY", "STOP-LOSS": 212.00, "2.0R TARGET": 238.00},
-        {"TICKER": "NVDA", "EPIC": "US.D.NVDA.CASH.IP", "MARKET": "USA", "SECTOR": "Technology", "PRICE": 125.40, "SIGNAL": "BUY", "STOP-LOSS": 120.00, "2.0R TARGET": 136.20}
+        {"TICKER": "AAPL", "MARKET": "USA", "SECTOR": "Technology", "PRICE": 220.50, "SIGNAL": "STRONG BUY", "STOP-LOSS": 212.00, "2.0R TARGET": 238.00},
+        {"TICKER": "NVDA", "MARKET": "USA", "SECTOR": "Technology", "PRICE": 125.40, "SIGNAL": "BUY", "STOP-LOSS": 120.00, "2.0R TARGET": 136.20}
     ]
     return pd.DataFrame(us_data)
 
@@ -50,9 +63,15 @@ def execute_strong_buys(df, ig_service):
 
     for _, row in df.iterrows():
         if row["SIGNAL"] == "STRONG BUY":
-            epic = row["EPIC"]
             ticker = row["TICKER"]
-            print(f"Executing automated order on IG for {ticker} (Epic: {epic}) - STRONG BUY...")
+            search_query = ticker.replace(".L", "")
+            epic = get_valid_epic_from_ig(ig_service, search_query)
+            
+            if not epic:
+                print(f"-> Could not resolve a valid IG Epic for {ticker}. Skipping.")
+                continue
+
+            print(f"Executing automated order on IG for {ticker} (Resolved Epic: {epic}) - STRONG BUY...")
             try:
                 response = ig_service.create_open_position(
                     currency_code="GBP" if row["MARKET"] == "UK" else "USD",
@@ -102,7 +121,6 @@ def monitor_and_manage_runners(ig_service, partial_profit_target_gbp=500.0):
             
             print(f"Monitoring runner position {epic} (ID: {deal_id}, Size: {current_size}) | P&L: £{profit_loss:.2f}")
             
-            # Condition: Take partial profit (half size) if profit threshold is reached and we haven't scaled out yet
             if profit_loss >= partial_profit_target_gbp and current_size > 0.5:
                 half_size = round(current_size / 2.0, 2)
                 print(f"-> Target profit of £{partial_profit_target_gbp} reached for {epic}! Banking half size ({half_size})...")
@@ -164,7 +182,7 @@ def main():
     # 1. Manage active trades (take partial profits & let runners continue)
     monitor_and_manage_runners(ig_service, partial_profit_target_gbp=500.0)
     
-    # 2. Execute new entry signals
+    # 2. Execute new entry signals using dynamic live Epic resolution
     execute_strong_buys(uk_df, ig_service)
     execute_strong_buys(us_df, ig_service)
     
