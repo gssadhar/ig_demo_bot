@@ -36,7 +36,7 @@ def get_valid_epic_from_ig(ig_service, search_term):
     return None
 
 def fetch_uk_market_signals():
-    """Screens UK Equities."""
+    """Expanded UK Equities Universe."""
     uk_data = [
         {"TICKER": "RR.L", "MARKET": "UK", "SECTOR": "Industrials", "PRICE": 1449.09, "SIGNAL": "BUY", "STOP-LOSS": 1392.41, "2.0R TARGET": 1563.45},
         {"TICKER": "LLOY.L", "MARKET": "UK", "SECTOR": "Financial Services", "PRICE": 114.72, "SIGNAL": "STRONG BUY", "STOP-LOSS": 111.77, "2.0R TARGET": 120.62},
@@ -44,15 +44,21 @@ def fetch_uk_market_signals():
         {"TICKER": "SHEL.L", "MARKET": "UK", "SECTOR": "Energy", "PRICE": 3241.50, "SIGNAL": "BUY", "STOP-LOSS": 3085.24, "2.0R TARGET": 3554.02},
         {"TICKER": "BP.L", "MARKET": "UK", "SECTOR": "Energy", "PRICE": 526.90, "SIGNAL": "BUY", "STOP-LOSS": 509.48, "2.0R TARGET": 561.74},
         {"TICKER": "DGE.L", "MARKET": "UK", "SECTOR": "Consumer Defensive", "PRICE": 1574.79, "SIGNAL": "STRONG BUY", "STOP-LOSS": 1474.77, "2.0R TARGET": 1774.83},
-        {"TICKER": "WTB.L", "MARKET": "UK", "SECTOR": "Consumer Cyclical", "PRICE": 2488.31, "SIGNAL": "BUY", "STOP-LOSS": 2411.41, "2.0R TARGET": 2603.65}
+        {"TICKER": "WTB.L", "MARKET": "UK", "SECTOR": "Consumer Cyclical", "PRICE": 2488.31, "SIGNAL": "BUY", "STOP-LOSS": 2411.41, "2.0R TARGET": 2603.65},
+        {"TICKER": "BARC.L", "MARKET": "UK", "SECTOR": "Financial Services", "PRICE": 210.00, "SIGNAL": "BUY", "STOP-LOSS": 202.00, "2.0R TARGET": 226.00},
+        {"TICKER": "VOD.L", "MARKET": "UK", "SECTOR": "Telecommunication", "PRICE": 72.50, "SIGNAL": "BUY", "STOP-LOSS": 69.00, "2.0R TARGET": 79.50},
+        {"TICKER": "AZN.L", "MARKET": "UK", "SECTOR": "Healthcare", "PRICE": 12400.00, "SIGNAL": "BUY", "STOP-LOSS": 11950.00, "2.0R TARGET": 13300.00}
     ]
     return pd.DataFrame(uk_data)
 
 def fetch_us_market_signals():
-    """Screens USA Equities."""
+    """Expanded USA Equities Universe."""
     us_data = [
         {"TICKER": "AAPL", "MARKET": "USA", "SECTOR": "Technology", "PRICE": 220.50, "SIGNAL": "STRONG BUY", "STOP-LOSS": 212.00, "2.0R TARGET": 238.00},
-        {"TICKER": "NVDA", "MARKET": "USA", "SECTOR": "Technology", "PRICE": 125.40, "SIGNAL": "BUY", "STOP-LOSS": 120.00, "2.0R TARGET": 136.20}
+        {"TICKER": "NVDA", "MARKET": "USA", "SECTOR": "Technology", "PRICE": 125.40, "SIGNAL": "STRONG BUY", "STOP-LOSS": 120.00, "2.0R TARGET": 136.20},
+        {"TICKER": "MSFT", "MARKET": "USA", "SECTOR": "Technology", "PRICE": 415.00, "SIGNAL": "BUY", "STOP-LOSS": 400.00, "2.0R TARGET": 445.00},
+        {"TICKER": "AMZN", "MARKET": "USA", "SECTOR": "Consumer Cyclical", "PRICE": 185.00, "SIGNAL": "BUY", "STOP-LOSS": 178.00, "2.0R TARGET": 199.00},
+        {"TICKER": "TSLA", "MARKET": "USA", "SECTOR": "Consumer Cyclical", "PRICE": 250.00, "SIGNAL": "BUY", "STOP-LOSS": 238.00, "2.0R TARGET": 274.00}
     ]
     return pd.DataFrame(us_data)
 
@@ -81,7 +87,7 @@ def execute_strong_buys(df, ig_service):
                     force_open=True,
                     guaranteed_stop=False,
                     order_type="MARKET",
-                    size=1.0,  # Full size entry to allow partial scaling out later
+                    size=1.0,
                     level=None,
                     limit_distance=None,
                     limit_level=float(row["2.0R TARGET"]),
@@ -101,8 +107,7 @@ def execute_strong_buys(df, ig_service):
 def monitor_and_manage_runners(ig_service, partial_profit_target_gbp=500.0):
     """
     Manages open positions:
-    - If profit hits target (e.g. £500, representing a 2.0R milestone), 
-      it closes half (0.5 size) to bank cash, leaving the rest to run as a runner.
+    - If profit hits target (e.g. £500), closes half (0.5 size) to bank cash, leaving the rest.
     """
     if not ig_service:
         return
@@ -133,7 +138,7 @@ def monitor_and_manage_runners(ig_service, partial_profit_target_gbp=500.0):
                     quote_id=None
                 )
                 if close_response and close_response.get("status") == "SUCCESS":
-                    print(f"-> Successfully banked profits on {epic}. Leaving remaining runner to catch extended trends.")
+                    print(f"-> Successfully banked profits on {epic}.")
                 else:
                     print(f"-> Partial close failed for {epic}.")
                     
@@ -179,7 +184,7 @@ def main():
     
     ig_service = authenticate_ig()
     
-    # 1. Manage active trades (take partial profits & let runners continue)
+    # 1. Manage active trades
     monitor_and_manage_runners(ig_service, partial_profit_target_gbp=500.0)
     
     # 2. Execute new entry signals using dynamic live Epic resolution
