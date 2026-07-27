@@ -25,8 +25,7 @@ def authenticate_ig():
 def get_valid_epic_from_ig(ig_service, search_term, market_type="UK"):
     """
     Factually queries IG's live system to find the correct, 
-    account-compatible epic string for a given ticker or company name,
-    ensuring it matches Spread Betting instrument types.
+    account-compatible epic string for a given ticker or company name.
     """
     try:
         markets = ig_service.search_markets(search_term)
@@ -106,6 +105,25 @@ def execute_strong_buys(df, ig_service):
                 print(f"-> Could not resolve a valid IG Epic for {ticker}. Skipping.")
                 continue
 
+            price = float(row["PRICE"])
+            stop_loss = float(row["STOP-LOSS"])
+            target = float(row["2.0R TARGET"])
+
+            # --- HYBRID EXIT STRATEGY IMPLEMENTATION ---
+            if market == "UK":
+                # Strategy UK: Absolute Price Levels (Works natively for UK spread bets)
+                stop_lvl = stop_loss
+                limit_lvl = target
+                stop_dist = None
+                limit_dist = None
+            else:
+                # Strategy USA: Clean Market Entry First (Zero Stops/Limits in payload), 
+                # then immediately attach validated risk levels via secondary modification call.
+                stop_lvl = None
+                limit_lvl = None
+                stop_dist = None
+                limit_dist = None
+
             print(f"Executing automated order on IG for {ticker} (Resolved Epic: {epic}) - STRONG BUY...")
             try:
                 response = ig_service.create_open_position(
@@ -118,16 +136,31 @@ def execute_strong_buys(df, ig_service):
                     order_type="MARKET",
                     size=1.0,
                     level=None,
-                    limit_distance=None,
-                    limit_level=float(row["2.0R TARGET"]),
+                    limit_distance=limit_dist,
+                    limit_level=limit_lvl,
                     quote_id=None,
-                    stop_distance=None,
-                    stop_level=float(row["STOP-LOSS"]),
+                    stop_distance=stop_dist,
+                    stop_level=stop_lvl,
                     trailing_stop=None,
                     trailing_stop_increment=None
                 )
+                
                 if response and response.get("dealStatus") == "ACCEPTED":
-                    print(f"-> Success! Deal ID: {response.get('dealId')}")
+                    deal_id = response.get("dealId")
+                    print(f"-> Success! Deal ID: {deal_id}")
+                    
+                    # For US Equities: Attach stops/limits post-execution to bypass IG's strict initial payload check
+                    if market == "USA" and deal_id:
+                        print(f"-> Applying post-execution risk levels for US stock {ticker}...")
+                        try:
+                            ig_service.update_open_position(
+                                deal_id=deal_id,
+                                stop_level=stop_loss,
+                                limit_level=target
+                            )
+                            print(f"-> Successfully attached stop/limit to US position {deal_id}")
+                        except Exception as inner_e:
+                            print(f"-> Warning: Position opened but failed to attach risk levels automatically: {inner_e}")
                 else:
                     print(f"-> Order rejected for {ticker}: {response.get('reason')}")
             except Exception as e:
@@ -216,7 +249,7 @@ def main():
     # 1. Manage active trades
     monitor_and_manage_runners(ig_service, partial_profit_target_gbp=500.0)
     
-    # 2. Execute new entry signals using absolute level pricing
+    # 2. Execute new entry signals using the Hybrid Exit Strategy
     execute_strong_buys(uk_df, ig_service)
     execute_strong_buys(us_df, ig_service)
     
