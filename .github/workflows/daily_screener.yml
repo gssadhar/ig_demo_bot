@@ -2,8 +2,6 @@ name: Global Equity Screener Alert & IG Execution
 
 on:
   schedule:
-    # Runs 4 times a day (UTC times aligning roughly with UK/US open & close windows)
-    # 07:30 UTC (UK Open prep), 13:00 UTC (US Open prep), 16:30 UTC (UK Close), 21:30 UTC (US Close)
     - cron: '30 7,13,16,21 * * 1-5'
   workflow_dispatch:
 
@@ -24,7 +22,7 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pandas numpy yfinance trading-ig
+          pip install pandas numpy yfinance trading-ig munch
 
       - name: Run Screener & Execute Trades
         env:
