@@ -42,49 +42,49 @@ def get_valid_epic_from_ig(ig_service, search_term, market_type="UK"):
     return None
 
 def fetch_uk_market_signals():
-    """Expanded UK Equities Universe (Top 20 Leaders across diversified sectors)."""
+    """Expanded UK Equities Universe (Top 20 Leaders across diversified sectors with 1:2.5 & 1:4 targets)."""
     uk_data = [
-        {"TICKER": "RR.L", "MARKET": "UK", "SECTOR": "Industrials", "PRICE": 1449.09, "SIGNAL": "BUY", "STOP-LOSS": 1392.41, "2.0R TARGET": 1563.45},
-        {"TICKER": "LLOY.L", "MARKET": "UK", "SECTOR": "Financial Services", "PRICE": 114.72, "SIGNAL": "STRONG BUY", "STOP-LOSS": 111.77, "2.0R TARGET": 120.62},
-        {"TICKER": "LGEN.L", "MARKET": "UK", "SECTOR": "Financial Services", "PRICE": 300.00, "SIGNAL": "STRONG BUY", "STOP-LOSS": 292.74, "2.0R TARGET": 314.52},
-        {"TICKER": "SHEL.L", "MARKET": "UK", "SECTOR": "Energy", "PRICE": 3241.50, "SIGNAL": "BUY", "STOP-LOSS": 3085.24, "2.0R TARGET": 3554.02},
-        {"TICKER": "BP.L", "MARKET": "UK", "SECTOR": "Energy", "PRICE": 526.90, "SIGNAL": "BUY", "STOP-LOSS": 509.48, "2.0R TARGET": 561.74},
-        {"TICKER": "DGE.L", "MARKET": "UK", "SECTOR": "Consumer Defensive", "PRICE": 1574.79, "SIGNAL": "STRONG BUY", "STOP-LOSS": 1474.77, "2.0R TARGET": 1774.83},
-        {"TICKER": "WTB.L", "MARKET": "UK", "SECTOR": "Consumer Cyclical", "PRICE": 2488.31, "SIGNAL": "BUY", "STOP-LOSS": 2411.41, "2.0R TARGET": 2603.65},
-        {"TICKER": "BARC.L", "MARKET": "UK", "SECTOR": "Financial Services", "PRICE": 210.00, "SIGNAL": "BUY", "STOP-LOSS": 202.00, "2.0R TARGET": 226.00},
-        {"TICKER": "VOD.L", "MARKET": "UK", "SECTOR": "Telecommunication", "PRICE": 72.50, "SIGNAL": "BUY", "STOP-LOSS": 69.00, "2.0R TARGET": 79.50},
-        {"TICKER": "AZN.L", "MARKET": "UK", "SECTOR": "Healthcare", "PRICE": 12400.00, "SIGNAL": "BUY", "STOP-LOSS": 11950.00, "2.0R TARGET": 13300.00},
-        {"TICKER": "HSBA.L", "MARKET": "UK", "SECTOR": "Financial Services", "PRICE": 710.00, "SIGNAL": "BUY", "STOP-LOSS": 685.00, "2.0R TARGET": 760.00},
-        {"TICKER": "RIO.L", "MARKET": "UK", "SECTOR": "Basic Materials", "PRICE": 5200.00, "SIGNAL": "BUY", "STOP-LOSS": 5000.00, "2.0R TARGET": 5600.00},
-        {"TICKER": "ULVR.L", "MARKET": "UK", "SECTOR": "Consumer Defensive", "PRICE": 4100.00, "SIGNAL": "BUY", "STOP-LOSS": 3950.00, "2.0R TARGET": 4400.00},
-        {"TICKER": "GLEN.L", "MARKET": "UK", "SECTOR": "Basic Materials", "PRICE": 440.00, "SIGNAL": "BUY", "STOP-LOSS": 422.00, "2.0R TARGET": 476.00},
-        {"TICKER": "GSK.L", "MARKET": "UK", "SECTOR": "Healthcare", "PRICE": 1500.00, "SIGNAL": "BUY", "STOP-LOSS": 1445.00, "2.0R TARGET": 1610.00},
-        {"TICKER": "NG.L", "MARKET": "UK", "SECTOR": "Utilities", "PRICE": 1020.00, "SIGNAL": "BUY", "STOP-LOSS": 985.00, "2.0R TARGET": 1090.00},
-        {"TICKER": "REL.L", "MARKET": "UK", "SECTOR": "Industrials", "PRICE": 3400.00, "SIGNAL": "BUY", "STOP-LOSS": 3280.00, "2.0R TARGET": 3640.00},
-        {"TICKER": "ANTO.L", "MARKET": "UK", "SECTOR": "Basic Materials", "PRICE": 2100.00, "SIGNAL": "BUY", "STOP-LOSS": 2020.00, "2.0R TARGET": 2260.00},
-        {"TICKER": "EXPN.L", "MARKET": "UK", "SECTOR": "Industrials", "PRICE": 2800.00, "SIGNAL": "BUY", "STOP-LOSS": 2700.00, "2.0R TARGET": 3000.00},
-        {"TICKER": "CPG.L", "MARKET": "UK", "SECTOR": "Consumer Cyclical", "PRICE": 2200.00, "SIGNAL": "BUY", "STOP-LOSS": 2120.00, "2.0R TARGET": 2360.00}
+        {"TICKER": "RR.L", "MARKET": "UK", "SECTOR": "Industrials", "PRICE": 1449.09, "SIGNAL": "BUY", "STOP-LOSS": 1392.41, "TARGET_1_2P5": 1590.79, "TARGET_1_4": 1675.81},
+        {"TICKER": "LLOY.L", "MARKET": "UK", "SECTOR": "Financial Services", "PRICE": 114.72, "SIGNAL": "STRONG BUY", "STOP-LOSS": 111.77, "TARGET_1_2P5": 122.10, "TARGET_1_4": 126.52},
+        {"TICKER": "LGEN.L", "MARKET": "UK", "SECTOR": "Financial Services", "PRICE": 300.00, "SIGNAL": "STRONG BUY", "STOP-LOSS": 292.74, "TARGET_1_2P5": 318.15, "TARGET_1_4": 329.04},
+        {"TICKER": "SHEL.L", "MARKET": "UK", "SECTOR": "Energy", "PRICE": 3241.50, "SIGNAL": "BUY", "STOP-LOSS": 3085.24, "TARGET_1_2P5": 3633.10, "TARGET_1_4": 3866.54},
+        {"TICKER": "BP.L", "MARKET": "UK", "SECTOR": "Energy", "PRICE": 526.90, "SIGNAL": "BUY", "STOP-LOSS": 509.48, "TARGET_1_2P5": 570.45, "TARGET_1_4": 596.50},
+        {"TICKER": "DGE.L", "MARKET": "UK", "SECTOR": "Consumer Defensive", "PRICE": 1574.79, "SIGNAL": "STRONG BUY", "STOP-LOSS": 1474.77, "TARGET_1_2P5": 1824.84, "TARGET_1_4": 1974.87},
+        {"TICKER": "WTB.L", "MARKET": "UK", "SECTOR": "Consumer Cyclical", "PRICE": 2488.31, "SIGNAL": "BUY", "STOP-LOSS": 2411.41, "TARGET_1_2P5": 2680.56, "TARGET_1_4": 2795.91},
+        {"TICKER": "BARC.L", "MARKET": "UK", "SECTOR": "Financial Services", "PRICE": 210.00, "SIGNAL": "BUY", "STOP-LOSS": 202.00, "TARGET_1_2P5": 230.00, "TARGET_1_4": 242.00},
+        {"TICKER": "VOD.L", "MARKET": "UK", "SECTOR": "Telecommunication", "PRICE": 72.50, "SIGNAL": "BUY", "STOP-LOSS": 69.00, "TARGET_1_2P5": 81.25, "TARGET_1_4": 86.50},
+        {"TICKER": "AZN.L", "MARKET": "UK", "SECTOR": "Healthcare", "PRICE": 12400.00, "SIGNAL": "BUY", "STOP-LOSS": 11950.00, "TARGET_1_2P5": 13525.00, "TARGET_1_4": 14200.00},
+        {"TICKER": "HSBA.L", "MARKET": "UK", "SECTOR": "Financial Services", "PRICE": 710.00, "SIGNAL": "BUY", "STOP-LOSS": 685.00, "TARGET_1_2P5": 772.50, "TARGET_1_4": 810.00},
+        {"TICKER": "RIO.L", "MARKET": "UK", "SECTOR": "Basic Materials", "PRICE": 5200.00, "SIGNAL": "BUY", "STOP-LOSS": 5000.00, "TARGET_1_2P5": 5700.00, "TARGET_1_4": 6000.00},
+        {"TICKER": "ULVR.L", "MARKET": "UK", "SECTOR": "Consumer Defensive", "PRICE": 4100.00, "SIGNAL": "BUY", "STOP-LOSS": 3950.00, "TARGET_1_2P5": 4475.00, "TARGET_1_4": 4700.00},
+        {"TICKER": "GLEN.L", "MARKET": "UK", "SECTOR": "Basic Materials", "PRICE": 440.00, "SIGNAL": "BUY", "STOP-LOSS": 422.00, "TARGET_1_2P5": 485.00, "TARGET_1_4": 512.00},
+        {"TICKER": "GSK.L", "MARKET": "UK", "SECTOR": "Healthcare", "PRICE": 1500.00, "SIGNAL": "BUY", "STOP-LOSS": 1445.00, "TARGET_1_2P5": 1637.50, "TARGET_1_4": 1720.00},
+        {"TICKER": "NG.L", "MARKET": "UK", "SECTOR": "Utilities", "PRICE": 1020.00, "SIGNAL": "BUY", "STOP-LOSS": 985.00, "TARGET_1_2P5": 1107.50, "TARGET_1_4": 1160.00},
+        {"TICKER": "REL.L", "MARKET": "UK", "SECTOR": "Industrials", "PRICE": 3400.00, "SIGNAL": "BUY", "STOP-LOSS": 3280.00, "TARGET_1_2P5": 3700.00, "TARGET_1_4": 3880.00},
+        {"TICKER": "ANTO.L", "MARKET": "UK", "SECTOR": "Basic Materials", "PRICE": 2100.00, "SIGNAL": "BUY", "STOP-LOSS": 2020.00, "TARGET_1_2P5": 2300.00, "TARGET_1_4": 2420.00},
+        {"TICKER": "EXPN.L", "MARKET": "UK", "SECTOR": "Industrials", "PRICE": 2800.00, "SIGNAL": "BUY", "STOP-LOSS": 2700.00, "TARGET_1_2P5": 3050.00, "TARGET_1_4": 3200.00},
+        {"TICKER": "CPG.L", "MARKET": "UK", "SECTOR": "Consumer Cyclical", "PRICE": 2200.00, "SIGNAL": "BUY", "STOP-LOSS": 2120.00, "TARGET_1_2P5": 2400.00, "TARGET_1_4": 2520.00}
     ]
     return pd.DataFrame(uk_data)
 
 def fetch_us_market_signals():
-    """Expanded USA Equities Universe (Top 15 Leaders across diversified sectors)."""
+    """Expanded USA Equities Universe (Top 15 Leaders across diversified sectors with 1:2.5 & 1:4 targets)."""
     us_data = [
-        {"TICKER": "AAPL", "MARKET": "USA", "SECTOR": "Technology", "PRICE": 220.50, "SIGNAL": "STRONG BUY", "STOP-LOSS": 212.00, "2.0R TARGET": 238.00},
-        {"TICKER": "NVDA", "MARKET": "USA", "SECTOR": "Technology", "PRICE": 125.40, "SIGNAL": "STRONG BUY", "STOP-LOSS": 120.00, "2.0R TARGET": 136.20},
-        {"TICKER": "MSFT", "MARKET": "USA", "SECTOR": "Technology", "PRICE": 415.00, "SIGNAL": "BUY", "STOP-LOSS": 400.00, "2.0R TARGET": 445.00},
-        {"TICKER": "AMZN", "MARKET": "USA", "SECTOR": "Consumer Cyclical", "PRICE": 185.00, "SIGNAL": "BUY", "STOP-LOSS": 178.00, "2.0R TARGET": 199.00},
-        {"TICKER": "TSLA", "MARKET": "USA", "SECTOR": "Consumer Cyclical", "PRICE": 250.00, "SIGNAL": "BUY", "STOP-LOSS": 238.00, "2.0R TARGET": 274.00},
-        {"TICKER": "GOOGL", "MARKET": "USA", "SECTOR": "Communication Services", "PRICE": 175.00, "SIGNAL": "BUY", "STOP-LOSS": 168.00, "2.0R TARGET": 189.00},
-        {"TICKER": "META", "MARKET": "USA", "SECTOR": "Communication Services", "PRICE": 480.00, "SIGNAL": "BUY", "STOP-LOSS": 460.00, "2.0R TARGET": 520.00},
-        {"TICKER": "JPM", "MARKET": "USA", "SECTOR": "Financial Services", "PRICE": 205.00, "SIGNAL": "BUY", "STOP-LOSS": 197.00, "2.0R TARGET": 221.00},
-        {"TICKER": "JNJ", "MARKET": "USA", "SECTOR": "Healthcare", "PRICE": 155.00, "SIGNAL": "BUY", "STOP-LOSS": 149.00, "2.0R TARGET": 167.00},
-        {"TICKER": "XOM", "MARKET": "USA", "SECTOR": "Energy", "PRICE": 115.00, "SIGNAL": "BUY", "STOP-LOSS": 110.00, "2.0R TARGET": 125.00},
-        {"TICKER": "NFLX", "MARKET": "USA", "SECTOR": "Communication Services", "PRICE": 650.00, "SIGNAL": "BUY", "STOP-LOSS": 625.00, "2.0R TARGET": 700.00},
-        {"TICKER": "AMD", "MARKET": "USA", "SECTOR": "Technology", "PRICE": 150.00, "SIGNAL": "BUY", "STOP-LOSS": 144.00, "2.0R TARGET": 162.00},
-        {"TICKER": "INTC", "MARKET": "USA", "SECTOR": "Technology", "PRICE": 30.00, "SIGNAL": "BUY", "STOP-LOSS": 28.50, "2.0R TARGET": 33.00},
-        {"TICKER": "WMT", "MARKET": "USA", "SECTOR": "Consumer Defensive", "PRICE": 70.00, "SIGNAL": "BUY", "STOP-LOSS": 67.50, "2.0R TARGET": 75.00},
-        {"TICKER": "V", "MARKET": "USA", "SECTOR": "Financial Services", "PRICE": 275.00, "SIGNAL": "BUY", "STOP-LOSS": 265.00, "2.0R TARGET": 295.00}
+        {"TICKER": "AAPL", "MARKET": "USA", "SECTOR": "Technology", "PRICE": 220.50, "SIGNAL": "STRONG BUY", "STOP-LOSS": 212.00, "TARGET_1_2P5": 241.75, "TARGET_1_4": 254.50},
+        {"TICKER": "NVDA", "MARKET": "USA", "SECTOR": "Technology", "PRICE": 125.40, "SIGNAL": "STRONG BUY", "STOP-LOSS": 120.00, "TARGET_1_2P5": 138.90, "TARGET_1_4": 147.40},
+        {"TICKER": "MSFT", "MARKET": "USA", "SECTOR": "Technology", "PRICE": 415.00, "SIGNAL": "BUY", "STOP-LOSS": 400.00, "TARGET_1_2P5": 452.50, "TARGET_1_4": 475.00},
+        {"TICKER": "AMZN", "MARKET": "USA", "SECTOR": "Consumer Cyclical", "PRICE": 185.00, "SIGNAL": "BUY", "STOP-LOSS": 178.00, "TARGET_1_2P5": 202.50, "TARGET_1_4": 213.00},
+        {"TICKER": "TSLA", "MARKET": "USA", "SECTOR": "Consumer Cyclical", "PRICE": 250.00, "SIGNAL": "BUY", "STOP-LOSS": 238.00, "TARGET_1_2P5": 280.00, "TARGET_1_4": 298.00},
+        {"TICKER": "GOOGL", "MARKET": "USA", "SECTOR": "Communication Services", "PRICE": 175.00, "SIGNAL": "BUY", "STOP-LOSS": 168.00, "TARGET_1_2P5": 192.50, "TARGET_1_4": 203.00},
+        {"TICKER": "META", "MARKET": "USA", "SECTOR": "Communication Services", "PRICE": 480.00, "SIGNAL": "BUY", "STOP-LOSS": 460.00, "TARGET_1_2P5": 530.00, "TARGET_1_4": 560.00},
+        {"TICKER": "JPM", "MARKET": "USA", "SECTOR": "Financial Services", "PRICE": 205.00, "SIGNAL": "BUY", "STOP-LOSS": 197.00, "TARGET_1_2P5": 225.00, "TARGET_1_4": 237.00},
+        {"TICKER": "JNJ", "MARKET": "USA", "SECTOR": "Healthcare", "PRICE": 155.00, "SIGNAL": "BUY", "STOP-LOSS": 149.00, "TARGET_1_2P5": 170.00, "TARGET_1_4": 179.00},
+        {"TICKER": "XOM", "MARKET": "USA", "SECTOR": "Energy", "PRICE": 115.00, "SIGNAL": "BUY", "STOP-LOSS": 110.00, "TARGET_1_2P5": 127.50, "TARGET_1_4": 135.00},
+        {"TICKER": "NFLX", "MARKET": "USA", "SECTOR": "Communication Services", "PRICE": 650.00, "SIGNAL": "BUY", "STOP-LOSS": 625.00, "TARGET_1_2P5": 712.50, "TARGET_1_4": 750.00},
+        {"TICKER": "AMD", "MARKET": "USA", "SECTOR": "Technology", "PRICE": 150.00, "SIGNAL": "BUY", "STOP-LOSS": 144.00, "TARGET_1_2P5": 165.00, "TARGET_1_4": 174.00},
+        {"TICKER": "INTC", "MARKET": "USA", "SECTOR": "Technology", "PRICE": 30.00, "SIGNAL": "BUY", "STOP-LOSS": 28.50, "TARGET_1_2P5": 33.75, "TARGET_1_4": 36.00},
+        {"TICKER": "WMT", "MARKET": "USA", "SECTOR": "Consumer Defensive", "PRICE": 70.00, "SIGNAL": "BUY", "STOP-LOSS": 67.50, "TARGET_1_2P5": 76.25, "TARGET_1_4": 80.00},
+        {"TICKER": "V", "MARKET": "USA", "SECTOR": "Financial Services", "PRICE": 275.00, "SIGNAL": "BUY", "STOP-LOSS": 265.00, "TARGET_1_2P5": 300.00, "TARGET_1_4": 315.00}
     ]
     return pd.DataFrame(us_data)
 
@@ -105,24 +105,8 @@ def execute_strong_buys(df, ig_service):
                 print(f"-> Could not resolve a valid IG Epic for {ticker}. Skipping.")
                 continue
 
-            price = float(row["PRICE"])
             stop_loss = float(row["STOP-LOSS"])
-            target = float(row["2.0R TARGET"])
-
-            # --- HYBRID EXIT STRATEGY IMPLEMENTATION ---
-            if market == "UK":
-                # Strategy UK: Absolute Price Levels (Works natively for UK spread bets)
-                stop_lvl = stop_loss
-                limit_lvl = target
-                stop_dist = None
-                limit_dist = None
-            else:
-                # Strategy USA: Clean Market Entry First (Zero Stops/Limits in payload), 
-                # then immediately attach validated risk levels via secondary modification call.
-                stop_lvl = None
-                limit_lvl = None
-                stop_dist = None
-                limit_dist = None
+            target_1_4 = float(row["TARGET_1_4"]) # Full final target set on position
 
             print(f"Executing automated order on IG for {ticker} (Resolved Epic: {epic}) - STRONG BUY...")
             try:
@@ -136,40 +120,28 @@ def execute_strong_buys(df, ig_service):
                     order_type="MARKET",
                     size=1.0,
                     level=None,
-                    limit_distance=limit_dist,
-                    limit_level=limit_lvl,
+                    limit_distance=None,
+                    limit_level=target_1_4,
                     quote_id=None,
-                    stop_distance=stop_dist,
-                    stop_level=stop_lvl,
+                    stop_distance=None,
+                    stop_level=stop_loss,
                     trailing_stop=None,
                     trailing_stop_increment=None
                 )
                 
                 if response and response.get("dealStatus") == "ACCEPTED":
-                    deal_id = response.get("dealId")
-                    print(f"-> Success! Deal ID: {deal_id}")
-                    
-                    # For US Equities: Attach stops/limits post-execution to bypass IG's strict initial payload check
-                    if market == "USA" and deal_id:
-                        print(f"-> Applying post-execution risk levels for US stock {ticker}...")
-                        try:
-                            ig_service.update_open_position(
-                                deal_id=deal_id,
-                                stop_level=stop_loss,
-                                limit_level=target
-                            )
-                            print(f"-> Successfully attached stop/limit to US position {deal_id}")
-                        except Exception as inner_e:
-                            print(f"-> Warning: Position opened but failed to attach risk levels automatically: {inner_e}")
+                    print(f"-> Success! Deal ID: {response.get('dealId')}")
                 else:
                     print(f"-> Order rejected for {ticker}: {response.get('reason')}")
             except Exception as e:
                 print(f"-> Error executing {ticker}: {e}")
 
-def monitor_and_manage_runners(ig_service, partial_profit_target_gbp=500.0):
+def monitor_and_manage_runners(df_combined, ig_service):
     """
-    Manages open positions:
-    - If profit hits target (e.g. £500), closes half (0.5 size) to bank cash, leaving the rest.
+    Hybrid Exit Strategy Execution:
+    - Automatically checks live market prices against the 1:2.5 R:R target.
+    - When price reaches or exceeds the 1:2.5 target, closes 50% (0.5 size) to bank profits.
+    - Leaves the remaining 50% running toward the 1:4 target.
     """
     if not ig_service:
         return
@@ -182,25 +154,35 @@ def monitor_and_manage_runners(ig_service, partial_profit_target_gbp=500.0):
 
         for _, pos in positions.iterrows():
             deal_id = pos.get("dealId")
-            profit_loss = float(pos.get("profitAndLoss", 0.0))
             epic = pos.get("epic")
             current_size = float(pos.get("size", 1.0))
             
-            print(f"Monitoring runner position {epic} (ID: {deal_id}, Size: {current_size}) | P&L: £{profit_loss:.2f}")
+            matched_row = df_combined[df_combined['TICKER'].str.replace('.L', '') == epic.split('.')[0]]
+            if matched_row.empty:
+                continue
+                
+            target_1_2p5 = float(matched_row.iloc[0]["TARGET_1_2P5"])
             
-            if profit_loss >= partial_profit_target_gbp and current_size > 0.5:
+            market_info = ig_service.fetch_market_by_epic(epic)
+            if not market_info:
+                continue
+            
+            bid_price = float(market_info.get("snapshot", {}).get("bid", 0.0))
+            print(f"Monitoring runner position {epic} (ID: {deal_id}, Size: {current_size}) | Bid: {bid_price} | 1:2.5 Target: {target_1_2p5}")
+            
+            if bid_price >= target_1_2p5 and current_size > 0.5:
                 half_size = round(current_size / 2.0, 2)
-                print(f"-> Target profit of £{partial_profit_target_gbp} reached for {epic}! Banking half size ({half_size})...")
+                print(f"-> 1:2.5 R:R target reached for {epic}! Securing 50% partial close ({half_size})...")
                 
                 close_response = ig_service.close_open_position(
                     deal_id=deal_id,
-                    direction="SELL" if pos.get("direction") == "BUY" else "BUY",
+                    direction="SELL",
                     size=half_size,
                     order_type="MARKET",
                     quote_id=None
                 )
                 if close_response and close_response.get("status") == "SUCCESS":
-                    print(f"-> Successfully banked profits on {epic}.")
+                    print(f"-> Successfully banked 50% profits on {epic}. Runner active toward 1:4 target.")
                 else:
                     print(f"-> Partial close failed for {epic}.")
                     
@@ -222,7 +204,6 @@ def generate_html_output(uk_df, us_df):
     rows_html = ""
     for _, row in combined_df.iterrows():
         badge_class = "strong-buy-badge" if row["SIGNAL"] == "STRONG BUY" else "buy-badge"
-        target_col = row.get("2.0R TARGET", row.get("1.5R TARGET", 0.0))
         rows_html += f"""
             <tr>
                 <td>{row['TICKER']} ({row['MARKET']})</td>
@@ -230,7 +211,7 @@ def generate_html_output(uk_df, us_df):
                 <td>{row['PRICE']}</td>
                 <td><span class="{badge_class}">{row['SIGNAL']}</span></td>
                 <td>{row['STOP-LOSS']}</td>
-                <td>{target_col}</td>
+                <td>{row['TARGET_1_2P5']} (1:2.5) / {row['TARGET_1_4']} (1:4)</td>
             </tr>
         """
 
@@ -243,13 +224,14 @@ def main():
     print("--- Starting 4x Daily Runner Strategy Pipeline (35 Equities Universe) ---")
     uk_df = fetch_uk_market_signals()
     us_df = fetch_us_market_signals()
+    combined_df = pd.concat([uk_df, us_df], ignore_index=True)
     
     ig_service = authenticate_ig()
     
-    # 1. Manage active trades
-    monitor_and_manage_runners(ig_service, partial_profit_target_gbp=500.0)
+    # 1. Manage active trades with 1:2.5 partial close rule
+    monitor_and_manage_runners(combined_df, ig_service)
     
-    # 2. Execute new entry signals using the Hybrid Exit Strategy
+    # 2. Execute new entry signals across the full 35-equity universe
     execute_strong_buys(uk_df, ig_service)
     execute_strong_buys(us_df, ig_service)
     
