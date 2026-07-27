@@ -106,22 +106,6 @@ def execute_strong_buys(df, ig_service):
                 print(f"-> Could not resolve a valid IG Epic for {ticker}. Skipping.")
                 continue
 
-            price = float(row["PRICE"])
-            stop_loss = float(row["STOP-LOSS"])
-            target = float(row["2.0R TARGET"])
-            
-            # Use distance-based risk parameters for US markets to avoid absolute level formatting rejections
-            if market == "USA":
-                stop_distance = round(abs(price - stop_loss), 2)
-                limit_distance = round(abs(target - price), 2)
-                stop_lvl = None
-                limit_lvl = None
-            else:
-                stop_distance = None
-                limit_distance = None
-                stop_lvl = stop_loss
-                limit_lvl = target
-
             print(f"Executing automated order on IG for {ticker} (Resolved Epic: {epic}) - STRONG BUY...")
             try:
                 response = ig_service.create_open_position(
@@ -134,11 +118,11 @@ def execute_strong_buys(df, ig_service):
                     order_type="MARKET",
                     size=1.0,
                     level=None,
-                    limit_distance=limit_distance,
-                    limit_level=limit_lvl,
+                    limit_distance=None,
+                    limit_level=float(row["2.0R TARGET"]),
                     quote_id=None,
-                    stop_distance=stop_distance,
-                    stop_level=stop_lvl,
+                    stop_distance=None,
+                    stop_level=float(row["STOP-LOSS"]),
                     trailing_stop=None,
                     trailing_stop_increment=None
                 )
@@ -232,7 +216,7 @@ def main():
     # 1. Manage active trades
     monitor_and_manage_runners(ig_service, partial_profit_target_gbp=500.0)
     
-    # 2. Execute new entry signals using dynamic live Epic resolution
+    # 2. Execute new entry signals using absolute level pricing
     execute_strong_buys(uk_df, ig_service)
     execute_strong_buys(us_df, ig_service)
     
