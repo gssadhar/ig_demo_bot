@@ -79,6 +79,40 @@ def execute_strong_buys(df, ig_service):
             except Exception as e:
                 print(f"-> Error executing {ticker}: {e}")
 
+def monitor_and_close_positions(ig_service, target_profit_gbp=500.0):
+    """Monitors open positions and closes them automatically if profit threshold is met."""
+    if not ig_service:
+        return
+    
+    try:
+        positions = ig_service.fetch_open_positions()
+        if positions is None or positions.empty:
+            print("No open positions found to monitor.")
+            return
+
+        for _, pos in positions.iterrows():
+            deal_id = pos.get("dealId")
+            profit_loss = float(pos.get("profitAndLoss", 0.0))
+            epic = pos.get("epic")
+            
+            print(f"Monitoring position {epic} (Deal ID: {deal_id}) | P&L: £{profit_loss:.2f}")
+            
+            if profit_loss >= target_profit_gbp:
+                print(f"-> Target profit of £{target_profit_gbp} reached for {epic}! Closing position...")
+                close_response = ig_service.close_open_position(
+                    deal_id=deal_id,
+                    direction="SELL" if pos.get("direction") == "BUY" else "BUY",
+                    size=pos.get("size"),
+                    order_type="MARKET",
+                    quote_id=None
+                )
+                if close_response and close_response.get("status") == "SUCCESS":
+                    print(f"-> Successfully closed {epic}. Profit locked in: £{profit_loss:.2f}")
+                else:
+                    print(f"-> Failed to close position {epic}.")
+    except Exception as e:
+        print(f"Error monitoring open positions: {e}")
+
 def generate_html_output(uk_df, us_df):
     """Combines UK and US tables into index.html."""
     template_path = "template.html"
@@ -111,14 +145,20 @@ def generate_html_output(uk_df, us_df):
     print("Dashboard index.html successfully updated with UK & USA feeds.")
 
 def main():
-    print("--- Starting 4x Daily Screener Pipeline ---")
+    print("--- Starting 4x Daily Screener & Exit Management Pipeline ---")
     uk_df = fetch_uk_market_signals()
     us_df = fetch_us_market_signals()
     
     ig_service = authenticate_ig()
+    
+    # 1. Monitor and take profits on existing winners
+    monitor_and_close_positions(ig_service, target_profit_gbp=500.0)
+    
+    # 2. Execute new entry signals
     execute_strong_buys(uk_df, ig_service)
     execute_strong_buys(us_df, ig_service)
     
+    # 3. Update web dashboard
     generate_html_output(uk_df, us_df)
 
 if __name__ == "__main__":
