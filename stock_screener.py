@@ -22,14 +22,23 @@ def authenticate_ig():
         print(f"IG Authentication failed: {e}")
         return None
 
-def get_valid_epic_from_ig(ig_service, search_term):
+def get_valid_epic_from_ig(ig_service, search_term, market_type="UK"):
     """
     Factually queries IG's live system to find the correct, 
-    account-compatible epic string for a given ticker or company name.
+    account-compatible epic string for a given ticker or company name,
+    ensuring it matches Spread Betting instrument types.
     """
     try:
         markets = ig_service.search_markets(search_term)
         if markets is not None and not markets.empty:
+            for _, row in markets.iterrows():
+                epic = row["epic"]
+                # Filter for Spread Betting epics (typically contain '.D.') to avoid CFD type mismatches on SB accounts
+                if market_type == "UK" and ".D." in epic and epic.endswith(".IP"):
+                    return epic
+                elif market_type == "USA" and (".D." in epic or "US" in epic):
+                    return epic
+            # Fallback to first result if specific filter doesn't match perfectly
             return markets.iloc[0]["epic"]
     except Exception as e:
         print(f"Error searching epic for {search_term}: {e}")
@@ -70,8 +79,10 @@ def execute_strong_buys(df, ig_service):
     for _, row in df.iterrows():
         if row["SIGNAL"] == "STRONG BUY":
             ticker = row["TICKER"]
+            market = row["MARKET"]
             search_query = ticker.replace(".L", "")
-            epic = get_valid_epic_from_ig(ig_service, search_query)
+            
+            epic = get_valid_epic_from_ig(ig_service, search_query, market_type=market)
             
             if not epic:
                 print(f"-> Could not resolve a valid IG Epic for {ticker}. Skipping.")
@@ -80,10 +91,10 @@ def execute_strong_buys(df, ig_service):
             print(f"Executing automated order on IG for {ticker} (Resolved Epic: {epic}) - STRONG BUY...")
             try:
                 response = ig_service.create_open_position(
-                    currency_code="GBP" if row["MARKET"] == "UK" else "USD",
+                    currency_code="GBP" if market == "UK" else "USD",
                     direction="BUY",
                     epic=epic,
-                    expiry="DFB" if row["MARKET"] == "UK" else "-",
+                    expiry="DFB",
                     force_open=True,
                     guaranteed_stop=False,
                     order_type="MARKET",
@@ -187,7 +198,7 @@ def main():
     # 1. Manage active trades
     monitor_and_manage_runners(ig_service, partial_profit_target_gbp=500.0)
     
-    # 2. Execute new entry signals using dynamic live Epic resolution
+    # 2. Execute new entry signals using dynamic live Epic resolution matching account type
     execute_strong_buys(uk_df, ig_service)
     execute_strong_buys(us_df, ig_service)
     
