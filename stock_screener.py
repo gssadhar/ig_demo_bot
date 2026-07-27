@@ -23,23 +23,23 @@ def authenticate_ig():
         return None
 
 def fetch_uk_market_signals():
-    """Screens UK Equities (Prices handled consistently in Pence/GBX where applicable)."""
+    """Screens UK Equities mapped to valid IG Demo Epics."""
     uk_data = [
-        {"TICKER": "RR.L", "MARKET": "UK", "SECTOR": "Industrials", "PRICE": 1449.09, "SIGNAL": "BUY", "STOP-LOSS": 1392.41, "1.5R TARGET": 1534.11},
-        {"TICKER": "LLOY.L", "MARKET": "UK", "SECTOR": "Financial Services", "PRICE": 114.72, "SIGNAL": "STRONG BUY", "STOP-LOSS": 111.77, "1.5R TARGET": 119.15},
-        {"TICKER": "LGEN.L", "MARKET": "UK", "SECTOR": "Financial Services", "PRICE": 300.00, "SIGNAL": "STRONG BUY", "STOP-LOSS": 292.74, "1.5R TARGET": 310.90},
-        {"TICKER": "SHEL.L", "MARKET": "UK", "SECTOR": "Energy", "PRICE": 3241.50, "SIGNAL": "BUY", "STOP-LOSS": 3085.24, "1.5R TARGET": 3475.89},
-        {"TICKER": "BP.L", "MARKET": "UK", "SECTOR": "Energy", "PRICE": 526.90, "SIGNAL": "BUY", "STOP-LOSS": 509.48, "1.5R TARGET": 553.03},
-        {"TICKER": "DGE.L", "MARKET": "UK", "SECTOR": "Consumer Defensive", "PRICE": 1574.79, "SIGNAL": "STRONG BUY", "STOP-LOSS": 1474.77, "1.5R TARGET": 1724.82},
-        {"TICKER": "WTB.L", "MARKET": "UK", "SECTOR": "Consumer Cyclical", "PRICE": 2488.31, "SIGNAL": "BUY", "STOP-LOSS": 2411.41, "1.5R TARGET": 2603.65}
+        {"TICKER": "RR.L", "EPIC": "IX.D.RR.DAILY.IP", "MARKET": "UK", "SECTOR": "Industrials", "PRICE": 1449.09, "SIGNAL": "BUY", "STOP-LOSS": 1392.41, "1.5R TARGET": 1534.11},
+        {"TICKER": "LLOY.L", "EPIC": "IX.D.LLOY.DAILY.IP", "MARKET": "UK", "SECTOR": "Financial Services", "PRICE": 114.72, "SIGNAL": "STRONG BUY", "STOP-LOSS": 111.77, "1.5R TARGET": 119.15},
+        {"TICKER": "LGEN.L", "EPIC": "IX.D.LGEN.DAILY.IP", "MARKET": "UK", "SECTOR": "Financial Services", "PRICE": 300.00, "SIGNAL": "STRONG BUY", "STOP-LOSS": 292.74, "1.5R TARGET": 310.90},
+        {"TICKER": "SHEL.L", "EPIC": "IX.D.SHEL.DAILY.IP", "MARKET": "UK", "SECTOR": "Energy", "PRICE": 3241.50, "SIGNAL": "BUY", "STOP-LOSS": 3085.24, "1.5R TARGET": 3475.89},
+        {"TICKER": "BP.L", "EPIC": "IX.D.BP.DAILY.IP", "MARKET": "UK", "SECTOR": "Energy", "PRICE": 526.90, "SIGNAL": "BUY", "STOP-LOSS": 509.48, "1.5R TARGET": 553.03},
+        {"TICKER": "DGE.L", "EPIC": "IX.D.DGE.DAILY.IP", "MARKET": "UK", "SECTOR": "Consumer Defensive", "PRICE": 1574.79, "SIGNAL": "STRONG BUY", "STOP-LOSS": 1474.77, "1.5R TARGET": 1724.82},
+        {"TICKER": "WTB.L", "EPIC": "IX.D.WTB.DAILY.IP", "MARKET": "UK", "SECTOR": "Consumer Cyclical", "PRICE": 2488.31, "SIGNAL": "BUY", "STOP-LOSS": 2411.41, "1.5R TARGET": 2603.65}
     ]
     return pd.DataFrame(uk_data)
 
 def fetch_us_market_signals():
-    """Screens USA Equities (Prices quoted in USD)."""
+    """Screens USA Equities mapped to valid IG Demo Epics."""
     us_data = [
-        {"TICKER": "AAPL", "MARKET": "USA", "SECTOR": "Technology", "PRICE": 220.50, "SIGNAL": "STRONG BUY", "STOP-LOSS": 212.00, "1.5R TARGET": 233.25},
-        {"TICKER": "NVDA", "MARKET": "USA", "SECTOR": "Technology", "PRICE": 125.40, "SIGNAL": "BUY", "STOP-LOSS": 120.00, "1.5R TARGET": 133.50}
+        {"TICKER": "AAPL", "EPIC": "US.D.AAPL.CASH.IP", "MARKET": "USA", "SECTOR": "Technology", "PRICE": 220.50, "SIGNAL": "STRONG BUY", "STOP-LOSS": 212.00, "1.5R TARGET": 233.25},
+        {"TICKER": "NVDA", "EPIC": "US.D.NVDA.CASH.IP", "MARKET": "USA", "SECTOR": "Technology", "PRICE": 125.40, "SIGNAL": "BUY", "STOP-LOSS": 120.00, "1.5R TARGET": 133.50}
     ]
     return pd.DataFrame(us_data)
 
@@ -50,18 +50,19 @@ def execute_strong_buys(df, ig_service):
 
     for _, row in df.iterrows():
         if row["SIGNAL"] == "STRONG BUY":
-            epic = row["TICKER"]
-            print(f"Executing automated order on IG for {epic} ({row['MARKET']} Market - STRONG BUY)...")
+            epic = row["EPIC"]
+            ticker = row["TICKER"]
+            print(f"Executing automated order on IG for {ticker} (Epic: {epic}) - STRONG BUY...")
             try:
                 response = ig_service.create_open_position(
                     currency_code="GBP" if row["MARKET"] == "UK" else "USD",
                     direction="BUY",
                     epic=epic,
-                    expiry="DFB",
+                    expiry="DFB" if row["MARKET"] == "UK" else "-",
                     force_open=True,
                     guaranteed_stop=False,
                     order_type="MARKET",
-                    size=0.5,
+                    size=1.0,
                     level=None,
                     limit_distance=None,
                     limit_level=float(row["1.5R TARGET"]),
@@ -74,9 +75,9 @@ def execute_strong_buys(df, ig_service):
                 if response and response.get("dealStatus") == "ACCEPTED":
                     print(f"-> Success! Deal ID: {response.get('dealId')}")
                 else:
-                    print(f"-> Order rejected for {epic}: {response.get('reason')}")
+                    print(f"-> Order rejected for {ticker}: {response.get('reason')}")
             except Exception as e:
-                print(f"-> Error executing {epic}: {e}")
+                print(f"-> Error executing {ticker}: {e}")
 
 def generate_html_output(uk_df, us_df):
     """Combines UK and US tables into index.html."""
