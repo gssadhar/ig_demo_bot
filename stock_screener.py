@@ -1,5 +1,7 @@
 import os
 import sys
+from datetime import datetime
+import pytz
 import pandas as pd
 from trading_ig import IGService
 
@@ -21,6 +23,31 @@ def authenticate_ig():
     except Exception as e:
         print(f"IG Authentication failed: {e}")
         return None
+
+def is_market_open(market_type):
+    """Checks if the respective market is currently open for trading."""
+    tz_london = pytz.timezone("Europe/London")
+    now = datetime.now(tz_london)
+    
+    # Check for weekends
+    if now.weekday() >= 5: # Saturday or Sunday
+        return False
+        
+    current_time = now.time()
+    
+    if market_type == "UK":
+        # LSE regular trading hours: 08:00 - 16:30 London Time
+        market_open = datetime.strptime("08:00", "%H:%M").time()
+        market_close = datetime.strptime("16:30", "%H:%M").time()
+        return market_open <= current_time <= market_close
+        
+    elif market_type == "USA":
+        # US regular trading hours converted to London Time (14:30 - 21:00)
+        market_open = datetime.strptime("14:30", "%H:%M").time()
+        market_close = datetime.strptime("21:00", "%H:%M").time()
+        return market_open <= current_time <= market_close
+        
+    return True
 
 def get_valid_epic_from_ig(ig_service, search_term, market_type="UK"):
     """
@@ -88,15 +115,19 @@ def fetch_us_market_signals():
     ]
     return pd.DataFrame(us_data)
 
-def execute_strong_buys(df, ig_service):
+def execute_strong_buys(df, market, ig_service):
     if not ig_service:
         print("Skipping execution: No active IG session.")
+        return
+
+    # Check if market is open before sending orders
+    if not is_market_open(market):
+        print(f"-> {market} market is currently closed. Skipping order execution to prevent rejection.")
         return
 
     for _, row in df.iterrows():
         if row["SIGNAL"] == "STRONG BUY":
             ticker = row["TICKER"]
-            market = row["MARKET"]
             search_query = ticker.replace(".L", "")
             
             epic = get_valid_epic_from_ig(ig_service, search_query, market_type=market)
@@ -106,10 +137,11 @@ def execute_strong_buys(df, ig_service):
                 continue
 
             stop_loss = float(row["STOP-LOSS"])
-            target_1_4 = float(row["TARGET_1_4"]) # Full final target set on position
+            target_1_4 = float(row["TARGET_1_4"])
 
             print(f"Executing automated order on IG for {ticker} (Resolved Epic: {epic}) - STRONG BUY...")
             try:
+                # Step 1: Execute clean market order without inline stops/limits (prevents level errors)
                 response = ig_service.create_open_position(
                     currency_code="GBP" if market == "UK" else "USD",
                     direction="BUY",
@@ -121,16 +153,25 @@ def execute_strong_buys(df, ig_service):
                     size=1.0,
                     level=None,
                     limit_distance=None,
-                    limit_level=target_1_4,
+                    limit_level=None,
                     quote_id=None,
                     stop_distance=None,
-                    stop_level=stop_loss,
+                    stop_level=None,
                     trailing_stop=None,
                     trailing_stop_increment=None
                 )
                 
                 if response and response.get("dealStatus") == "ACCEPTED":
-                    print(f"-> Success! Deal ID: {response.get('dealId')}")
+                    deal_id = response.get("dealId")
+                    print(f"-> Success! Deal ID: {deal_id}. Attaching stop-loss and limit targets...")
+                    
+                    # Step 2: Update the open position with target and stop levels
+                    ig_service.update_open_position(
+                        deal_id=deal_id,
+                        limit_level=target_1_4,
+                        stop_level=stop_loss
+                    )
+                    print(f"-> Stop-loss ({stop_loss}) and Target ({target_1_4}) successfully attached.")
                 else:
                     print(f"-> Order rejected for {ticker}: {response.get('reason')}")
             except Exception as e:
@@ -231,9 +272,9 @@ def main():
     # 1. Manage active trades with 1:2.5 partial close rule
     monitor_and_manage_runners(combined_df, ig_service)
     
-    # 2. Execute new entry signals across the full 35-equity universe
-    execute_strong_buys(uk_df, ig_service)
-    execute_strong_buys(us_df, ig_service)
+    # 2. Execute new entry signals across the full 35-equity universe with decoupled stop/limits
+    execute_strong_buys(uk_df, "UK", ig_service)
+    execute_strong_buys(us_df, "USA", ig_service)
     
     # 3. Update dashboard
     generate_html_output(uk_df, us_df)
