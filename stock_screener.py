@@ -43,7 +43,7 @@ def get_valid_epic_from_ig(ig_service, search_term, market_type="UK"):
     return None
 
 def fetch_uk_market_signals():
-    """Expanded UK Equities Universe across diversified sectors."""
+    """Expanded UK Equities Universe (Top 20 Leaders across diversified sectors)."""
     uk_data = [
         {"TICKER": "RR.L", "MARKET": "UK", "SECTOR": "Industrials", "PRICE": 1449.09, "SIGNAL": "BUY", "STOP-LOSS": 1392.41, "2.0R TARGET": 1563.45},
         {"TICKER": "LLOY.L", "MARKET": "UK", "SECTOR": "Financial Services", "PRICE": 114.72, "SIGNAL": "STRONG BUY", "STOP-LOSS": 111.77, "2.0R TARGET": 120.62},
@@ -57,12 +57,19 @@ def fetch_uk_market_signals():
         {"TICKER": "AZN.L", "MARKET": "UK", "SECTOR": "Healthcare", "PRICE": 12400.00, "SIGNAL": "BUY", "STOP-LOSS": 11950.00, "2.0R TARGET": 13300.00},
         {"TICKER": "HSBA.L", "MARKET": "UK", "SECTOR": "Financial Services", "PRICE": 710.00, "SIGNAL": "BUY", "STOP-LOSS": 685.00, "2.0R TARGET": 760.00},
         {"TICKER": "RIO.L", "MARKET": "UK", "SECTOR": "Basic Materials", "PRICE": 5200.00, "SIGNAL": "BUY", "STOP-LOSS": 5000.00, "2.0R TARGET": 5600.00},
-        {"TICKER": "ULVR.L", "MARKET": "UK", "SECTOR": "Consumer Defensive", "PRICE": 4100.00, "SIGNAL": "BUY", "STOP-LOSS": 3950.00, "2.0R TARGET": 4400.00}
+        {"TICKER": "ULVR.L", "MARKET": "UK", "SECTOR": "Consumer Defensive", "PRICE": 4100.00, "SIGNAL": "BUY", "STOP-LOSS": 3950.00, "2.0R TARGET": 4400.00},
+        {"TICKER": "GLEN.L", "MARKET": "UK", "SECTOR": "Basic Materials", "PRICE": 440.00, "SIGNAL": "BUY", "STOP-LOSS": 422.00, "2.0R TARGET": 476.00},
+        {"TICKER": "GSK.L", "MARKET": "UK", "SECTOR": "Healthcare", "PRICE": 1500.00, "SIGNAL": "BUY", "STOP-LOSS": 1445.00, "2.0R TARGET": 1610.00},
+        {"TICKER": "NG.L", "MARKET": "UK", "SECTOR": "Utilities", "PRICE": 1020.00, "SIGNAL": "BUY", "STOP-LOSS": 985.00, "2.0R TARGET": 1090.00},
+        {"TICKER": "REL.L", "MARKET": "UK", "SECTOR": "Industrials", "PRICE": 3400.00, "SIGNAL": "BUY", "STOP-LOSS": 3280.00, "2.0R TARGET": 3640.00},
+        {"TICKER": "ANTO.L", "MARKET": "UK", "SECTOR": "Basic Materials", "PRICE": 2100.00, "SIGNAL": "BUY", "STOP-LOSS": 2020.00, "2.0R TARGET": 2260.00},
+        {"TICKER": "EXPN.L", "MARKET": "UK", "SECTOR": "Industrials", "PRICE": 2800.00, "SIGNAL": "BUY", "STOP-LOSS": 2700.00, "2.0R TARGET": 3000.00},
+        {"TICKER": "CPG.L", "MARKET": "UK", "SECTOR": "Consumer Cyclical", "PRICE": 2200.00, "SIGNAL": "BUY", "STOP-LOSS": 2120.00, "2.0R TARGET": 2360.00}
     ]
     return pd.DataFrame(uk_data)
 
 def fetch_us_market_signals():
-    """Expanded USA Equities Universe across diversified sectors."""
+    """Expanded USA Equities Universe (Top 15 Leaders across diversified sectors)."""
     us_data = [
         {"TICKER": "AAPL", "MARKET": "USA", "SECTOR": "Technology", "PRICE": 220.50, "SIGNAL": "STRONG BUY", "STOP-LOSS": 212.00, "2.0R TARGET": 238.00},
         {"TICKER": "NVDA", "MARKET": "USA", "SECTOR": "Technology", "PRICE": 125.40, "SIGNAL": "STRONG BUY", "STOP-LOSS": 120.00, "2.0R TARGET": 136.20},
@@ -74,7 +81,11 @@ def fetch_us_market_signals():
         {"TICKER": "JPM", "MARKET": "USA", "SECTOR": "Financial Services", "PRICE": 205.00, "SIGNAL": "BUY", "STOP-LOSS": 197.00, "2.0R TARGET": 221.00},
         {"TICKER": "JNJ", "MARKET": "USA", "SECTOR": "Healthcare", "PRICE": 155.00, "SIGNAL": "BUY", "STOP-LOSS": 149.00, "2.0R TARGET": 167.00},
         {"TICKER": "XOM", "MARKET": "USA", "SECTOR": "Energy", "PRICE": 115.00, "SIGNAL": "BUY", "STOP-LOSS": 110.00, "2.0R TARGET": 125.00},
-        {"TICKER": "NFLX", "MARKET": "USA", "SECTOR": "Communication Services", "PRICE": 650.00, "SIGNAL": "BUY", "STOP-LOSS": 625.00, "2.0R TARGET": 700.00}
+        {"TICKER": "NFLX", "MARKET": "USA", "SECTOR": "Communication Services", "PRICE": 650.00, "SIGNAL": "BUY", "STOP-LOSS": 625.00, "2.0R TARGET": 700.00},
+        {"TICKER": "AMD", "MARKET": "USA", "SECTOR": "Technology", "PRICE": 150.00, "SIGNAL": "BUY", "STOP-LOSS": 144.00, "2.0R TARGET": 162.00},
+        {"TICKER": "INTC", "MARKET": "USA", "SECTOR": "Technology", "PRICE": 30.00, "SIGNAL": "BUY", "STOP-LOSS": 28.50, "2.0R TARGET": 33.00},
+        {"TICKER": "WMT", "MARKET": "USA", "SECTOR": "Consumer Defensive", "PRICE": 70.00, "SIGNAL": "BUY", "STOP-LOSS": 67.50, "2.0R TARGET": 75.00},
+        {"TICKER": "V", "MARKET": "USA", "SECTOR": "Financial Services", "PRICE": 275.00, "SIGNAL": "BUY", "STOP-LOSS": 265.00, "2.0R TARGET": 295.00}
     ]
     return pd.DataFrame(us_data)
 
@@ -196,7 +207,7 @@ def generate_html_output(uk_df, us_df):
     print("Dashboard index.html successfully updated with UK & USA feeds.")
 
 def main():
-    print("--- Starting 4x Daily Runner Strategy Pipeline ---")
+    print("--- Starting 4x Daily Runner Strategy Pipeline (35 Equities Universe) ---")
     uk_df = fetch_uk_market_signals()
     us_df = fetch_us_market_signals()
     
