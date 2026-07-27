@@ -106,6 +106,22 @@ def execute_strong_buys(df, ig_service):
                 print(f"-> Could not resolve a valid IG Epic for {ticker}. Skipping.")
                 continue
 
+            price = float(row["PRICE"])
+            stop_loss = float(row["STOP-LOSS"])
+            target = float(row["2.0R TARGET"])
+            
+            # Use distance-based risk parameters for US markets to avoid absolute level formatting rejections
+            if market == "USA":
+                stop_distance = round(abs(price - stop_loss), 2)
+                limit_distance = round(abs(target - price), 2)
+                stop_lvl = None
+                limit_lvl = None
+            else:
+                stop_distance = None
+                limit_distance = None
+                stop_lvl = stop_loss
+                limit_lvl = target
+
             print(f"Executing automated order on IG for {ticker} (Resolved Epic: {epic}) - STRONG BUY...")
             try:
                 response = ig_service.create_open_position(
@@ -118,11 +134,11 @@ def execute_strong_buys(df, ig_service):
                     order_type="MARKET",
                     size=1.0,
                     level=None,
-                    limit_distance=None,
-                    limit_level=float(row["2.0R TARGET"]),
+                    limit_distance=limit_distance,
+                    limit_level=limit_lvl,
                     quote_id=None,
-                    stop_distance=None,
-                    stop_level=float(row["STOP-LOSS"]),
+                    stop_distance=stop_distance,
+                    stop_level=stop_lvl,
                     trailing_stop=None,
                     trailing_stop_increment=None
                 )
