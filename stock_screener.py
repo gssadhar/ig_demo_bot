@@ -23,15 +23,15 @@ def authenticate_ig():
         return None
 
 def fetch_uk_market_signals():
-    """Screens UK Equities mapped to valid IG Demo Epics."""
+    """Screens UK Equities mapped to valid IG Demo Spread Betting Epics."""
     uk_data = [
-        {"TICKER": "RR.L", "EPIC": "IX.D.RR.DAILY.IP", "MARKET": "UK", "SECTOR": "Industrials", "PRICE": 1449.09, "SIGNAL": "BUY", "STOP-LOSS": 1392.41, "2.0R TARGET": 1563.45},
-        {"TICKER": "LLOY.L", "EPIC": "IX.D.LLOY.DAILY.IP", "MARKET": "UK", "SECTOR": "Financial Services", "PRICE": 114.72, "SIGNAL": "STRONG BUY", "STOP-LOSS": 111.77, "2.0R TARGET": 120.62},
-        {"TICKER": "LGEN.L", "EPIC": "IX.D.LGEN.DAILY.IP", "MARKET": "UK", "SECTOR": "Financial Services", "PRICE": 300.00, "SIGNAL": "STRONG BUY", "STOP-LOSS": 292.74, "2.0R TARGET": 314.52},
-        {"TICKER": "SHEL.L", "EPIC": "IX.D.SHEL.DAILY.IP", "MARKET": "UK", "SECTOR": "Energy", "PRICE": 3241.50, "SIGNAL": "BUY", "STOP-LOSS": 3085.24, "2.0R TARGET": 3554.02},
-        {"TICKER": "BP.L", "EPIC": "IX.D.BP.DAILY.IP", "MARKET": "UK", "SECTOR": "Energy", "PRICE": 526.90, "SIGNAL": "BUY", "STOP-LOSS": 509.48, "2.0R TARGET": 561.74},
-        {"TICKER": "DGE.L", "EPIC": "IX.D.DGE.DAILY.IP", "MARKET": "UK", "SECTOR": "Consumer Defensive", "PRICE": 1574.79, "SIGNAL": "STRONG BUY", "STOP-LOSS": 1474.77, "2.0R TARGET": 1774.83},
-        {"TICKER": "WTB.L", "EPIC": "IX.D.WTB.DAILY.IP", "MARKET": "UK", "SECTOR": "Consumer Cyclical", "PRICE": 2488.31, "SIGNAL": "BUY", "STOP-LOSS": 2411.41, "1.5R TARGET": 2603.65}
+        {"TICKER": "RR.L", "EPIC": "SB.D.RR.DAILY.IP", "MARKET": "UK", "SECTOR": "Industrials", "PRICE": 1449.09, "SIGNAL": "BUY", "STOP-LOSS": 1392.41, "2.0R TARGET": 1563.45},
+        {"TICKER": "LLOY.L", "EPIC": "SB.D.LLOY.DAILY.IP", "MARKET": "UK", "SECTOR": "Financial Services", "PRICE": 114.72, "SIGNAL": "STRONG BUY", "STOP-LOSS": 111.77, "2.0R TARGET": 120.62},
+        {"TICKER": "LGEN.L", "EPIC": "SB.D.LGEN.DAILY.IP", "MARKET": "UK", "SECTOR": "Financial Services", "PRICE": 300.00, "SIGNAL": "STRONG BUY", "STOP-LOSS": 292.74, "2.0R TARGET": 314.52},
+        {"TICKER": "SHEL.L", "EPIC": "SB.D.SHEL.DAILY.IP", "MARKET": "UK", "SECTOR": "Energy", "PRICE": 3241.50, "SIGNAL": "BUY", "STOP-LOSS": 3085.24, "2.0R TARGET": 3554.02},
+        {"TICKER": "BP.L", "EPIC": "SB.D.BP.DAILY.IP", "MARKET": "UK", "SECTOR": "Energy", "PRICE": 526.90, "SIGNAL": "BUY", "STOP-LOSS": 509.48, "2.0R TARGET": 561.74},
+        {"TICKER": "DGE.L", "EPIC": "SB.D.DGE.DAILY.IP", "MARKET": "UK", "SECTOR": "Consumer Defensive", "PRICE": 1574.79, "SIGNAL": "STRONG BUY", "STOP-LOSS": 1474.77, "2.0R TARGET": 1774.83},
+        {"TICKER": "WTB.L", "EPIC": "SB.D.WTB.DAILY.IP", "MARKET": "UK", "SECTOR": "Consumer Cyclical", "PRICE": 2488.31, "SIGNAL": "BUY", "STOP-LOSS": 2411.41, "2.0R TARGET": 2603.65}
     ]
     return pd.DataFrame(uk_data)
 
@@ -83,7 +83,7 @@ def monitor_and_manage_runners(ig_service, partial_profit_target_gbp=500.0):
     """
     Manages open positions:
     - If profit hits target (e.g. £500, representing a 2.0R milestone), 
-      it closes half (0.5 size) to bank cash, leaving the rest to run.
+      it closes half (0.5 size) to bank cash, leaving the rest to run as a runner.
     """
     if not ig_service:
         return
@@ -102,7 +102,7 @@ def monitor_and_manage_runners(ig_service, partial_profit_target_gbp=500.0):
             
             print(f"Monitoring runner position {epic} (ID: {deal_id}, Size: {current_size}) | P&L: £{profit_loss:.2f}")
             
-            # Condition 1: Take partial profit (half size) if profit threshold is reached and we haven't scaled out yet
+            # Condition: Take partial profit (half size) if profit threshold is reached and we haven't scaled out yet
             if profit_loss >= partial_profit_target_gbp and current_size > 0.5:
                 half_size = round(current_size / 2.0, 2)
                 print(f"-> Target profit of £{partial_profit_target_gbp} reached for {epic}! Banking half size ({half_size})...")
