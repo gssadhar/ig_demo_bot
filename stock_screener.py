@@ -53,18 +53,23 @@ def execute_strong_buys(df, ig_service):
             epic = row["TICKER"]
             print(f"Executing automated order on IG for {epic} ({row['MARKET']} Market - STRONG BUY)...")
             try:
-                # Adjust sizing or currency handling cleanly depending on market rules
                 response = ig_service.create_open_position(
                     currency_code="GBP" if row["MARKET"] == "UK" else "USD",
                     direction="BUY",
                     epic=epic,
                     expiry="DFB",
-                    force_open="true",
-                    guaranteed_stop="false",
+                    force_open=True,
+                    guaranteed_stop=False,
                     order_type="MARKET",
-                    size="0.5",
-                    stop_level=str(row["STOP-LOSS"]),
-                    limit_level=str(row["1.5R TARGET"])
+                    size=0.5,
+                    level=None,
+                    limit_distance=None,
+                    limit_level=float(row["1.5R TARGET"]),
+                    quote_id=None,
+                    stop_distance=None,
+                    stop_level=float(row["STOP-LOSS"]),
+                    trailing_stop=None,
+                    trailing_stop_increment=None
                 )
                 if response and response.get("dealStatus") == "ACCEPTED":
                     print(f"-> Success! Deal ID: {response.get('dealId')}")
@@ -74,7 +79,7 @@ def execute_strong_buys(df, ig_service):
                 print(f"-> Error executing {epic}: {e}")
 
 def generate_html_output(uk_df, us_df):
-    """Combines UK and US tables into index.html to fix the '0 recommendations' bug."""
+    """Combines UK and US tables into index.html."""
     template_path = "template.html"
     if not os.path.exists(template_path):
         print("Error: template.html not found.")
