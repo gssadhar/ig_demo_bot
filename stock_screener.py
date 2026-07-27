@@ -150,7 +150,7 @@ def execute_strong_buys(df, market, ig_service):
                     force_open=True,
                     guaranteed_stop=False,
                     order_type="MARKET",
-                    size=1.0,
+                    size=0.5,
                     level=None,
                     limit_distance=None,
                     limit_level=None,
