@@ -61,6 +61,45 @@ def get_valid_epic_from_ig(ig_service, search_term, market_type="UK"):
         print(f"Error searching epic for {search_term}: {e}")
     return None
 
+import yfinance as yf
+import numpy as np
+
+def fetch_dynamic_stock_data(ticker_symbol):
+    """
+    Dynamically fetches live price, calculates ATR-based stops/targets, 
+    and checks volume surges using Yahoo Finance.
+    """
+    try:
+        stock = yf.Ticker(ticker_symbol)
+        df_hist = stock.history(period="3mo")
+        
+        if df_hist.empty or len(df_hist) < 20:
+            return None
+            
+        current_price = float(df_hist['Close'].iloc[-1])
+        
+        # Calculate 14-period ATR
+        high_low = df_hist['High'] - df_hist['Low']
+        high_close = np.abs(df_hist['High'] - df_hist['Close'].shift())
+        low_close = np.abs(df_hist['Low'] - df_hist['Close'].shift())
+        true_range = np.maximum(high_low, np.maximum(high_close, low_close))
+        atr = float(true_range.rolling(window=14).mean().iloc[-1])
+        
+        # Calculate dynamic levels
+        stop_loss = round(current_price - (1.5 * atr), 2)
+        target_pivot = round(current_price + (2.5 * atr), 2)
+        target_macro = round(current_price + (4.0 * atr), 2)
+        
+        return {
+            "PRICE": round(current_price, 2),
+            "STOP-LOSS": stop_loss,
+            "TARGET_1_2P5": target_pivot,
+            "TARGET_1_4": target_macro
+        }
+    except Exception as e:
+        print(f"Error fetching dynamic data for {ticker_symbol}: {e}")
+        return None
+
 def fetch_uk_market_signals():
     """Expanded UK Equities Universe integrated with Front-Run Structural Pivot/Resistance Targets & Analysis Meta."""
     uk_data = [
